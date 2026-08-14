@@ -345,8 +345,40 @@ def image_diff(a, b, out=None, tiles=24):
         # difference can render as an all-black image and read as "no difference".
         from PIL import ImageOps
         ImageOps.autocontrast(d.convert("L")).save(out)
+    # ── WHERE is the difference? (not: is it harmless) ───────────────────────
+    # The video path reports an explicit mode and the stills path did not, so a JPEG
+    # round-trip -- a partner re-exporting from Canva, the commonest way a file comes
+    # back changed-but-not-edited -- returned a flat "DIFFERS", indistinguishable from
+    # someone altering the start time. The stills tests never caught it because their
+    # "identical" fixture is a shutil.copy, so the still path had never once been run
+    # against a re-encode: the same blind spot the video path confesses to, other medium.
+    #
+    # 🔴 THE FIRST FIX WAS WRONG AND THE MEASUREMENTS KILLED IT. The plan was to call a
+    # whole-frame, low-amplitude difference "re-encode noise" and let a flag forgive it.
+    # Measured on one 640x360 frame, against the same source:
+    #
+    #     JPEG q92 re-save (harmless)   mean 1.5517   peak 230
+    #     JPEG q50 re-save (harmless)   mean 2.3602   peak 233
+    #     brightness +3%   (REAL edit)  mean 0.2647   peak   7
+    #     saturation +15%  (REAL edit)  mean 0.5650   peak  24
+    #
+    # The real edits are QUIETER than the harmless re-saves, on both statistics. Any
+    # threshold loose enough to forgive a q92 round-trip also forgives a 15% saturation
+    # shift. Recompression and a subtle global grade are not separable by aggregate
+    # pixel statistics, so this classifies LOCATION only and refuses to guess intent.
+    # `--ignore-reencode` was designed, implemented, and deleted for this reason.
+    frame_area = float(w * h) or 1.0
+    bbox_area = ((bbox[2] - bbox[0]) * (bbox[3] - bbox[1])) if bbox else 0
+    spread = bbox_area / frame_area
+    if bbox is None:
+        mode = "identical"
+    elif spread > 0.9:
+        mode = "whole-frame"      # AMBIGUOUS: re-encode or a global edit. Cannot tell.
+    else:
+        mode = "localised"        # someone changed a specific place
     return {"identical": bbox is None, "bbox": bbox, "mean_delta": round(overall, 6),
             "peak_delta": peak, "hot_tiles": hot[:12], "size": ia.size,
+            "mode": mode, "bbox_coverage": round(spread, 4),
             "diff_image": str(out) if out else None}
 
 
@@ -414,9 +446,11 @@ def main():
     ap.add_argument("--out", type=Path, help="write a difference image (stills only)")
     ap.add_argument("--edl", type=Path, help="write a marker EDL (video only)")
     ap.add_argument("--absolute", type=float, metavar="DB",
-                    help="fixed PSNR threshold instead of one derived from this pair")
+                    help="VIDEO ONLY. fixed PSNR threshold instead of one derived from this pair")
     ap.add_argument("--drop", type=float, default=6.0, metavar="DB",
-                    help="dB below the pair's own median that counts as a difference (default 6)")
+                    help="VIDEO ONLY. dB below the pair's own median that counts as a "
+                         "difference (default 6). Stills use exact pixel comparison and "
+                         "ignore this.")
     ap.add_argument("--limit", type=float, metavar="SEC", help="only compare the first N seconds")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args()
@@ -438,6 +472,10 @@ def main():
         if ka == "image":
             result.update(image_diff(a.a, a.b, a.out))
             differs = not result["identical"]
+            # No "forgive re-encodes" flag, deliberately. It was built, then deleted:
+            # the measurements above show it would also forgive a real global colour
+            # edit. A tool that silently forgives a whole class of change is worse than
+            # one that over-reports, because you cannot audit what you were never told.
         else:
             pa, pb = probe(a.a), probe(a.b)
             result["container"] = compare_containers(pa, pb)
@@ -501,11 +539,27 @@ def report(r):
         if r["identical"]:
             print("\n  IDENTICAL — every pixel matches.\n")
             return
-        print(f"\n  DIFFERS. mean delta {r['mean_delta']:g}/255, peak {r['peak_delta']}/255")
+        # Lead with the VERDICT, then locality, then amplitude. Mean delta used to come
+        # first and it inverts between the two cases -- a harmless JPEG round-trip scored
+        # 0.54 while a changed start time scored 0.09 -- so the most prominent number was
+        # the one most likely to point the reader the wrong way.
+        if r.get("mode") == "whole-frame":
+            print(f"\n  DIFFERS across the WHOLE FRAME "
+                  f"({r['bbox_coverage']*100:.0f}% of the area).")
+            print("  ⚠️  This shape is AMBIGUOUS and the tool will not guess. It is what a")
+            print("  re-export or recompression looks like, and it is also what a global")
+            print("  colour or brightness change looks like. They are not separable by")
+            print("  pixel statistics: in testing, a 15% saturation shift produced a")
+            print("  SMALLER delta than a harmless JPEG re-save. Do not read this as")
+            print("  'just a re-encode'. Ask what was changed, or diff the source files.")
+        else:
+            print(f"\n  DIFFERS — a LOCALISED change, which is what a targeted edit looks like.")
+            print(f"  peak {r['peak_delta']}/255, mean delta {r['mean_delta']:g}/255")
         print(f"  bounding box of all differences: {r['bbox']}  (image {r['size'][0]}x{r['size'][1]})")
         bw, bh = r['bbox'][2]-r['bbox'][0], r['bbox'][3]-r['bbox'][1]
-        print(f"  that box is {bw}x{bh}px of a {r['size'][0]}x{r['size'][1]} frame")
-        if not r["hot_tiles"]:
+        print(f"  that box is {bw}x{bh}px of a {r['size'][0]}x{r['size'][1]} frame "
+              f"({r['bbox_coverage']*100:.1f}% of the area)")
+        if not r["hot_tiles"] and r.get("mode") != "diffuse":
             print("\n  No REGION exceeded the tile threshold — the difference is too small or too")
             print("  localised to raise a tile average. The bounding box above is where it is.")
         if r["hot_tiles"]:

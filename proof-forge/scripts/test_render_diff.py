@@ -133,6 +133,42 @@ try:
     check("a ONE PIXEL change is caught", not d["identical"])
     check("...and the bounding box is exactly that pixel", d["bbox"] == (500, 300, 501, 301),
           str(d["bbox"]))
+    check("a one-pixel change is classified LOCALISED", d["mode"] == "localised", d["mode"])
+
+    # ── the blind spot ────────────────────────────────────────────────────────
+    # Every "identical" stills fixture above is a shutil.copy, so until 2026-08-14 the
+    # still path had NEVER been run against a re-encode. A JPEG round-trip -- a partner
+    # re-exporting from Canva, the commonest way a file comes back changed-but-not-edited
+    # -- returned a flat DIFFERS, indistinguishable from someone altering the start time.
+    # This is the same blind spot the video path already confesses to, in the other
+    # medium, and byte-identical fixtures are how both of them hid.
+    j_png = TMP / "jpeg_roundtrip.png"
+    Image.open(a_png).convert("RGB").save(TMP / "rt.jpg", quality=92)
+    Image.open(TMP / "rt.jpg").convert("RGB").save(j_png)
+    check("FIXTURE CONTROL: the round-trip actually changed the bytes",
+          md5(a_png) != md5(j_png))
+    rt = R.image_diff(a_png, j_png)
+    check("a JPEG round-trip is NOT reported identical", not rt["identical"])
+    check("...and is classified WHOLE-FRAME, not localised", rt["mode"] == "whole-frame", rt["mode"])
+    check("...and covers essentially the entire frame", rt["bbox_coverage"] > 0.9,
+          str(rt["bbox_coverage"]))
+    check("a targeted edit is never classified whole-frame", d["mode"] == "localised", d["mode"])
+
+    # The evidence that killed the "harmless re-encode" classifier. A real global grade
+    # scores BELOW a harmless re-save on both mean and peak, so no amplitude threshold
+    # can separate them. If someone re-adds a --ignore-reencode flag, this test is why
+    # they should not.
+    from PIL import ImageEnhance
+    sat = TMP / "saturated.png"
+    ImageEnhance.Color(Image.open(a_png).convert("RGB")).enhance(1.15).save(sat)
+    rs = R.image_diff(a_png, sat)
+    check("a REAL 15% saturation shift is quieter than a harmless JPEG re-save",
+          rs["mean_delta"] < rt["mean_delta"] and rs["peak_delta"] < rt["peak_delta"],
+          f"grade mean={rs['mean_delta']} peak={rs['peak_delta']} vs "
+          f"roundtrip mean={rt['mean_delta']} peak={rt['peak_delta']}")
+    check("...so BOTH land in whole-frame and neither is auto-forgiven",
+          rs["mode"] == "whole-frame" and rt["mode"] == "whole-frame")
+
     try:
         R.image_diff(a_png, TMP / "mismatch.png")
         check("missing file raises", False)

@@ -29,7 +29,43 @@ difference mode and scrub the whole thing, one clip at a time. The failure mode 
 and human eyes miss it. The commercial tool that does this properly starts in the mid five
 figures.
 
-## The hard part is the threshold, not the diff
+## Stills work completely differently from video. Read this before trusting a still result.
+
+**Everything in the next section is VIDEO ONLY.** Stills use exact pixel comparison. There
+is no adaptive threshold, no baseline, no noise floor, and `--drop` / `--absolute` are
+accepted and then ignored. That was undocumented until 2026-08-14 and it misled a careful
+reader into reporting a mode and baseline for a stills run that never had one.
+
+Stills report a **location** classification, and only a location:
+
+| Mode | Means |
+|---|---|
+| `identical` | every pixel matches |
+| `localised` | the difference sits in a small part of the frame — what a targeted edit looks like |
+| `whole-frame` | the difference covers >90% of the frame — **ambiguous, see below** |
+
+🔴 **`whole-frame` is not "just a re-encode," and the tool will not tell you it is.** A
+partner re-exporting from Canva and a partner applying a global colour shift produce the
+same shape, and **they are not separable by pixel statistics.** Measured on one 640×360
+frame against the same source:
+
+| Change | mean delta | peak |
+|---|---|---|
+| JPEG q92 re-save (harmless) | 1.5517 | 230 |
+| JPEG q50 re-save (harmless) | 2.3602 | 233 |
+| brightness +3% (**a real edit**) | 0.2647 | 7 |
+| saturation +15% (**a real edit**) | 0.5650 | 24 |
+
+**The real edits are quieter than the harmless re-saves, on both statistics.** Any threshold
+loose enough to forgive a q92 round-trip also forgives a 15% saturation shift. A
+`--ignore-reencode` flag was designed, built, and then deleted for exactly this reason. When
+you get `whole-frame`, the answer is not in the pixels: ask what was changed, or diff the
+source files.
+
+Related trap: **`mean delta` inverts between the two cases**, so it is no longer the first
+number printed. A harmless re-save scored 0.54 while a changed start time scored 0.09.
+
+## The hard part is the threshold, not the diff — VIDEO ONLY
 
 Two exports of the same timeline are never bit-identical. A different encoder, bitrate or
 colour pipeline moves every pixel a little. So an absolute PSNR threshold either flags the
