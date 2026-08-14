@@ -1,8 +1,10 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "forge",
-  "description": "Claude Code plugins for making things: design-forge for visual work, story-forge for long-form fiction, deck-forge for presentations. All built on the same idea — judgment stays with the model, and anything expressed as a number gets measured instead of eyeballed.",
-  "owner": { "name": "Treynor Tetik" },
+  "description": "Claude Code plugins for making things and then checking them: design-forge for visual work, story-forge for long-form fiction, deck-forge for presentations, proof-forge for verifying exports. All built on the same idea \u2014 judgment stays with the model, and anything expressed as a number gets measured instead of eyeballed.",
+  "owner": {
+    "name": "Treynor Tetik"
+  },
   "plugins": [
     {
       "name": "design-forge",
@@ -11,8 +13,19 @@
       "source": "./design-forge",
       "category": "design",
       "license": "MIT",
-      "author": { "name": "Treynor Tetik" },
-      "keywords": ["design", "critique", "accessibility", "wcag", "typography", "visual-qa", "css", "anti-slop"]
+      "author": {
+        "name": "Treynor Tetik"
+      },
+      "keywords": [
+        "design",
+        "critique",
+        "accessibility",
+        "wcag",
+        "typography",
+        "visual-qa",
+        "css",
+        "anti-slop"
+      ]
     },
     {
       "name": "story-forge",
@@ -21,8 +34,18 @@
       "source": "./story-forge",
       "category": "writing",
       "license": "MIT",
-      "author": { "name": "Treynor Tetik" },
-      "keywords": ["writing", "fiction", "novel", "outlining", "editing", "anti-slop", "continuity"]
+      "author": {
+        "name": "Treynor Tetik"
+      },
+      "keywords": [
+        "writing",
+        "fiction",
+        "novel",
+        "outlining",
+        "editing",
+        "anti-slop",
+        "continuity"
+      ]
     },
     {
       "name": "deck-forge",
@@ -31,8 +54,38 @@
       "source": "./deck-forge",
       "category": "productivity",
       "license": "MIT",
-      "author": { "name": "Treynor Tetik" },
-      "keywords": ["powerpoint", "pptx", "google-slides", "presentation", "accessibility", "wcag", "legibility"]
+      "author": {
+        "name": "Treynor Tetik"
+      },
+      "keywords": [
+        "powerpoint",
+        "pptx",
+        "google-slides",
+        "presentation",
+        "accessibility",
+        "wcag",
+        "legibility"
+      ]
+    },
+    {
+      "name": "proof-forge",
+      "displayName": "Proof Forge",
+      "description": "Verify what came out of the render. Compare two exports and mark exactly where they differ \u2014 video with timecoded markers and an EDL, stills with a bounding box, audio with a phase-invert null test. The threshold is derived from the pair being compared, so a routine re-encode produces nothing and one bad second produces one marker.",
+      "source": "./proof-forge",
+      "category": "productivity",
+      "license": "MIT",
+      "author": {
+        "name": "Treynor Tetik"
+      },
+      "keywords": [
+        "video",
+        "qc",
+        "render",
+        "diff",
+        "ffmpeg",
+        "delivery",
+        "post-production"
+      ]
     }
   ]
 }

@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+"""
+test_render_diff.py — regression tests for the render diff.
+
+Generates its own fixtures with ffmpeg, so there is nothing to check in and nothing
+to go stale. Needs ffmpeg and Pillow.
+
+The two cases that matter most are the first two, and they pull in opposite
+directions: a heavy re-encode must produce NOTHING, and one bad second in one corner
+must produce a marker. A tool that only satisfies one of those is useless — either it
+cries wolf on every export or it misses the thing you are looking for.
+
+    python3 test_render_diff.py
+"""
+import shutil
+import subprocess
+import sys
+import tempfile
+import wave
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent))
+import render_diff as R
+
+FAILS, RUN = [], 0
+TMP = Path(tempfile.mkdtemp(prefix="renderdiff-test-"))
+
+
+def check(name, cond, detail=""):
+    global RUN
+    RUN += 1
+    if cond:
+        print(f"  ok   {name}")
+    else:
+        print(f"  FAIL {name}  {detail}")
+        FAILS.append(name)
+
+
+def ff(*args):
+    r = subprocess.run(["ffmpeg", "-v", "error", "-y", *args],
+                       capture_output=True, text=True)
+    if r.returncode:
+        raise SystemExit(f"fixture build failed: {r.stderr[:300]}")
+
+
+def md5(p):
+    import hashlib
+    return hashlib.md5(Path(p).read_bytes()).hexdigest()
+
+
+if not shutil.which("ffmpeg"):
+    print("SKIP: ffmpeg not on PATH")
+    sys.exit(0)
+
+print(f"\nfixtures in {TMP}")
+src = TMP / "src.mp4"
+ff("-f", "lavfi", "-i", "testsrc2=size=640x360:rate=24:duration=6",
+   "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", str(src))
+
+# ── 1. a heavy re-encode must be SILENT ──────────────────────────────────────
+print("\nfalse positives (the property that makes it usable)")
+reenc = TMP / "reencode.mp4"
+ff("-i", str(src), "-c:v", "libx264", "-crf", "32", "-pix_fmt", "yuv420p", str(reenc))
+frames = R.video_psnr(src, reenc)
+flagged, base, thr = R.flag_frames(frames)
+check("CRF 18 vs CRF 32 produces no markers", len(flagged) == 0,
+      f"{len(flagged)} frames flagged at baseline {base:.1f}dB")
+check("...and the baseline reflects the real noise floor", 25 < base < 55, f"{base:.2f}dB")
+
+# a second, even harsher re-encode
+reenc2 = TMP / "reencode2.mp4"
+ff("-i", str(src), "-c:v", "mpeg4", "-q:v", "8", str(reenc2))
+f2, b2, _ = R.flag_frames(R.video_psnr(src, reenc2))
+check("a different CODEC entirely still produces no markers", len(f2) == 0,
+      f"{len(f2)} flagged at baseline {b2:.1f}dB")
+
+# ── 2. one corner, one second, must be FOUND ─────────────────────────────────
+print("\ntrue positives")
+corner = TMP / "corner.mp4"
+ff("-i", str(src), "-vf",
+   "drawbox=x=560:y=280:w=70:h=70:color=magenta@1.0:t=fill:enable='between(t,3,4)'",
+   "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", str(corner))
+fc, bc, _ = R.flag_frames(R.video_psnr(src, corner))
+ranges = R.group_ranges(fc, 24.0)
+check("a 70x70 box for 1s in a 640x360 frame is caught", len(fc) > 0)
+check("...and collapses to ONE marker, not 24", len(ranges) == 1, f"{len(ranges)} ranges")
+if ranges:
+    r0 = ranges[0]
+    check("the marker lands in the right second",
+          2.8 <= r0["start_frame"] / 24 <= 3.3 and 3.8 <= r0["end_frame"] / 24 <= 4.3,
+          f"{r0['start_tc']} -> {r0['end_tc']}")
+    check("the marker carries the worst dB", r0["worst_psnr_db"] < bc)
+
+# ── 3. grouping and timecode ─────────────────────────────────────────────────
+print("\ngrouping and timecode")
+g = R.group_ranges([(10, 20.0), (11, 19.0), (12, 21.0), (60, 15.0), (61, 16.0)], 24.0)
+check("two clusters group into two markers", len(g) == 2, str(len(g)))
+check("the worst value in a run wins", g[0]["worst_psnr_db"] == 19.0)
+check("timecode is HH:MM:SS:FF", R.timecode(0, 24) == "00:00:00:00", R.timecode(0, 24))
+check("one second in is 00:00:01:00", R.timecode(24, 24) == "00:00:01:00", R.timecode(24, 24))
+check("an hour in is 01:00:00:00", R.timecode(24 * 3600, 24) == "01:00:00:00",
+      R.timecode(24 * 3600, 24))
+check("no fps degrades to a frame number", "frame" in R.timecode(5, None))
+
+# ── 4. structural mismatch is reported BEFORE pixels ─────────────────────────
+print("\nstructural mismatch")
+small = TMP / "small.mp4"
+ff("-i", str(src), "-vf", "scale=320:180", "-c:v", "libx264", "-crf", "18",
+   "-pix_fmt", "yuv420p", str(small))
+cont = R.compare_containers(R.probe(src), R.probe(small))
+check("a resolution mismatch is reported", any(c["kind"] == "resolution" for c in cont),
+      str(cont))
+shorter = TMP / "short.mp4"
+ff("-i", str(src), "-t", "2", "-c", "copy", str(shorter))
+cont2 = R.compare_containers(R.probe(src), R.probe(shorter))
+check("a duration mismatch is reported", any(c["kind"] == "duration" for c in cont2))
+check("identical files report no structural difference",
+      R.compare_containers(R.probe(src), R.probe(src)) == [])
+
+# ── 5. stills ────────────────────────────────────────────────────────────────
+print("\nstills")
+try:
+    from PIL import Image
+    a_png, b_png, c_png = TMP / "a.png", TMP / "b.png", TMP / "c.png"
+    ff("-i", str(src), "-vframes", "1", str(a_png))
+    shutil.copy(a_png, b_png)
+    im = Image.open(a_png).convert("RGB")
+    im.putpixel((500, 300), (0, 255, 0) if im.getpixel((500, 300)) != (0, 255, 0) else (255, 0, 0))
+    im.save(c_png)
+    check("identical stills report identical", R.image_diff(a_png, b_png)["identical"])
+    d = R.image_diff(a_png, c_png)
+    check("a ONE PIXEL change is caught", not d["identical"])
+    check("...and the bounding box is exactly that pixel", d["bbox"] == (500, 300, 501, 301),
+          str(d["bbox"]))
+    try:
+        R.image_diff(a_png, TMP / "mismatch.png")
+        check("missing file raises", False)
+    except Exception:
+        check("a missing still raises rather than returning a verdict", True)
+except ImportError:
+    print("  SKIP stills (Pillow missing)")
+
+# ── 6. audio null ────────────────────────────────────────────────────────────
+print("\naudio null test")
+s1, s2, s6 = TMP / "s1.wav", TMP / "s2.wav", TMP / "s6.wav"
+ff("-f", "lavfi", "-i", "sine=frequency=440:duration=3:sample_rate=48000", str(s1))
+shutil.copy(s1, s2)
+w = wave.open(str(s1), "rb")
+prm = w.getparams()
+buf = bytearray(w.readframes(w.getnframes()))
+w.close()
+step = prm.sampwidth * prm.nchannels
+buf[int(1.5 * prm.framerate) * step:int(1.51 * prm.framerate) * step] = \
+    b"\x00" * (int(0.01 * prm.framerate) * step)
+o = wave.open(str(s6), "wb")
+o.setparams(prm)
+o.writeframes(bytes(buf))
+o.close()
+# The fixture must actually differ. A previous version of this test used an ffmpeg
+# filter that silently did nothing, so both files were byte-identical and the tool's
+# correct "identical" verdict looked like a bug. Assert the premise.
+check("the dropout fixture really differs from the source", md5(s1) != md5(s6))
+check("identical audio nulls to silence", R.audio_null(s1, s2)["nulls"])
+n6 = R.audio_null(s1, s6)
+check("a 10ms dropout does NOT null", not n6["nulls"],
+      f"residual {n6['residual_peak_db']}")
+check("...and the residual is loud enough to notice", n6["residual_peak_db"] > -60,
+      str(n6["residual_peak_db"]))
+
+# ── 7. helpers ───────────────────────────────────────────────────────────────
+print("\nhelpers")
+check("median of an even list averages the middle", R.median([1, 2, 3, 4]) == 2.5)
+check("median of an odd list is the middle", R.median([5, 1, 3]) == 3)
+check("median of nothing is 0", R.median([]) == 0.0)
+check("all-inf frames means identical", R.flag_frames([(0, float("inf"))])[0] == [])
+check("--absolute overrides the derived threshold",
+      R.flag_frames([(0, 30.0), (1, 30.0)], absolute=40.0)[2] == 40.0)
+check("kind_of recognises video/image/audio",
+      (R.kind_of("x.mov"), R.kind_of("x.PNG"), R.kind_of("x.wav")) == ("video", "image", "audio"))
+check("kind_of returns None for junk", R.kind_of("x.docx") is None)
+
+print(f"\n{RUN - len(FAILS)}/{RUN} passed")
+if FAILS:
+    print("FAILED: " + ", ".join(FAILS))
+shutil.rmtree(TMP, ignore_errors=True)
+sys.exit(1 if FAILS else 0)

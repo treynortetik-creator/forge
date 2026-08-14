@@ -1,0 +1,20 @@
+{
+  "name": "proof-forge",
+  "version": "0.1.0",
+  "description": "Verify what came out of the render. Compare two exports and mark exactly where they differ, on video, stills or audio, with a threshold derived from the pair rather than guessed at.",
+  "author": {
+    "name": "treynortetik-creator"
+  },
+  "homepage": "https://github.com/treynortetik-creator/forge",
+  "repository": "https://github.com/treynortetik-creator/forge",
+  "license": "MIT",
+  "keywords": [
+    "video",
+    "qc",
+    "render",
+    "diff",
+    "ffmpeg",
+    "delivery",
+    "post-production"
+  ]
+}

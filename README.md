@@ -1,6 +1,6 @@
 # Forge
 
-Three Claude Code plugins for making things.
+Four Claude Code plugins for making things, and checking them.
 
 <p align="center">
   <img src="media/forge-writes.gif" width="230" alt="Forge writing a novel by hand">
@@ -15,6 +15,7 @@ Three Claude Code plugins for making things.
 | **[design-forge](design-forge/)** | Visual work — an adversarial builder/critic loop, a measurement harness, a licence-cleared asset library, a scroll-film site builder |
 | **[story-forge](story-forge/)** | Long-form fiction — braindump to dossier, outlining, drafting, a three-pass line edit, a continuity audit |
 | **[deck-forge](deck-forge/)** | Presentations — a component library that cannot build a native chart, and a harness that measures legibility at distance and contrast against the real backdrop |
+| **[proof-forge](proof-forge/)** | Exports — compare two renders and mark exactly where they differ, on video, stills or audio |
 
 They share one idea: **judgment stays with the model, and anything expressed as a number gets measured
 instead of eyeballed.**
@@ -43,7 +44,8 @@ harness decides which one wins.*
 claude plugin marketplace add treynortetik-creator/forge
 claude plugin install design-forge@forge     # any of them,
 claude plugin install story-forge@forge      # or
-claude plugin install deck-forge@forge       # all three
+claude plugin install deck-forge@forge       # or
+claude plugin install proof-forge@forge      # all four
 ```
 
 Or clone and install locally:
@@ -143,6 +145,38 @@ sizes in CSS pixels, so applying them to points invents failures between 18 and 
 The harness shipped four times reporting green on the defect it exists to catch, including a version
 that returned "0 runs, all PASS, exit 0" on a deck built exactly the way the plugin says to build one.
 Each of those is now a regression test; there are 33.
+
+---
+
+## proof-forge
+
+The single strongest request in a dig through practitioner forums, verbatim:
+
+> *"I need to compare two exports and make sure they are exact visual replicas... the only way I know
+> how is to drop a video file into the top layer and compare it one clip at a time. This is incredibly
+> tedious and isn't even foolproof. **Sometimes the difference is just one little corner of the frame
+> for one second in a two-hour sequence.**"*
+
+And the spec for the fix, from the same person: *"even if there was a tool that just did the
+difference-mode scanning for you and **added markers where the differences appeared**, that would be a
+big step."* The commercial equivalent starts in the mid five figures.
+
+**The hard part is the threshold, not the diff.** Two exports of the same timeline are never
+bit-identical — a different encoder, bitrate or colour pipeline moves every pixel slightly. An
+absolute threshold therefore flags either the whole file or none of it, depending on codec, and a
+tool that cries wolf on a routine re-encode is one people stop running.
+
+So the threshold is derived **from the pair being compared**: take the median per-frame PSNR as that
+pair's own encoding-noise floor and flag frames that fall well below it. Verified in both directions —
+CRF 18 against CRF 32, and against an entirely different codec, produce **zero** markers; a 70×70 box
+for one second in a 640×360 frame produces exactly **one**, in the right second, with an EDL you can
+import.
+
+Stills get a bounding box and a per-tile heat map. Audio gets a phase-invert null test, which is exact
+rather than statistical: identical audio cancels to digital silence, and a 0.1% gain change surfaces
+at −78 dBFS.
+
+31 tests, fixtures generated with ffmpeg at run time.
 
 ---
 
