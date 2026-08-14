@@ -83,12 +83,21 @@ def extract(pattern, text):
 
 
 def norm_numbers(text):
-    """Numbers with formatting normalised, so 1,000 == 1000 and 4.50 == 4.5."""
+    """Numbers with formatting normalised, so 1,000 == 1000 and 4.50 == 4.5.
+
+    The trailing-zero strip has to run on the fractional part, not on the whole
+    string. `re.sub(r"\\.0+$", ...)` collapses 4.00 but leaves 4.50 alone, so a copy
+    edit that writes 4.5 for 4.50 was reported as a DELETED NUMBER — a false positive
+    on exactly the kind of harmless tidying this check must stay quiet about.
+    """
     out = set()
     for m in NUMBER.finditer(text):
         raw = m.group(0).strip()
         core = raw.replace(",", "").replace("$", "").strip()
-        core = re.sub(r"\.0+$", "", core)
+        mm = re.match(r"^([-+]?\d+)\.(\d+)(.*)$", core)
+        if mm:
+            frac = mm.group(2).rstrip("0")
+            core = mm.group(1) + (f".{frac}" if frac else "") + mm.group(3)
         if re.search(r"\d", core):
             out.add(core.lower())
     return out
