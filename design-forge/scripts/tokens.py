@@ -91,7 +91,9 @@ SOURCES = {
              "The official webfonts/v1 API 403s without a key -- use this instead. Cache it."),
 }
 
-CSS_VAR = re.compile(r"^\s*(--[\w-]+)\s*:\s*([^;]+);", re.M)
+# NOT ^-anchored: Polaris ships minified onto a single line, where an anchored
+# pattern matched 0 of 531 declarations and returned silently.
+CSS_VAR = re.compile(r"(--[\w-]+)\s*:\s*([^;}]+)[;}]")
 COLOURISH = re.compile(r"#[0-9a-fA-F]{3,8}\b|\b(?:rgb|rgba|hsl|hsla|oklch|oklab|color)\(", re.I)
 
 
@@ -126,6 +128,8 @@ def walk_dtcg(node, prefix=""):
 
 
 def walk_json(node, prefix="", depth=0):
+    """Flatten nested JSON. MUST recurse into lists -- shadcn's palettes are arrays of
+    {scale,hex,rgb,hsl,oklch}, and skipping lists silently returned 6% of the file."""
     """Generic nested-json flattener for Figma-shaped and vendor-shaped files."""
     out = {}
     if depth > 8:
@@ -135,6 +139,12 @@ def walk_json(node, prefix="", depth=0):
             return {prefix: node["value"]}
         for k, v in node.items():
             out.update(walk_json(v, f"{prefix}.{k}" if prefix else k, depth + 1))
+    elif isinstance(node, list):
+        for i, v in enumerate(node):
+            key = None
+            if isinstance(v, dict):
+                key = v.get("scale") or v.get("name") or v.get("id")
+            out.update(walk_json(v, f"{prefix}.{key if key is not None else i}", depth + 1))
     elif isinstance(node, (str, int, float)) and prefix:
         out[prefix] = node
     return out
@@ -145,7 +155,7 @@ def extract(key, text):
     if fmt in ("css", "scss"):
         d = parse_css(text)
         if not d and fmt == "scss":
-            d = {m[0]: m[1] for m in re.findall(r"'([\w-]+)'\s*:\s*(#[0-9a-fA-F]{3,8})", text)}
+            d = {m[0]: m[1] for m in re.findall(r"'?\"?([\w-]+)\"?'?\s*:\s*(#[0-9a-fA-F]{3,8})", text)}
         return d
     if fmt == "gfonts":
         return {f["family"]: f.get("stroke") or f.get("category", "")
@@ -195,7 +205,16 @@ def main():
             try:
                 text, status = fetch(u)
                 if a.check:
-                    print(f"  {'OK ' if status == 200 else status} {k:<11} {u}")
+                    # Liveness is not usability. Parse it too, or a dead parser reads green.
+                    got = 0
+                    try:
+                        got = len(extract(k, text))
+                    except Exception:
+                        got = 0
+                    tag = "OK " if (status == 200 and got) else ("EMPTY" if status == 200 else str(status))
+                    if not got:
+                        failures += 1
+                    print(f"  {tag:<5} {k:<11} {got:>5} tokens  {u}")
                     continue
                 merged.update(extract(k, text))
             except Exception as e:
@@ -204,6 +223,9 @@ def main():
         if a.check:
             continue
         if not merged:
+            failures += 1
+            print(f"  PARSE-FAIL {k:<11} resolved but extracted ZERO tokens — the parser no "
+                  f"longer matches this source's format", file=sys.stderr)
             continue
         if a.category:
             merged = {kk: vv for kk, vv in merged.items() if a.category.lower() in kk.lower()}

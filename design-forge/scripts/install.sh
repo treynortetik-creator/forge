@@ -11,6 +11,9 @@
 #   ./scripts/install.sh --check      change nothing, just report
 
 set -uo pipefail
+# NOTE: deliberately NOT `set -e` (we want to report every check), so every install
+# step below must test its own exit status. It previously did not, and sailed past two
+# hard failures to print "Done."
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BOLD=$'\033[1m'; DIM=$'\033[2m'; GRN=$'\033[32m'; YLW=$'\033[33m'; RST=$'\033[0m'
 MODE="${1:---plugin}"
@@ -36,7 +39,7 @@ note "claude CLI present"
 # ── 2. Make the bundled scripts executable ──────────────────────────────
 say "2. Marking scripts executable"
 find "$ROOT" -name "*.sh" -exec chmod +x {} \; 2>/dev/null
-find "$ROOT" -name "*.py" -path "*/scripts/*" -exec chmod +x {} \; 2>/dev/null
+find "$ROOT" \( -name "*.py" -o -name "*.js" \) -exec chmod +x {} \; 2>/dev/null
 note "done  (a missing executable bit is the classic silent plugin failure)"
 
 # ── 3. Validate before installing ───────────────────────────────────────
@@ -49,16 +52,37 @@ fi
 
 # ── 4. Register + install ───────────────────────────────────────────────
 say "4. Installing the plugin"
-if claude plugin marketplace list 2>/dev/null | grep -q "design-forge-dev"; then
-  note "marketplace already registered, updating"
-  claude plugin marketplace update design-forge-dev >/dev/null 2>&1 || true
-else
-  claude plugin marketplace add "$ROOT" && note "marketplace added"
+
+# The marketplace manifest lives in the REPO ROOT, not in the plugin dir — this
+# plugin is one of several the marketplace hosts. Pointing `marketplace add` at the
+# plugin dir fails with "Marketplace file not found", and the marketplace is named
+# after the repo, not the plugin.
+MARKET_DIR="$ROOT"
+[ -f "$ROOT/../.claude-plugin/marketplace.json" ] && MARKET_DIR="$(cd "$ROOT/.." && pwd)"
+MARKET_NAME=$(python3 -c "import json,sys;print(json.load(open('$MARKET_DIR/.claude-plugin/marketplace.json'))['name'])" 2>/dev/null)
+PLUGIN_NAME=$(python3 -c "import json;print(json.load(open('$ROOT/.claude-plugin/plugin.json'))['name'])" 2>/dev/null)
+
+if [ -z "$MARKET_NAME" ] || [ -z "$PLUGIN_NAME" ]; then
+  echo "  Could not read the manifests. Expected:" >&2
+  echo "    $MARKET_DIR/.claude-plugin/marketplace.json" >&2
+  echo "    $ROOT/.claude-plugin/plugin.json" >&2
+  exit 1
 fi
-if claude plugin list 2>/dev/null | grep -q "design-forge"; then
-  note "already installed — run 'claude plugin update design-forge' to refresh"
+note "marketplace '$MARKET_NAME' at $MARKET_DIR · plugin '$PLUGIN_NAME'"
+
+if claude plugin marketplace list 2>/dev/null | grep -q "$MARKET_NAME"; then
+  note "marketplace already registered, updating"
+  claude plugin marketplace update "$MARKET_NAME" >/dev/null 2>&1 || true
 else
-  claude plugin install design-forge@design-forge-dev && note "installed"
+  if claude plugin marketplace add "$MARKET_DIR"; then note "marketplace added"
+  else echo "  FAILED to add the marketplace. Nothing installed." >&2; exit 1; fi
+fi
+
+if claude plugin list 2>/dev/null | grep -q "$PLUGIN_NAME"; then
+  note "already installed — 'claude plugin update $PLUGIN_NAME@$MARKET_NAME' to refresh"
+else
+  if claude plugin install "$PLUGIN_NAME@$MARKET_NAME"; then note "installed"
+  else echo "  FAILED to install $PLUGIN_NAME@$MARKET_NAME." >&2; exit 1; fi
 fi
 note "restart the session (or /clear) for the skills to load"
 

@@ -38,14 +38,14 @@ symlink (`~/.claude/plugins/cache/design-forge-dev/design-forge/<version>/`), an
 **version-gated, not content-gated**. Editing a `SKILL.md` and running update does nothing at all:
 
 ```
-✔ design-forge is already at the latest version (0.1.0).
+✔ design-forge is already at the latest version (0.3.0).
 ```
 
 Your change is real, saved, and simply not installed. The full loop:
 
 ```bash
 claude plugin validate .                                # catch manifest errors first
-# bump "version" in BOTH .claude-plugin/plugin.json and .claude-plugin/marketplace.json
+# bump "version" in .claude-plugin/plugin.json (and the repo-root marketplace.json entry)
 claude plugin marketplace update design-forge-dev       # re-read the marketplace
 claude plugin update design-forge@design-forge-dev      # note the @marketplace qualifier
 ```
@@ -148,13 +148,17 @@ JSON.stringify(__DF.report({ accent:'#2b7fff', cap:3, floor:16, measure:680 }))
 ```
 typeLadder    3/3 PASS [16,20,72]
 typeFloor     0 under 16px PASS
-accent        worst 3/3 @y=2880 PASS
-shadows       0 PASS
+accent        worst 3/3 @y=2880, 3 total PASS
+shadows_house 0 PASS (house rule, not normative)
 proseMeasure  1 measure(s) PASS [668]
 contrast      0 WCAG AA failures PASS
 wcag148       0 failures PASS
 targetSize    0 under 24px PASS
+rhythm        5 sections, 0 under 96px PASS
+alignment     11 left edges
 tokens        radii[8,12] weights[400,500,900]
+viewport      [1440,648]
+caveat        One page, one state, one width...
 ```
 
 ⚠️ **Always cache-bust after an edit** (`page.html?v=2`). A stale copy reports the pre-fix numbers,
@@ -222,8 +226,8 @@ Each of these cost real time on the run that produced this plugin.
 
 ```
 design-forge/
-├── .claude-plugin/{plugin,marketplace}.json
-├── skills/            14 skills
+├── .claude-plugin/plugin.json
+├── skills/            7 skills
 ├── scripts/
 │   ├── install.sh     validate → register → install (+ optional toolchain)
 │   ├── doctor.sh      dependency report, exits 0 always

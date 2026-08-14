@@ -14,7 +14,8 @@
  * Setup once:  npm i puppeteer-core   (and have Google Chrome installed)
  * Chrome path is auto-detected for macOS/Linux/Windows; override with CHROME_PATH=/path.
  */
-const puppeteer = require('puppeteer-core');
+const puppeteer = (() => { try { return require('puppeteer-core'); }
+  catch { console.error('verify.js needs puppeteer-core.\n  cd "$CLAUDE_PLUGIN_ROOT"/skills/scroll-film-studio/scripts && npm install'); process.exit(1); } })();
 
 function chromePath() {
   if (process.env.CHROME_PATH) return process.env.CHROME_PATH;

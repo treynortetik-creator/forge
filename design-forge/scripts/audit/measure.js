@@ -102,9 +102,13 @@
     return (l1 + 0.05) / (l2 + 0.05);
   };
 
-  // Walk up for the first non-transparent background — what the text actually sits on.
+  // Walk up compositing every translucent layer onto what is behind it. Returning the
+  // first alpha>0.5 layer as if it were opaque scored a 60% black scrim as pure black —
+  // 5.92:1 reported for a true 1.62:1, i.e. a PASS on a hard failure. Same alpha defect
+  // that was fixed on the foreground, living on the background side.
   const effectiveBg = (el) => {
     let n = el;
+    const stack = [];   // translucent layers, outermost-last
     while (n && n !== document.documentElement) {
       const cs = getComputedStyle(n);
       // A gradient or image background carries no backgroundColor. Walking past it
@@ -112,13 +116,17 @@
       // fabricated number. Bail out honestly instead.
       const c = cs.backgroundColor;
       const cv = rgb(c);
-      // An opaque background-color is measurable even with an image on top of it.
-      // Only give up when there is an image AND nothing solid behind it.
-      if (cv && cv[3] > 0.5) return cv;
       if (cs.backgroundImage && cs.backgroundImage !== 'none') return null;
+      if (cv && cv[3] > 0) {
+        if (cv[3] >= 0.999) {                       // opaque: this is the floor
+          return stack.reduceRight((under, layer) => over(layer, under), [cv[0], cv[1], cv[2]]);
+        }
+        stack.push(cv);                             // translucent: composite later
+      }
       n = n.parentElement;
     }
-    return [255, 255, 255];
+    // Ran out of ancestors: the page background is white by default.
+    return stack.reduceRight((under, layer) => over(layer, under), [255, 255, 255]);
   };
 
   const visualPresentation = {};
@@ -166,17 +174,39 @@
     accentScan(accent, cap = 3, step = 20) {
       const target = typeof accent === 'string' && accent.startsWith('#') ? hexToRgb(accent) : rgb(accent);
       if (!target) return { error: 'pass a hex like #2b7fff or an rgb() string' };
+      // Colours authored in oklch()/lab()/color() cannot be compared to an rgb target.
+      // Reporting "ACCENT NOT FOUND" for them is a FALSE ALARM indistinguishable from the
+      // real wrong-hex defect -- and tokens.py's flagship source ships 312 oklch colours.
+      const unparseable = [...document.querySelectorAll('body *, svg *')].filter((el) => {
+        if (!shown(el)) return false;
+        const cs = getComputedStyle(el);
+        return ['color', 'backgroundColor', 'fill', 'stroke'].some(
+          (k) => cs[k] && /^(oklch|lab|lch|oklab|color)\(/i.test(cs[k]));
+      }).length;
       const raw = [...document.querySelectorAll('body *, svg *')].filter((el) => {
+        if (!shown(el)) return false;    // an invisible accent is not a use, and must not defeat the absent-floor
         const cs = getComputedStyle(el);
         // fill/stroke matter: the house style tells you to hand-author SVG charts
         // where one bar takes the accent, and colour/background never sees those.
         return ['color', 'backgroundColor', 'fill', 'stroke', 'borderTopColor', 'outlineColor']
           .some((k) => sameColor(rgb(cs[k]), target));
       });
-      // Subtree dedup: `<div class=n>4-12<span>hrs</span></div>` is ONE accent use,
-      // not two. Keep only the outermost element of each accent-coloured subtree.
-      // (Learned the hard way -- the naive text-compare version reported 5 for 3.)
-      const els = raw.filter((el) => !raw.some((o) => o !== el && o.contains(el)));
+      // Subtree dedup keeps the OUTERMOST element of an accent-coloured subtree, so
+      // `<div class=n>4-12<span>hrs</span></div>` counts once. But a themed wrapper
+      // (`<div style="color:accent">` around five accent spans) was swallowing all five
+      // and reporting 1 — a false PASS on the check this file calls the important one.
+      // An ancestor only absorbs a descendant when it is itself a LEAF-ish use: it must
+      // not contain another accent element that carries its own distinct text.
+      const ownText = (o) => [...o.childNodes]
+        .filter((k) => k.nodeType === 3).map((k) => k.textContent.trim()).join('');
+      const els = raw.filter((el) => {
+        // Drop a pure wrapper: it carries no text of its own and only exists to theme
+        // accent descendants. Counting it double-counts the group.
+        if (!ownText(el) && raw.some((o) => o !== el && el.contains(o))) return false;
+        // Drop a descendant only when its accent ancestor IS the same visual use —
+        // i.e. that ancestor has its own text (`<div>4-12<span>hrs</span></div>`).
+        return !raw.some((o) => o !== el && o.contains(el) && ownText(o).length > 0);
+      });
       const boxes = els.map((el) => {
         const r = el.getBoundingClientRect();
         const fixed = /fixed|sticky/.test(getComputedStyle(el).position);
@@ -199,8 +229,11 @@
       const absent = boxes.length === 0;
       return {
         accent, totalOnPage: boxes.length, worstCaseInOneViewport: worst, atScrollY: at, cap,
-        absent, pass: !absent && worst <= cap,
-        note: absent ? 'ACCENT NOT FOUND ON PAGE — either the wrong hex is shipping, or this page does not use the accent at all. Not a pass.' : undefined,
+        unparseableColourElements: unparseable || undefined,
+        absent, pass: !absent && worst <= cap && !unparseable,
+        note: unparseable
+          ? `${unparseable} element(s) use a colour space this check cannot compare (oklch/lab/color). NOT MEASURABLE — sample by hand. This is not the wrong-hex defect.`
+          : (absent ? 'ACCENT NOT FOUND ON PAGE — either the wrong hex is shipping, or this page does not use the accent at all. Not a pass.' : undefined),
         elements: who,
       };
     },
@@ -254,10 +287,12 @@
         .filter((el) => {
           const sh = getComputedStyle(el).boxShadow;
           if (!sh || sh === 'none') return false;
-          // A zero-blur ring (`0 0 0 1px #ddd`) is a hairline border, which is the
-          // technique this rule RECOMMENDS. Only blur counts as elevation.
-          return /(-?[\d.]+px)\s+(-?[\d.]+px)\s+(-?[\d.]+)px/.test(sh)
-            && parseFloat(RegExp.$3) > 0;
+          // A zero-blur ring (`0 0 0 1px #ddd`) is a hairline border, the technique this
+          // rule RECOMMENDS. Only blur counts as elevation. Must scan EVERY shadow in a
+          // comma-separated list -- a leading ring was hiding a real shadow behind it
+          // (Tailwind `ring` + `shadow-lg` reported 0).
+          const blurs = [...sh.matchAll(/(-?[\d.]+)px\s+(-?[\d.]+)px\s+(-?[\d.]+)px/g)];
+          return blurs.some((m) => parseFloat(m[3]) > 0);
         })
         .map((el) => el.tagName.toLowerCase() + cls(el));
       return { tier: 'house', count: hits.length, allow, pass: hits.length <= allow, elements: [...new Set(hits)].slice(0, 8) };
@@ -345,11 +380,13 @@
        https://www.w3.org/WAI/WCAG22/Understanding/visual-presentation.html */
     visualPresentation(maxChars = 80) {
       const out = { maxChars, justified: [], longLines: [], tightLeading: [], paraSpacing: [] };
+      let checked = 0;
       textNodes().forEach((el) => {
         const cs = getComputedStyle(el);
         const fs = px(cs.fontSize);
         const t = el.textContent.trim();
         if (t.length < 120 || fs < 12) return;
+        checked += 1;
         const sel = el.tagName.toLowerCase() + cls(el);
 
         if (cs.textAlign === 'justify') out.justified.push(sel);
@@ -371,7 +408,12 @@
         if (mb < lh * 1.5) out.paraSpacing.push({ sel, margin: rnd(mb), need: rnd(lh * 1.5) });
       });
       const fails = out.justified.length + out.longLines.length + out.tightLeading.length + out.paraSpacing.length;
-      return { ...out, failures: fails, pass: fails === 0, sc: '1.4.8 (AAA)' };
+      return {
+        ...out, checked, failures: fails,
+        pass: checked > 0 && fails === 0,
+        note: checked === 0 ? 'NO TEXT BLOCKS MEASURED — not a pass. The 120-character gate may be excluding real prose; lower it or check the page has body copy.' : undefined,
+        sc: '1.4.8 (AAA)',
+      };
     },
 
     /* WCAG 2.2 SC 2.5.8 Target Size Minimum (AA) = 24x24 CSS px.
@@ -385,6 +427,11 @@
       document.querySelectorAll(sel).forEach((el) => {
         const r = el.getBoundingClientRect();
         if (r.width === 0 || r.height === 0) return;
+        // Visually-hidden skip links (.sr-only: 1x1 + clip / clip-path) are an
+        // accessibility AFFORDANCE, not a target-size violation. Do not flag them.
+        const cs2 = getComputedStyle(el);
+        const clipped = (cs2.clip && cs2.clip !== 'auto') || (cs2.clipPath && cs2.clipPath !== 'none');
+        if (clipped && r.width <= 2 && r.height <= 2) return;
         // Exemption: a link inline within a sentence of text.
         if (el.tagName === 'A' && getComputedStyle(el).display.includes('inline')) {
           const p = el.parentElement;

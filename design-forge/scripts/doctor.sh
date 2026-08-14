@@ -36,8 +36,19 @@ check git     "git"          optional "versioning your design work"
 
 echo
 echo "${BOLD}Rendering${RST} ${DIM}(the craft critic goes blind without one of these)${RST}"
-if [ -d "$HOME/Library/Application Support/Google/Chrome" ] || have google-chrome || have chromium; then
-  row "Chrome" ok "present — pair the claude-in-chrome extension"
+# Check for the APPLICATION, not the profile directory — the profile is only created on
+# first launch, so an installed-but-never-opened Chrome reported MISSING, and an
+# uninstalled Chrome whose profile lingered reported present.
+CHROME_FOUND=""
+for app in "Google Chrome" "Chromium" "Brave Browser" "Microsoft Edge" "Arc" "Google Chrome Canary"; do
+  [ -d "/Applications/$app.app" ] && CHROME_FOUND="$app" && break
+done
+for bin in google-chrome google-chrome-stable chromium chromium-browser brave-browser microsoft-edge; do
+  [ -n "$CHROME_FOUND" ] && break
+  have "$bin" && CHROME_FOUND="$bin"
+done
+if [ -n "$CHROME_FOUND" ]; then
+  row "Chrome" ok "$CHROME_FOUND — pair the claude-in-chrome extension"
 else
   row "Chrome" no "MISSING — no screenshots, no measurement, no craft critic"
 fi
