@@ -51,6 +51,25 @@ the web and it costs nothing to check.
 instances per page. If your page has zero, you are already in the top sixth of the web. ⚠️ (WebAIM is
 high-trust; this figure was not read at the primary source.)
 
+**How much a checker actually catches — with a real primary source.** 📗 The **UK Government Digital
+Service accessibility tool audit** seeded a page with **142 known barriers** and ran 13 checkers:
+**SortSite 40% · WAVE 30% · axe 29%**. (2018, and overdue for replication — treat the figure as dated,
+not as folklore. It measures *criteria coverage*; vendor claims nearer 57% measure *issue volume*, a
+different denominator. Both can be honest.)
+<https://alphagov.github.io/accessibility-tool-audit/>
+
+**The reason a harness is worth building at all, quantified.** ⚠️ A 2026 survey of 1,000 US workers
+found **46% say fixing AI output takes as long as doing the work manually** and 11% say longer —
+**57% report the time saving vanishes once corrections are needed.** METR's RCT is the sharpest version:
+experienced developers ran **19% slower while believing they were 20% faster.**
+
+> **The reconciling story, and it is this repository's thesis in practitioners' own terms: AI collapses
+> generation time and inflates verification time. The harness decides which one wins.**
+
+**The single best illustration of what a harness sees and a person cannot:** an Amazon listing was
+suppressed because the background was `RGB(255,253,252)` instead of pure white. No human eye resolves
+that. Three lines of code do.
+
 ⚠️ **axe-core `color-contrast` skips text over background images, obscured text, and images of text.**
 Those are exactly the cases a looking critic *can* judge. The tools are complementary, not redundant —
 and the harness reports them as `indeterminate` rather than passing them silently.

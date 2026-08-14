@@ -26,6 +26,12 @@ and you get something useful. Ask it to count accents or verify a hex and you ge
 So the work is split. A harness computes what is computable. The model is spent on taste, structure,
 and whether the thing is actually any good.
 
+**Why that split is worth the trouble:** a 2026 survey of 1,000 workers found **46% say fixing AI
+output takes as long as doing the work manually**, and **57% say the time saving disappears once
+corrections are needed**. METR's RCT is sharper still — experienced developers ran **19% slower while
+believing they were 20% faster**. *AI collapses generation time and inflates verification time. The
+harness decides which one wins.*
+
 <sub>Sources and verification tiers for every figure: [design-forge/references/mechanisms.md](design-forge/references/mechanisms.md)</sub>
 
 ---
