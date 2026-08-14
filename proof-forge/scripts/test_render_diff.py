@@ -18,6 +18,7 @@ import sys
 import tempfile
 import wave
 from pathlib import Path
+import pathlib
 
 sys.path.insert(0, str(Path(__file__).parent))
 import render_diff as R
@@ -62,7 +63,7 @@ print("\nfalse positives (the property that makes it usable)")
 reenc = TMP / "reencode.mp4"
 ff("-i", str(src), "-c:v", "libx264", "-crf", "32", "-pix_fmt", "yuv420p", str(reenc))
 frames = R.video_psnr(src, reenc)
-flagged, base, thr = R.flag_frames(frames)
+flagged, base, thr, _m = R.flag_frames(frames)
 check("CRF 18 vs CRF 32 produces no markers", len(flagged) == 0,
       f"{len(flagged)} frames flagged at baseline {base:.1f}dB")
 check("...and the baseline reflects the real noise floor", 25 < base < 55, f"{base:.2f}dB")
@@ -70,7 +71,7 @@ check("...and the baseline reflects the real noise floor", 25 < base < 55, f"{ba
 # a second, even harsher re-encode
 reenc2 = TMP / "reencode2.mp4"
 ff("-i", str(src), "-c:v", "mpeg4", "-q:v", "8", str(reenc2))
-f2, b2, _ = R.flag_frames(R.video_psnr(src, reenc2))
+f2, b2, _, _ = R.flag_frames(R.video_psnr(src, reenc2))
 check("a different CODEC entirely still produces no markers", len(f2) == 0,
       f"{len(f2)} flagged at baseline {b2:.1f}dB")
 
@@ -80,7 +81,7 @@ corner = TMP / "corner.mp4"
 ff("-i", str(src), "-vf",
    "drawbox=x=560:y=280:w=70:h=70:color=magenta@1.0:t=fill:enable='between(t,3,4)'",
    "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", str(corner))
-fc, bc, _ = R.flag_frames(R.video_psnr(src, corner))
+fc, bc, _, _ = R.flag_frames(R.video_psnr(src, corner))
 ranges = R.group_ranges(fc, 24.0)
 check("a 70x70 box for 1s in a 640x360 frame is caught", len(fc) > 0)
 check("...and collapses to ONE marker, not 24", len(ranges) == 1, f"{len(ranges)} ranges")
@@ -175,9 +176,70 @@ check("median of nothing is 0", R.median([]) == 0.0)
 check("all-inf frames means identical", R.flag_frames([(0, float("inf"))])[0] == [])
 check("--absolute overrides the derived threshold",
       R.flag_frames([(0, 30.0), (1, 30.0)], absolute=40.0)[2] == 40.0)
+check("flag_frames returns a mode", len(R.flag_frames([(0, 30.0)])) == 4)
 check("kind_of recognises video/image/audio",
       (R.kind_of("x.mov"), R.kind_of("x.PNG"), R.kind_of("x.wav")) == ("video", "image", "audio"))
 check("kind_of returns None for junk", R.kind_of("x.docx") is None)
+
+
+# ── 8. findings from the full-project review ─────────────────────────────────
+print("\nthe majority-identical case (a smart-render / segment re-export)")
+
+# 🔴 The threshold went VACUOUS on exactly this input. Excluding bit-identical frames
+# from the median made the defect its own baseline, so nothing could fall 6dB below
+# itself: 120 identical + 24 defect frames reported ZERO and exited 0. Both original
+# fixtures were FULL re-encodes, where every frame is finite, so nothing caught it.
+fl, base, thr, mode = R.flag_frames(
+    [(i, float("inf")) for i in range(120)] + [(120 + i, 20.0) for i in range(24)])
+check("a mostly-identical file reports its changed frames", len(fl) == 24, f"{len(fl)} flagged")
+check("...and says it was a partial re-encode, not a uniform one", mode == "partial", mode)
+
+fl2, b2, t2, m2 = R.flag_frames(
+    [(i, 38.0 + (i % 3)) for i in range(140)] + [(140 + i, 20.0) for i in range(4)])
+check("a FULL re-encode still uses the derived threshold", m2 == "reencode", m2)
+check("...and still finds only the outliers", len(fl2) == 4, f"{len(fl2)} flagged")
+
+check("a wholly identical pair reports nothing",
+      R.flag_frames([(i, float("inf")) for i in range(50)])[0] == [])
+check("--absolute overrides the mode choice",
+      R.flag_frames([(0, 30.0), (1, 30.0)], absolute=40.0)[3] == "absolute")
+
+print("\nSMPTE timecode at the rates NLEs actually deliver")
+# timecode counts FRAMES at the nominal rate, not wall-clock seconds. Dividing by the
+# real fps drifts 3.6 s/hour at 29.97 -- ~215 frames into a two-hour sequence, which
+# is precisely the scale this tool exists for. The old suite only used fps=24, where
+# wall-clock and frame-count happen to coincide.
+check("24fps: one hour is 01:00:00:00", R.timecode(86400, 24) == "01:00:00:00",
+      R.timecode(86400, 24))
+check("25fps: one hour is 01:00:00:00", R.timecode(90000, 25) == "01:00:00:00",
+      R.timecode(90000, 25))
+check("30fps NDF: one hour is 01:00:00:00", R.timecode(108000, 30) == "01:00:00:00",
+      R.timecode(108000, 30))
+check("29.97 uses DROP FRAME and lands on the hour",
+      R.timecode(107892, 29.97) == "01:00:00;00", R.timecode(107892, 29.97))
+check("29.97 marks drop-frame with a semicolon", ";" in R.timecode(100, 29.97))
+check("23.976 stays non-drop (drop-frame is undefined for it)",
+      ";" not in R.timecode(100, 23.976), R.timecode(100, 23.976))
+# the old implementation produced 00:01:60:00 here — seconds never carried to minutes
+bad = [f for f in range(0, 200000, 977)
+       if int(R.timecode(f, 23.976).replace(";", ":").split(":")[2]) > 59]
+check("seconds never exceed 59 (the old carry bug)", not bad, f"{len(bad)} bad frames")
+bad2 = [f for f in range(0, 200000, 991)
+        if int(R.timecode(f, 29.97).replace(";", ":").split(":")[3]) > 29]
+check("frames never exceed the nominal rate", not bad2, f"{len(bad2)} bad")
+check("no fps still degrades to a frame number", "frame" in R.timecode(5, None))
+
+# the EDL header must match the timecode it carries
+import tempfile as _tf
+_p = pathlib.Path(_tf.mktemp(suffix=".edl"))
+R.write_edl([{"start_tc": R.timecode(100, 29.97), "end_tc": R.timecode(130, 29.97),
+              "frames": 30, "worst_psnr_db": 20.0}], 29.97, _p)
+_t = _p.read_text()
+check("an EDL at 29.97 declares DROP FRAME", "FCM: DROP FRAME" in _t, _t.splitlines()[1])
+R.write_edl([{"start_tc": R.timecode(100, 24), "end_tc": R.timecode(130, 24),
+              "frames": 30, "worst_psnr_db": 20.0}], 24, _p)
+check("an EDL at 24 declares NON-DROP FRAME", "FCM: NON-DROP FRAME" in _p.read_text())
+
 
 print(f"\n{RUN - len(FAILS)}/{RUN} passed")
 if FAILS:

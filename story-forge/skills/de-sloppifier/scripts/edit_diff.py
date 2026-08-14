@@ -50,12 +50,23 @@ CITATION = re.compile(
     r"|\[[A-Z][A-Za-z]+\d{2,4}\]"                    # [Smith20]
 )
 # Any number carrying meaning: 14%, $2,400, 1,929 words, -23 LUFS, 4.5:1, 2026
-UNIT = (r"%|:\d+|x\b|"
-        r"(?:px|pt|em|rem|vw|vh|dB|dBFS|LUFS|LKFS|kHz|Hz|kbps|Mbps|fps|ms|s|min|hr|h|"
-        r"mm|cm|m|km|in|ft|kg|g|lb|USD|GBP|EUR|k|K|M|bn)\b")
-NUMBER = re.compile(r"(?<![\w.$])[-+]?\$?\d[\d,]*(?:\.\d+)?\s*(?:" + UNIT + r")?")
+# Units split by ambiguity. `in`, `s`, `m`, `h`, `k`, `M`, `g`, `x` are also ordinary
+# English words, so they may only attach with NO space -- otherwise "Sales rose by 4 in
+# the summer quarter" captures "4 in" as a measurement and a harmless reorder gets
+# reported as a DELETED NUMBER.
+UNIT_SPACED = (r"%|(?:px|pt|em|rem|vw|vh|dBFS|dB|LUFS|LKFS|kHz|Hz|kbps|Mbps|fps|ms|"
+               r"min|hr|mm|cm|km|ft|kg|lb|USD|GBP|EUR|bn)\b")
+UNIT_TIGHT = r"(?::\d+)|(?:x|in|s|m|h|k|K|M|g)\b"
+NUMBER = re.compile(r"(?<![\w.$])[-+]?\$?\d[\d,]*(?:\.\d+)?"
+                    r"(?:\s*(?:" + UNIT_SPACED + r")|(?:" + UNIT_TIGHT + r"))?")
 # Quoted material — straight and curly, both directions
-QUOTE = re.compile(r"[\"“][^\"”]{12,}[\"”]|['‘][^'’]{20,}['’]")
+# The single-quote branch must not match across two possessive apostrophes. "The dog's
+# bone lay beside the cat's bowl" was reported as a DELETED QUOTE -- and fiction, this
+# plugin's whole domain, is saturated with possessives. Require the opening mark to
+# start a word and the closing mark to end one.
+QUOTE = re.compile(r"[\"“][^\"”]{12,}[\"”]"
+                   r"|(?<![\w'’])[‘][^'’]{20,}[’](?![\w])"
+                   r"|(?<![\w'’])'[^']{20,}'(?![\w])")
 # A cross-reference the prose depends on
 XREF = re.compile(r"\b(?:see|per|in|from)\s+(?:Table|Figure|Fig\.|Chapter|Section|Appendix)\s*\d+"
                   r"|\b(?:Table|Figure|Fig\.|Chapter|Section|Appendix)\s+\d+", re.I)
@@ -79,7 +90,14 @@ def sentences(text):
 
 
 def extract(pattern, text):
-    return set(m.group(0).strip() for m in pattern.finditer(text))
+    return _multiset(m.group(0).strip() for m in pattern.finditer(text))
+
+
+def _multiset(items):
+    """Counts, not a set. Set difference reports nothing when a repeated item loses one
+    of its occurrences, so deleting one of two `41%` looked like no deletion at all."""
+    from collections import Counter
+    return Counter(items)
 
 
 def norm_numbers(text):
@@ -90,7 +108,7 @@ def norm_numbers(text):
     edit that writes 4.5 for 4.50 was reported as a DELETED NUMBER — a false positive
     on exactly the kind of harmless tidying this check must stay quiet about.
     """
-    out = set()
+    out = []
     for m in NUMBER.finditer(text):
         raw = m.group(0).strip()
         core = raw.replace(",", "").replace("$", "").strip()
@@ -99,8 +117,8 @@ def norm_numbers(text):
             frac = mm.group(2).rstrip("0")
             core = mm.group(1) + (f".{frac}" if frac else "") + mm.group(3)
         if re.search(r"\d", core):
-            out.add(core.lower())
-    return out
+            out.append(core.lower())
+    return _multiset(out)
 
 
 def classify(before, after):
@@ -114,17 +132,19 @@ def classify(before, after):
         ("cross-reference", XREF, "DELETION"),
     ):
         lost = extract(pat, before) - extract(pat, after)
-        for item in sorted(lost):
+        for item, n in sorted(lost.items()):
             findings.append({
                 "severity": sev, "kind": label, "detail": item,
-                "why": f"a {label} present before the edit is absent after it",
+                "why": (f"a {label} present before the edit is absent after it"
+                        + (f" ({n} occurrences lost)" if n > 1 else "")),
             })
 
     lost_nums = norm_numbers(before) - norm_numbers(after)
-    for item in sorted(lost_nums):
+    for item, n in sorted(lost_nums.items()):
         findings.append({
             "severity": "DELETION", "kind": "number", "detail": item,
-            "why": "a number present before the edit is absent after it",
+            "why": (f"a number present before the edit is absent after it"
+                    + (f" ({n} occurrences lost)" if n > 1 else "")),
         })
 
     # ---- MEANING: sentence-level semantic flips ----
@@ -138,14 +158,30 @@ def classify(before, after):
         if TRIVIAL.match(old) and TRIVIAL.match(new):
             continue
         for label, pat in (("negation", NEGATION), ("hedge", HEDGE), ("quantifier", QUANTIFIER)):
-            nb, na = len(pat.findall(old)), len(pat.findall(new))
-            if nb != na:
-                findings.append({
-                    "severity": "MEANING", "kind": label,
-                    "detail": f"{label} count {nb} → {na}",
-                    "before": old[:180], "after": new[:180],
-                    "why": f"removing or adding a {label} changes what the sentence claims",
-                })
+            # Compare the MULTISET of matched words, not the count. Counting alone is
+            # blind to any equal-count substitution, which is every meaning inversion
+            # that matters: "Most sites complied" -> "All sites complied" both match
+            # exactly one quantifier, so the count check returned NOTHING on the very
+            # example the skill advertises by name. Same hole for "most" -> "few" and
+            # for swapping one negation or hedge for another.
+            fb = sorted(m.lower() for m in pat.findall(old))
+            fa = sorted(m.lower() for m in pat.findall(new))
+            if fb != fa:
+                gone, added = sorted(set(fb) - set(fa)), sorted(set(fa) - set(fb))
+                if gone or added or len(fb) != len(fa):
+                    bits = []
+                    if gone:
+                        bits.append("removed " + ", ".join(repr(x) for x in gone))
+                    if added:
+                        bits.append("added " + ", ".join(repr(x) for x in added))
+                    if not bits:
+                        bits.append(f"count {len(fb)} → {len(fa)}")
+                    findings.append({
+                        "severity": "MEANING", "kind": label,
+                        "detail": f"{label}: " + "; ".join(bits),
+                        "before": old[:180], "after": new[:180],
+                        "why": f"changing a {label} changes what the sentence claims",
+                    })
         if tag == "delete" and len(old.split()) >= 6:
             findings.append({
                 "severity": "MEANING", "kind": "sentence removed",

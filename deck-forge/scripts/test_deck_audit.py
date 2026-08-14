@@ -20,6 +20,7 @@ from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.chart.data import CategoryChartData
 from pptx.enum.chart import XL_CHART_TYPE
+from lxml import etree as _et
 
 import deck_audit as D
 
@@ -292,10 +293,30 @@ for mode in ("hard", "any"):
     check(f"--json agrees with text on --fail-on {mode}", t == j, f"text={t} json={j}")
     check(f"a zero-run deck FAILS under --fail-on {mode}", t == 1, f"got {t}")
 
-# D5 — the master-placeholder link the docs promise must exist
-check("resolve_font_pt can return 'master placeholder'",
-      "master placeholder" in open("deck_audit.py").read(),
-      "documented in the header and SKILL.md but never implemented")
+# D5 — the master-placeholder link, tested by BEHAVIOUR not by grepping the source.
+# The old version searched deck_audit.py for the string "master placeholder", which
+# also occurs in a comment — so deleting the implementation and keeping the comment
+# stayed green. A test that a `git rm` of the feature cannot fail is not a test.
+pm = blank()
+_mst = pm.slide_master
+for _ph in _mst.placeholders:
+    if "BODY" in str(_ph.placeholder_format.type):
+        _body = _ph.text_frame._txBody
+        _ls = _body.find(f"{D.A}lstStyle")
+        if _ls is None:
+            _ls = _et.SubElement(_body, f"{D.A}lstStyle")
+            _body.remove(_ls); _body.insert(0, _ls)
+        _lvl = _et.SubElement(_ls, f"{D.A}lvl1pPr")
+        _et.SubElement(_lvl, f"{D.A}defRPr").set("sz", "600")   # 6pt on the MASTER
+        break
+sm = pm.slides.add_slide(pm.slide_layouts[1])
+sm.placeholders[1].text = "inherits 6pt from the master placeholder"
+resm = audit(pm)
+check("a size on a master placeholder is resolved, not skipped",
+      6.0 in resm["type_sizes"], str(resm["type_sizes"]))
+check("...and the report names that link",
+      any(x["source"] == "master placeholder" for x in resm["findings"]["tiny_text"]),
+      str([x["source"] for x in resm["findings"]["tiny_text"]]))
 
 # D6 — rotation
 pr = blank(); sr = pr.slides.add_slide(pr.slide_layouts[6])
@@ -328,6 +349,56 @@ _el = _et.fromstring('<root xmlns:p="p"><p:spPr/></root>')
 check("_find_any survives a childless element (which is falsy)",
       D._find_any(_el, "{p}spPr") is not None,
       "`a or b` on lxml elements silently skips an empty element")
+
+
+
+# ── 9. findings from the full-project review ─────────────────────────────────
+print("\nfindings from the full-project review")
+
+# SUBTITLE is not a title: str(PP_PLACEHOLDER.SUBTITLE) == "SUBTITLE (4)", so a
+# substring test for "title" keyed subtitles to the master TITLE style.
+check("SUBTITLE keys to bodyStyle, not titleStyle",
+      D._txstyle_key("SUBTITLE (4)", 1) == "body", D._txstyle_key("SUBTITLE (4)", 1))
+check("TITLE still keys to titleStyle", D._txstyle_key("TITLE (1)", 0) == "title")
+check("CENTER_TITLE keys to titleStyle", D._txstyle_key("CENTER_TITLE (3)", 0) == "title")
+check("a non-placeholder keys to otherStyle", D._txstyle_key(None, None) == "other")
+
+# Unmodelled colour transforms must return ok=False, not be silently ignored.
+def _clr(tag):
+    return _et.fromstring(
+        '<a:schemeClr xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" '
+        f'val="accent1"><a:{tag} val="50000"/></a:schemeClr>')
+for tag in ("alpha", "alphaMod", "alphaOff", "hueOff", "lum", "red", "gray", "inv"):
+    _, ok = D._apply_transforms((79, 129, 189), _clr(tag))
+    check(f"unmodelled transform {tag!r} is flagged, not ignored", not ok)
+for tag in ("lumMod", "lumOff", "shade", "tint"):
+    _, ok = D._apply_transforms((79, 129, 189), _clr(tag))
+    check(f"modelled transform {tag!r} still resolves", ok)
+
+# A GROUP has no p:style of its own; a descendant search returns its first CHILD's
+# fill reference and credits it as the group's backdrop.
+pg2 = blank()
+sg2 = pg2.slides.add_slide(pg2.slide_layouts[6])
+kid = sg2.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(1), Inches(1), Inches(2), Inches(1))
+grp2 = sg2.shapes.add_group_shape([kid])
+check("a group does not inherit its child's fill reference",
+      D.shape_fill_rgb(grp2, D.theme_colours(pg2), D.theme_fill_styles(pg2)) is None,
+      "fourth instance of the descendant-search bug class")
+
+# White-on-white inside a group must still be caught, not laundered to "unmeasured".
+pg3 = blank()
+sg3 = pg3.slides.add_slide(pg3.slide_layouts[6])
+k1 = sg3.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(1), Inches(1), Inches(1), Inches(1))
+k2 = sg3.shapes.add_textbox(Inches(3), Inches(3), Inches(6), Inches(1))
+rw2 = k2.text_frame.paragraphs[0].add_run()
+rw2.text = "white on the white slide, inside a group"
+rw2.font.size = Pt(32)
+rw2.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+sg3.shapes.add_group_shape([k1, k2])
+resg = audit(pg3)
+check("invisible text inside a group is still a contrast FAILURE",
+      len(resg["findings"]["low_contrast"]) >= 1,
+      f"low={resg['findings']['low_contrast']} unmeasured={resg['findings']['unmeasured_contrast']}")
 
 
 print(f"\n{RUN - len(FAILS)}/{RUN} passed")

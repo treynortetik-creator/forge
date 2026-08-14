@@ -321,6 +321,10 @@ class Slide:
                                         ([(attribution, self.t.pt("label_pt"))]
                                          if attribution else [])):
             self.deck._check_pt(size, val)
+            # This component writes runs directly instead of going through _text(),
+            # so it skipped the contrast gate entirely — in the one method whose
+            # docstring exists to make the contrast pair real.
+            self.deck._check_contrast(ink, fill, size, False, val)
             p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
             run = p.add_run()
             run.text = str(val)
@@ -359,6 +363,9 @@ class Slide:
                 run.font.name = self.t.family
                 is_head = header and r == 0
                 run.font.bold = is_head
+                self.deck._check_contrast("on_accent" if is_head else "ink",
+                                          "accent" if is_head else "bg",
+                                          pt, is_head, val)
                 run.font.color.rgb = self.t.rgb("on_accent" if is_head else "ink")
                 cell.fill.solid()
                 cell.fill.fore_color.rgb = self.t.rgb("accent" if is_head else "bg")
@@ -450,7 +457,7 @@ def demo(out):
     s.bars([("Q1", 42), ("Q2", 61), ("Q3", 88), ("Q4", 74)], unit="%")
     s2 = d.slide("Numbers that survive the trip")
     s2.stats([("88%", "of the thing, measured"), ("4.5:1", "minimum contrast"),
-              ("23pt", "legibility floor")])
+              (f"{d.floor_pt:g}pt", "legibility floor")])
     s2.callout("A verification tool that itself needs verifying is worse than nothing.",
                "the constraint this plugin is built around")
     s3 = d.slide("Tables survive too")

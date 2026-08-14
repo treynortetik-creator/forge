@@ -152,6 +152,23 @@ def _lvl_size_from_liststyle(el, lvl=0):
     return _size_from_rpr(node.find(f"{A}defRPr"))
 
 
+def _txstyle_key(ph_type, idx):
+    """Which master txStyles block a placeholder inherits from.
+
+    🔴 SUBTITLE is not a title. A substring test for "title" matched
+    `str(PP_PLACEHOLDER.SUBTITLE)` == "SUBTITLE (4)", so subtitles were measured at
+    TITLE size and colour. In OOXML the subTitle placeholder inherits from bodyStyle.
+    Matching on the exact enum name rather than a substring is the whole fix, and
+    "ctrtitle" was dead code -- python-pptx yields "CENTER_TITLE (3)".
+    """
+    name = (ph_type or "").split(" ")[0].upper()
+    if name in ("TITLE", "CENTER_TITLE"):
+        return "title"
+    if idx is None:
+        return "other"
+    return "body"
+
+
 def resolve_font_pt(run, para, shape, slide, prs, master_styles):
     """
     Effective point size for a run, walking the real chain.
@@ -217,12 +234,7 @@ def resolve_font_pt(run, para, shape, slide, prs, master_styles):
             pass
 
     # 6. master txStyles, keyed by placeholder role
-    key = "body"
-    t = (ph_type or "").lower()
-    if "title" in t or "ctrtitle" in t:
-        key = "title"
-    elif idx is None:
-        key = "other"
+    key = _txstyle_key(ph_type, idx)
     v = _lvl_size_from_liststyle(master_styles.get(key), lvl)
     if v:
         return v, f"master txStyles/{key}"
@@ -275,17 +287,13 @@ def resolve_font_colour(run, para, shape, slide, prs, master_styles, theme):
                 lay_ph.text_frame._txBody.find(f"{A}lstStyle"), theme, lvl)
             if got:
                 return got, "layout placeholder"
-    key = "body"
-    t = (ph_type or "").lower()
-    if "title" in t or "ctrtitle" in t:
-        key = "title"
-    elif idx is None:
-        key = "other"
+    key = _txstyle_key(ph_type, idx)
     got = _lvl_colour_from_liststyle(master_styles.get(key), theme, lvl)
     if got:
         return got, f"master txStyles/{key}"
     try:
-        ref = shape._element.find(f".//{P}style/{A}fontRef")
+        style = _find_any(shape._element, f"{P}style", f"{A}style")
+        ref = style.find(f"{A}fontRef") if style is not None else None
         if ref is not None:
             rgb, ok = _colour_el_to_rgb(_first_colour_child(ref), theme)
             if rgb is not None:
@@ -385,14 +393,18 @@ def _apply_transforms(rgb, clr_el):
     """
     if clr_el is None:
         return rgb, True
-    if clr_el.find(f"{A}alpha") is not None:
-        return rgb, False
-    known = {"lumMod", "lumOff", "shade", "tint", "satMod", "satOff",
-             "hueMod", "hueOff", "comp", "inv", "gray", "gamma", "invGamma"}
+    # Allow-list, not a deny-list. The first version built a `known` set and then
+    # never consulted it, bailing on only five tags — so alphaMod, alphaOff, hueOff,
+    # lum and red were SILENTLY IGNORED and a 50%-alphaMod colour got a confident
+    # contrast verdict as if it were opaque. Anything not modelled below must return
+    # ok=False, because this module's own rule is that unknown stays unknown.
+    MODELLED = {"lumMod", "lumOff", "shade", "tint", "satMod", "satOff", "hueMod"}
     for child in clr_el:
         tag = child.tag.split("}")[-1]
-        if tag in ("comp", "inv", "gray", "gamma", "invGamma"):
-            return rgb, False
+        if tag in ("alpha", "alphaMod", "alphaOff"):
+            return rgb, False          # needs compositing, not a colour question
+        if tag not in MODELLED:
+            return rgb, False          # comp/inv/gray/gamma/lum/red/hueOff/anything new
 
     h, sat, l = _hsl(*rgb)
     v = _pct(clr_el, "lumMod")
@@ -501,7 +513,14 @@ def _fill_from_style_ref(shape, theme, fill_styles):
     nothing in spPr.
     """
     try:
-        ref = shape._element.find(f".//{P}style/{A}fillRef")
+        # DIRECT child. `.//` walks into a GROUP's children and returns the first
+        # child's fill reference as the group's own fill -- which then gets credited
+        # as the backdrop for anything inside the group's bounds, fabricating a
+        # contrast pair in the very function whose docstring warns about that.
+        # FOURTH instance of this bug class in this file. In OOXML, `.//` is almost
+        # never what I want.
+        style = _find_any(shape._element, f"{P}style", f"{A}style")
+        ref = style.find(f"{A}fillRef") if style is not None else None
         if ref is None:
             return None
         idx = int(ref.get("idx") or 0)

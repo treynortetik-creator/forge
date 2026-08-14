@@ -308,7 +308,10 @@
         return { el: el.tagName.toLowerCase() + (el.id ? '#' + el.id : ''), top: rnd(px(cs.paddingTop)), bottom: rnd(px(cs.paddingBottom)) };
       });
       const vals = rows.flatMap((r) => [r.top, r.bottom]).filter((v) => v > 0);
-      const under = rows.filter((r) => (r.top && r.top < min) || (r.bottom && r.bottom < min));
+      // `r.top &&` skips padding:0 by truthiness — the WORST possible rhythm
+      // violation passed silently. This is the identical bug fixed six lines below
+      // in visualPresentation, which is how it survived here.
+      const under = rows.filter((r) => r.top < min || r.bottom < min);
       return { sections: rows, checked: rows.length, distinctValues: [...new Set(vals)].sort((a, b) => a - b),
                min, underMin: under, pass: rows.length > 0 && under.length === 0,
                note: rows.length === 0 ? 'NO SECTIONS MATCHED — not a pass, pass a selector that fits this page.' : undefined };
@@ -444,8 +447,12 @@
           });
       });
       const n = document.querySelectorAll(sel).length;
-      return { min, checked: n, undersized: small.length, pass: small.length === 0, offenders: small.slice(0, 8), sc: '2.5.8 (AA)',
-               note: n === 0 ? 'no interactive elements found' : undefined };
+      // Zero interactive elements is not a pass. Every other check in this file
+      // carries this guard and SKILL.md promises it globally; this one lacked it.
+      return { min, checked: n, undersized: small.length, pass: n > 0 && small.length === 0,
+               offenders: small.slice(0, 8), sc: '2.5.8 (AA)',
+               note: n === 0 ? 'NO INTERACTIVE ELEMENTS FOUND — not a pass. Either the '
+                             + 'selector is wrong or the page has no controls.' : undefined };
     },
 
     /* Two radii and two weights is a system. Six of each is an accident. */

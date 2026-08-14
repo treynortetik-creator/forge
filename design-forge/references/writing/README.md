@@ -1,7 +1,7 @@
 # Bundled craft notes
 
 Working notes the skills read from. Each carries its own `source:` frontmatter naming where it came
-from, and every source is credited in `../../NOTICES.md`.
+from, and every source is credited in `../../THIRD-PARTY-NOTICES.md`.
 
 Most of these are **summaries written in this repository's own words** of publicly posted craft
 material — largely Jason Hamilton / The Nerdy Novelist's videos and n8n automations, plus Wulf Moon's

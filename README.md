@@ -145,21 +145,26 @@ a warning, on the theory that a warning you can scroll past is how 8pt footnotes
 
 | | |
 |---|---|
-| **legibility** | minimum point size from angular subtense and the AV 4/6/8 rule, not folklore |
+| **legibility** | minimum point size from the ANSI/INFOCOMM V202.01 element-height model |
 | **contrast** | WCAG 1.4.3 against the **actual** backdrop, resolved by z-order |
 | **native charts** | the thing that will silently become a picture |
 | **off-slide geometry** | including shapes nested inside groups |
 
-Two results worth stating plainly. **Points are not a physical size** — a point is a document unit, and
-treating it as an inch gives a 185pt floor for a 30ft room. Run the real chain and, under the 4/6/8
-rule, the viewing distance *cancels*, because screen size scales with room depth. The floor lands at
-**23.1pt** on a 7.5in slide, which is a decent explanation for where the folk "minimum 24pt" rule came
-from. And **WCAG large text is 18pt or 14pt bold** — the familiar 24px/18.66px figures are those same
-sizes in CSS pixels, so applying them to points invents failures between 18 and 24pt.
+Two results worth stating plainly. **Points are not a physical size** — a point is a document unit,
+and treating it as an inch gives a 185pt floor for a 30ft room. And **WCAG large text is 18pt or 14pt
+bold** — the familiar 24px/18.66px figures are those same sizes in CSS pixels, so applying them to
+points invents failures between 18 and 24pt.
+
+⚠️ **On provenance, stated plainly:** the `/200` acuity factor is straight out of ANSI/INFOCOMM
+V202.01 §4.3.1. The 4/6/8 rule is **not** — it appears zero times in the standard, and AVIXA's own
+training deck titles it *"The Old Way of Doing Things"* with *"Origins are unclear."* The arithmetic
+is sound; the provenance is folklore. An earlier draft of this README claimed the opposite, and also
+claimed the resulting number explains where the folk "24pt minimum" came from. Nothing supports that,
+and the claim is withdrawn.
 
 The harness shipped four times reporting green on the defect it exists to catch, including a version
 that returned "0 runs, all PASS, exit 0" on a deck built exactly the way the plugin says to build one.
-Each of those is now a regression test; there are 33.
+Each of those is now a regression test.
 
 ---
 

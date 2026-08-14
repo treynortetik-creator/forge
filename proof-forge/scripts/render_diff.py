@@ -186,21 +186,46 @@ def median(xs):
 def flag_frames(frames, absolute=None, drop_db=6.0):
     """Which frames differ MORE than this pair's own encoding noise.
 
-    Returns (flagged, baseline, threshold). A finite PSNR of 'inf' means identical.
+    Returns (flagged, baseline, threshold, mode).
+
+    🔴 THE BUG THIS IS BUILT AROUND, which shipped and passed every test.
+    The first version took the median over FINITE frames only, excluding the
+    bit-identical ones. On a file that is mostly identical -- which is exactly what a
+    smart-render, a segment re-export or a lossless passthrough produces -- the only
+    finite frames ARE the defect, so the defect became its own baseline and nothing
+    could ever fall 6 dB below itself. 120 identical frames plus 24 defect frames at
+    20 dB reported ZERO findings and exit 0, on the precise scenario in this file's
+    own headline quote. The old tests never caught it because both fixtures were FULL
+    re-encodes, where every frame is finite.
+
+    So the mode is chosen from the data:
+
+      "partial"  most frames are bit-identical. The file was not re-encoded end to
+                 end; whatever is not identical is the changed region, full stop.
+                 Every non-identical frame is reported. No threshold is derived,
+                 because there is no noise floor to derive it from.
+      "reencode" the whole file was re-encoded. Every frame carries noise, so the
+                 median IS the noise floor and outliers are what matter.
     """
     finite = [v for _, v in frames if math.isfinite(v)]
+    n_ident = len(frames) - len(finite)
     if not finite:
-        return [], float("inf"), None          # every frame identical
-    baseline = median(finite)
+        return [], float("inf"), None, "identical"
+
     if absolute is not None:
-        thr = absolute
-    else:
-        # A frame is interesting when it is meaningfully worse than the file's own
-        # typical frame, not when it is worse than some number picked for a codec
-        # this file may not use.
-        thr = baseline - drop_db
-    flagged = [(n, v) for n, v in frames if math.isfinite(v) and v < thr]
-    return flagged, baseline, thr
+        return ([(n, v) for n, v in frames if math.isfinite(v) and v < absolute],
+                median(finite), absolute, "absolute")
+
+    # A file that is majority bit-identical was not uniformly re-encoded. Calling
+    # its handful of changed frames "the baseline" is what made this vacuous.
+    if n_ident > len(frames) / 2:
+        return ([(n, v) for n, v in frames if math.isfinite(v)],
+                float("inf"), None, "partial")
+
+    baseline = median(finite)
+    thr = baseline - drop_db
+    return ([(n, v) for n, v in frames if math.isfinite(v) and v < thr],
+            baseline, thr, "reencode")
 
 
 def group_ranges(flagged, fps, gap_frames=6):
@@ -226,22 +251,54 @@ def group_ranges(flagged, fps, gap_frames=6):
     return out
 
 
-def timecode(frame, fps):
+def timecode(frame, fps, drop=None):
+    """Frame index -> SMPTE timecode.
+
+    🔴 NOT wall-clock. Timecode counts FRAMES at the nominal rate, so 29.97fps counts
+    30 frames per timecode second and 23.976 counts 24. Dividing by the real fps and
+    re-deriving H:M:S:F drifts 3.6 s/hour against every NLE's counter -- about 215
+    frames into a two-hour sequence, which is the exact scale this tool is for. The
+    first version did that AND stamped the EDL "FCM: NON-DROP FRAME" while carrying
+    non-NDF numbers.
+
+    drop=None auto-selects: drop-frame for 29.97 and 59.94 (the rates it is defined
+    for), non-drop otherwise. Pass drop=False to force NDF.
+    """
     if not fps:
         return f"frame {frame}"
-    total = frame / fps
-    h = int(total // 3600)
-    m = int(total % 3600 // 60)
-    s = int(total % 60)
-    f = int(round((total - int(total)) * fps))
-    if f >= round(fps):
-        f, s = 0, s + 1
-    return f"{h:02d}:{m:02d}:{s:02d}:{f:02d}"
+    nominal = int(round(fps))
+    if nominal <= 0:
+        return f"frame {frame}"
+    if drop is None:
+        drop = abs(fps - 30000 / 1001) < 0.01 or abs(fps - 60000 / 1001) < 0.01
+
+    f = int(frame)
+    if drop:
+        # SMPTE drop-frame: skip 2 frame NUMBERS (4 at 59.94) each minute except
+        # every tenth. This renumbers; it never drops a picture.
+        d = nominal // 15                      # 2 at 30, 4 at 60
+        per_min, per_10min = nominal * 60 - d, nominal * 600 - 9 * d
+        tens, rem = divmod(f, per_10min)
+        if rem >= d:
+            f += d * 9 * tens + d * ((rem - d) // per_min)
+        else:
+            f += d * 9 * tens
+    h = f // (nominal * 3600)
+    m = f // (nominal * 60) % 60
+    sec = f // nominal % 60
+    fr = f % nominal
+    sep = ";" if drop else ":"
+    return f"{h:02d}:{m:02d}:{sec:02d}{sep}{fr:02d}"
 
 
 def write_edl(ranges, fps, path, title="RENDER DIFF"):
-    """A marker EDL an NLE can import. CMX3600-ish; markers only."""
-    lines = [f"TITLE: {title}", "FCM: NON-DROP FRAME", ""]
+    """A marker EDL an NLE can import. CMX3600-ish; markers only.
+
+    The FCM line must match the timecode actually written, or the importer places
+    every marker at the wrong frame while looking correct.
+    """
+    drop = bool(fps) and (abs(fps - 30000 / 1001) < 0.01 or abs(fps - 60000 / 1001) < 0.01)
+    lines = [f"TITLE: {title}", "FCM: DROP FRAME" if drop else "FCM: NON-DROP FRAME", ""]
     for i, r in enumerate(ranges, 1):
         lines.append(f"{i:03d}  AX       V     C        "
                      f"{r['start_tc']} {r['end_tc']} {r['start_tc']} {r['end_tc']}")
@@ -396,18 +453,32 @@ def main():
                 differs = True
             else:
                 frames = video_psnr(a.a, a.b, a.limit)
-                flagged, baseline, thr = flag_frames(frames, a.absolute, a.drop)
+                flagged, baseline, thr, mode = flag_frames(frames, a.absolute, a.drop)
                 ranges = group_ranges(flagged, pa["fps"])
                 result.update({
                     "compared_frames": len(frames),
                     "identical_frames": sum(1 for _, v in frames if not math.isfinite(v)),
                     "baseline_psnr_db": None if baseline == float("inf") else round(baseline, 2),
                     "threshold_db": None if thr is None else round(thr, 2),
+                    "mode": mode,
                     "ranges": ranges,
                 })
                 if a.edl and ranges:
                     result["edl"] = write_edl(ranges, pa["fps"], a.edl)
-                differs = bool(ranges) or bool(result["container"])
+                # The audio inside a video container used to be compared for PRESENCE
+                # and channel count only. Two exports with identical video and a
+                # corrupted audio track reported "NO OUTLIERS", exit 0, with nothing
+                # saying audio had been skipped -- and the plugin advertises audio.
+                if pa["audio"] and pb["audio"]:
+                    try:
+                        result["audio"] = audio_null(a.a, a.b)
+                    except DiffError as e:
+                        result["audio"] = {"error": str(e), "nulls": None}
+                else:
+                    result["audio"] = None
+                aud = result.get("audio") or {}
+                differs = (bool(ranges) or bool(result["container"])
+                           or aud.get("nulls") is False)
     except DiffError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         return 2
@@ -461,20 +532,47 @@ def report(r):
 
     n, ident = r["compared_frames"], r["identical_frames"]
     print(f"\n  compared {n} frames · {ident} bit-identical")
-    if r["baseline_psnr_db"] is None:
-        print("  every frame identical — nothing to mark.\n")
+    # Only "identical" means identical. In partial mode the baseline is inf too,
+    # and returning here printed "every frame identical" over a file with 24
+    # differing frames — the right exit code with the wrong sentence, which is its
+    # own kind of wrong.
+    if r.get("mode") == "identical" or (r["baseline_psnr_db"] is None
+                                        and not r["ranges"] and ident == n):
+        print("  every frame is bit-identical — nothing to mark.\n")
         return
-    print(f"  this pair's own baseline: {r['baseline_psnr_db']} dB PSNR "
-          f"(the encoding-noise floor)")
-    print(f"  flagging frames below:    {r['threshold_db']} dB")
+    if r.get("mode") == "partial":
+        print(f"  MOST FRAMES ARE BIT-IDENTICAL ({ident} of {n}), so this file was not "
+              f"re-encoded end to end.")
+        print("  No noise floor exists to compare against, so every frame that is not "
+              "identical is reported.")
+    else:
+        print(f"  this pair's own baseline: {r['baseline_psnr_db']} dB PSNR "
+              f"(the encoding-noise floor)")
+        print(f"  flagging frames below:    {r['threshold_db']} dB")
     if not r["ranges"]:
-        print("\n  NO OUTLIERS. The two files differ only by uniform encoding noise.")
-        print("  That is what a re-encode of the same timeline looks like.\n")
+        if r.get("mode") == "partial":
+            print("\n  NOTHING DIFFERS. Every compared frame is bit-identical.\n")
+        else:
+            print("\n  NO OUTLIERS. The two files differ only by uniform encoding noise.")
+            print("  That is what a full re-encode of the same timeline looks like.\n")
         return
-    print(f"\n  🔴 {len(r['ranges'])} region(s) differ beyond encoding noise:\n")
+    label = ("region(s) are not bit-identical" if r.get("mode") == "partial"
+             else "region(s) differ beyond encoding noise")
+    print(f"\n  🔴 {len(r['ranges'])} {label}:\n")
     for x in r["ranges"]:
         print(f"    {x['start_tc']} → {x['end_tc']}   {x['frames']} frame(s), "
               f"worst {x['worst_psnr_db']} dB")
+    a_ = r.get("audio")
+    if a_ is None:
+        print("\n  audio: neither file has an audio stream.")
+    elif a_.get("error"):
+        print(f"\n  ⚠️  audio: could not compare — {a_['error'][:120]}")
+    elif a_.get("nulls"):
+        print(f"\n  audio: NULLS TO SILENCE — the audio tracks are identical "
+              f"(residual {a_['residual_peak_db']} dBFS).")
+    else:
+        print(f"\n  🔴 audio: DOES NOT NULL — the audio differs "
+              f"(residual peak {a_['residual_peak_db']} dBFS).")
     if r.get("edl"):
         print(f"\n  markers written to {r['edl']}")
     print("\n  caveat: PSNR is a whole-frame number. It finds WHERE to look; it does not")

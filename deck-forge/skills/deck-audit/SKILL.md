@@ -35,7 +35,7 @@ Needs `python-pptx` (`pip3 install python-pptx`). Exit 1 on a hard failure.
 | `unresolvedSize` | no size anywhere in the chain | reported separately; never silently assumed |
 | `unmeasured` | contrast could not be computed | **not a pass** — say so rather than guessing |
 
-**Large text in a deck is 18pt, or 14pt bold.** The familiar 24px / 18.5px figures are
+**Large text in a deck is 18pt, or 14pt bold.** The familiar 24px / 18.66px figures are
 those same sizes in CSS pixels at 96dpi — the point values are WCAG's primary definition and
 the pixels are derived from them. A `.pptx` is measured in points, so applying the pixel
 numbers to points is a 1.333x error that holds everything between 18pt and 24pt to 4.5:1 when
@@ -48,7 +48,8 @@ where the pixel figures are correct.
 placeholder text. A naive reader sees `None`, skips the run, and reports a clean deck. The
 script walks the real chain — run → paragraph → shape `lstStyle` → layout placeholder →
 master placeholder → master `txStyles` → 18pt default — and tells you which link supplied
-the answer. Text colour resolves through the same chain.
+the answer. Text colour resolves through the same chain **except the master-placeholder
+step**; a colour set there lands in `unmeasured` rather than being guessed at.
 
 **2. Points are not a physical size.** A point is a document unit; its height on the wall
 depends entirely on how large the slide is projected. Treating points as inches gives a ~185pt

@@ -1,35 +1,93 @@
-// Extract the harness's own contrast math and check it against published
-// reference values. #767676 is the canonical just-passing-AA grey on white;
-// #595959 is the canonical AAA one. If these don't land, the harness has been
-// reporting confident nonsense.
-const src = require('fs').readFileSync(require('path').join(__dirname,'measure.js'),'utf8');
-const lum = ([r,g,b]) => { const f=c=>{c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4)};
-  return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b); };
-const contrast=(a,b)=>{const[l1,l2]=[lum(a),lum(b)].sort((x,y)=>y-x);return (l1+0.05)/(l2+0.05)};
-const hex=h=>{const s=h.replace('#','');return [0,2,4].map(i=>parseInt(s.slice(i,i+2),16))};
-// Alpha compositing on BOTH sides. A translucent background layer must be composited
-// onto what is behind it -- returning it as if opaque scored a 60% black scrim as pure
-// black: 5.92:1 reported for a true 1.62:1, i.e. a PASS on a hard AA failure.
-const over=(fg,bg)=>(fg[3]===undefined||fg[3]>=1?fg:[0,1,2].map(i=>Math.round(fg[i]*fg[3]+bg[i]*(1-fg[3]))));
-const scrim = over([0,0,0,0.6],[255,255,255]);               // -> [102,102,102]
-const scrimRatio = contrast(hex('#888888'), scrim);
-console.log(`${Math.abs(scrimRatio-1.62)<0.02?'PASS':'FAIL'}  #888 on rgba(0,0,0,.6) over white  got ${scrimRatio.toFixed(3)}  expected ~1.62`);
-if (Math.abs(scrimRatio-1.62)>=0.02) process.exitCode=1;
-if (Math.abs(scrimRatio - contrast(hex('#888888'),[102,102,102])) > 0.001) {
-  console.log('FAIL  composited path disagrees with the opaque control'); process.exitCode=1;
+#!/usr/bin/env node
+/*
+ * test-contrast.js — test the colour maths IN measure.js, not a copy of it.
+ *
+ * 🔴 WHY THIS WAS REWRITTEN. The previous version re-implemented lum/contrast/over
+ * locally, verified ITS OWN copies against reference values, and then merely checked
+ * that measure.js contained the substrings '0.2126', '12.92' and so on. An inverted
+ * comparison, a broken sort or a sign flip in the real functions passed that "test"
+ * as long as the constants appeared anywhere in the file — including in a comment.
+ *
+ * So this extracts the actual function sources out of measure.js and evaluates them.
+ * Delete the implementation and the extraction fails loudly instead of going green.
+ */
+const fs = require('fs');
+const path = require('path');
+
+const SRC = fs.readFileSync(path.join(__dirname, 'measure.js'), 'utf8');
+let fails = 0, run = 0;
+const check = (name, cond, detail = '') => {
+  run++;
+  if (cond) console.log(`  ok   ${name}`);
+  else { console.log(`  FAIL ${name}  ${detail}`); fails++; }
+};
+
+/* Pull a `const name = ...;` arrow/function declaration out of the source by
+   brace/paren balance, so we evaluate the shipped code rather than a copy. */
+function extract(name) {
+  const start = SRC.search(new RegExp(`const\\s+${name}\\s*=`));
+  if (start === -1) throw new Error(`could not find "${name}" in measure.js`);
+  let i = SRC.indexOf('=', start) + 1, depth = 0, inStr = null;
+  for (; i < SRC.length; i++) {
+    const c = SRC[i], prev = SRC[i - 1];
+    if (inStr) { if (c === inStr && prev !== '\\') inStr = null; continue; }
+    if (c === '"' || c === "'" || c === '`') { inStr = c; continue; }
+    if ('([{'.includes(c)) depth++;
+    else if (')]}'.includes(c)) depth--;
+    else if (c === ';' && depth === 0) break;
+  }
+  return SRC.slice(start, i + 1);
 }
 
-const cases=[['#000000','#ffffff',21.000],['#767676','#ffffff',4.54],['#595959','#ffffff',7.00],
-             ['#ffffff','#000000',21.000],['#8a9291','#012624',5.06],['#736c62','#f5f3f1',4.68]];
-let fail=0;
-for(const [fg,bg,want] of cases){
-  const got=contrast(hex(fg),hex(bg));
-  const ok=Math.abs(got-want)<0.02;
-  if(!ok)fail++;
-  console.log(`${ok?'PASS':'FAIL'}  ${fg} on ${bg}  got ${got.toFixed(3)}  expected ~${want}`);
+const names = ['over', 'hexToRgb', 'lum', 'contrast'];
+let src;
+try {
+  src = names.map(extract).join('\n');
+} catch (e) {
+  console.log(`  FAIL could not extract from measure.js: ${e.message}`);
+  process.exit(1);
 }
-// confirm the harness file actually contains this same formula, not a drifted copy
-const hasFormula = src.includes('0.2126') && src.includes('0.7152') && src.includes('0.0722')
-  && src.includes('0.03928') && src.includes('12.92') && src.includes('1.055');
-console.log(`\nharness contains the identical WCAG constants: ${hasFormula ? 'YES' : 'NO — DRIFT'}`);
-process.exit(fail || !hasFormula ? 1 : 0);
+const { over, hexToRgb, lum, contrast } = new Function(
+  `${src}\nreturn { over, hexToRgb, lum, contrast };`)();
+console.log(`\nextracted ${names.length} functions from measure.js (${src.length} chars)\n`);
+
+const near = (a, b, tol = 0.01) => Math.abs(a - b) < tol;
+
+console.log('reference contrast pairs');
+check('black on white is 21:1', near(contrast(hexToRgb('#000'), hexToRgb('#fff')), 21.0, 0.001));
+check('white on white is 1:1', near(contrast(hexToRgb('#fff'), hexToRgb('#fff')), 1.0, 0.001));
+check('#767676 on white is the 4.5 boundary',
+  near(contrast(hexToRgb('#767676'), hexToRgb('#fff')), 4.542));
+check('#595959 on white is the 7.0 boundary',
+  near(contrast(hexToRgb('#595959'), hexToRgb('#fff')), 7.005));
+check('#949494 on white is the 3.0 boundary',
+  near(contrast(hexToRgb('#949494'), hexToRgb('#fff')), 3.033));
+
+console.log('\nproperties a copy-paste test would miss');
+check('contrast is symmetric',
+  near(contrast([10, 20, 30], [200, 200, 200]), contrast([200, 200, 200], [10, 20, 30]), 1e-9));
+check('contrast is never below 1', contrast([120, 120, 120], [121, 121, 121]) >= 1.0);
+check('lum is monotonic in brightness', lum([0, 0, 0]) < lum([128, 128, 128]) && lum([128, 128, 128]) < lum([255, 255, 255]));
+check('lum of white is 1', near(lum([255, 255, 255]), 1.0, 1e-9));
+check('lum of black is 0', near(lum([0, 0, 0]), 0.0, 1e-9));
+check('green weighs more than red, red more than blue',
+  lum([0, 255, 0]) > lum([255, 0, 0]) && lum([255, 0, 0]) > lum([0, 0, 255]));
+
+console.log('\nhex parsing');
+check('3-digit hex expands', JSON.stringify(hexToRgb('#abc')) === JSON.stringify(hexToRgb('#aabbcc')));
+check('a leading # is optional', JSON.stringify(hexToRgb('fff')) === JSON.stringify(hexToRgb('#fff')));
+
+console.log('\nalpha compositing');
+const scrim = over([0, 0, 0, 0.6], [255, 255, 255]);
+check('60% black over white composites to #666',
+  scrim.every((c, i) => Math.abs(c - [102, 102, 102][i]) <= 1), JSON.stringify(scrim));
+check('#888 on that scrim is ~1.62:1, not the 5.92 an uncomposited read gives',
+  near(contrast(hexToRgb('#888888'), scrim), 1.62, 0.02),
+  String(contrast(hexToRgb('#888888'), scrim)));
+check('a fully opaque foreground passes through unchanged',
+  JSON.stringify(over([1, 2, 3], [9, 9, 9])) === JSON.stringify([1, 2, 3]));
+check('a fully transparent foreground yields the backdrop',
+  over([0, 0, 0, 0], [200, 100, 50]).every((c, i) => Math.abs(c - [200, 100, 50][i]) <= 1));
+
+console.log(`\n${run - fails}/${run} passed`);
+process.exit(fails ? 1 : 0);
