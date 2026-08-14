@@ -178,6 +178,25 @@ check("FP: a name moving to the front of a sentence is NOT a deletion",
 check("FP: a bare month is not an entity",
       _ents("The show runs in August at the hall.", "The show runs later at the hall.") == [])
 
+# ── altered vs removed ────────────────────────────────────────────────────────
+# A 300-char door script came back flagged "absent" when six words inside it changed.
+# Both still escalate -- silently rewording a quote is as serious as cutting it -- but
+# a gate that misnames what happened is a gate people stop reading.
+_q = '"' + "We are at the room limit right now, so I must hold you here a few minutes. " \
+     "Give me your number and I will text you the moment I can get you in." + '"'
+_q2 = _q.replace("I will text you", "I will call you")
+kinds = lambda b, a: {x["kind"] for x in E.classify(b, a)}
+check("a reworded quote is reported as ALTERED, not absent",
+      "quote altered" in kinds("He said " + _q, "He said " + _q2))
+check("an altered quote still escalates as DELETION severity",
+      any(x["severity"] == "DELETION" for x in E.classify("He said " + _q, "He said " + _q2)))
+check("a genuinely removed quote is still reported as removed",
+      "quote" in kinds("He said " + _q, "He said nothing at all about any of it."))
+check("an altered quote carries before/after so the change is visible",
+      all("before" in x and "after" in x
+          for x in E.classify("He said " + _q, "He said " + _q2)
+          if x["kind"] == "quote altered"))
+
 print(f"\n{RUN - len(FAILS)}/{RUN} passed")
 if FAILS:
     print("FAILED: " + ", ".join(FAILS))

@@ -189,6 +189,22 @@ def capitalised_tokens(text):
     return {m.group(0) for m in re.finditer(r"\b[A-Z][\w'’\-]*", text)}
 
 
+def _window(a, b, span=150):
+    """Excerpts of a and b centred on their first difference, with ellipses."""
+    i = 0
+    for i, (ca, cb) in enumerate(zip(a, b)):
+        if ca != cb:
+            break
+    else:
+        i = min(len(a), len(b))
+    start = max(0, i - span // 3)
+
+    def cut(s):
+        piece = s[start:start + span]
+        return ("…" if start else "") + piece + ("…" if start + span < len(s) else "")
+    return cut(a), cut(b)
+
+
 def classify(before, after):
     """Return findings, ordered most-dangerous-first."""
     findings = []
@@ -200,12 +216,34 @@ def classify(before, after):
         ("cross-reference", XREF, "DELETION"),
     ):
         lost = extract(pat, before) - extract(pat, after)
+        survivors = list(extract(pat, after))
         for item, n in sorted(lost.items()):
-            findings.append({
-                "severity": sev, "kind": label, "detail": item,
-                "why": (f"a {label} present before the edit is absent after it"
-                        + (f" ({n} occurrences lost)" if n > 1 else "")),
-            })
+            # REMOVED or ALTERED? These escalate the same -- silently rewording quoted
+            # material is at least as serious as cutting it -- but calling an alteration
+            # an absence is how a gate loses its reader. A 300-character door script came
+            # back flagged "absent" when six words inside it had changed, and the only way
+            # to find that out was to diff the two files by hand, which is the work this
+            # tool exists to remove. Report which one it was, and show the change.
+            near = max(((difflib.SequenceMatcher(None, item, s).ratio(), s)
+                        for s in survivors), default=(0.0, None))
+            if near[0] >= 0.75:
+                # Window the excerpts on the FIRST DIFFERENCE, not on character 0. A
+                # 250-char quote whose change lands at the end printed two identical
+                # 180-char prefixes, so the report proved nothing and the reader had to
+                # go diff it by hand anyway.
+                b_ex, a_ex = _window(item, near[1])
+                findings.append({
+                    "severity": sev, "kind": f"{label} altered", "detail": item,
+                    "before": b_ex, "after": a_ex,
+                    "why": (f"this {label} was not removed, it was REWORDED "
+                            f"({near[0]*100:.0f}% unchanged). Verify the change was intended."),
+                })
+            else:
+                findings.append({
+                    "severity": sev, "kind": label, "detail": item,
+                    "why": (f"a {label} present before the edit is absent after it"
+                            + (f" ({n} occurrences lost)" if n > 1 else "")),
+                })
 
     # Entities use a HARDER bar than numbers: only a drop to ZERO counts. Losing one of
     # five "Mara"s is the de-sloppifier doing its job -- Pass 2 explicitly tells it to
