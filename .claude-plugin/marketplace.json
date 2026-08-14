@@ -50,7 +50,7 @@
     {
       "name": "deck-forge",
       "displayName": "Deck Forge",
-      "description": "Build decks from shape primitives so they survive a Google Slides import fully editable, then measure them: type legibility derived from angular subtense, WCAG contrast resolved against the real backdrop by z-order, and native-chart detection. The builder cannot express a native chart, so compliance is structural rather than advisory.",
+      "description": "Build decks from shape primitives so they survive a Google Slides import fully editable, then measure them: type legibility from the AVIXA element-height model, WCAG contrast resolved against the real backdrop by z-order, and native-chart detection. The component library never creates a chart, and the audit catches one if you reach around it.",
       "source": "./deck-forge",
       "category": "productivity",
       "license": "MIT",

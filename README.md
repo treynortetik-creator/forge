@@ -123,6 +123,8 @@ signal was never length. It was dispersion.
 
 ---
 
+<img src="media/forge-decks.gif" width="180" align="right" alt="">
+
 ## deck-forge
 
 A native PowerPoint chart **flattens into a static image** on Google Slides import, and there is no
@@ -130,9 +132,13 @@ workaround inside an uploaded `.pptx` — Slides only keeps a chart live when it
 and that link cannot exist in a file you upload. The recipient cannot fix a typo in an axis label.
 
 The usual response is a style guide telling people to avoid charts. Style guides lose. So
-`deck_build.py` **has no `add_chart` and no way to reach one**. Every visual is built from rectangles,
-ovals, text boxes and tables — the primitives that survive the import editable. Compliance is
-structural, not advisory. The builder also enforces the legibility floor with an exception rather than
+`deck_build.py` **has no `add_chart`**, and every visual is built from rectangles,
+ovals, text boxes and tables — the primitives that survive the import editable.
+
+⚠️ A strong default, not a sealed box: `Slide.s` and `Deck.prs` are public, so a native chart is one
+attribute hop away. An earlier draft of this README claimed compliance was "structural"; a review
+disproved it in one line. What the round trip guarantees is narrower and still useful — **the library
+never creates a chart, and the audit catches one if you reach around it.** The builder also enforces the legibility floor with an exception rather than
 a warning, on the theory that a warning you can scroll past is how 8pt footnotes ship.
 
 `deck_audit.py` measures what a person looking at a slide cannot:
@@ -156,6 +162,8 @@ that returned "0 runs, all PASS, exit 0" on a deck built exactly the way the plu
 Each of those is now a regression test; there are 33.
 
 ---
+
+<img src="media/forge-proofs.gif" width="180" align="right" alt="">
 
 ## proof-forge
 

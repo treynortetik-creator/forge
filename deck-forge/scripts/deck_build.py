@@ -11,10 +11,16 @@ a file you upload. So the chart arrives as a dead picture: not editable, not
 restylable, not even selectable as data.
 
 The usual response is a style guide telling people not to use charts. Style guides
-lose. So this library **cannot express a native chart** — there is no `add_chart`,
-and there is no way to reach one through the public API here. Everything visual is
-built from rectangles, ovals, text boxes and tables, which are the primitives that
-survive the import editable. Compliance is structural, not advisory.
+lose. So there is no `add_chart` here: every component builds from rectangles, ovals,
+text boxes and tables, the primitives that survive the import editable.
+
+⚠️ This is a strong default, NOT a sealed box. `Slide.s` and `Deck.prs` are public
+attributes holding the live python-pptx objects, so `s.s.shapes.add_chart(...)`
+reaches a native chart in one hop. An earlier version of this docstring claimed
+compliance was "structural" and that there was "no way to reach one"; that was false,
+and an adversarial review demonstrated it in a single line. What the round trip
+actually guarantees is narrower and still worth having: **this library never creates
+a chart, and deck_audit.py catches one if you reach around it.**
 
 Two more properties, both deliberate:
 
