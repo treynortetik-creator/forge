@@ -21,6 +21,12 @@ System posture for all passes: *You are an expert line editor. This is a difficu
 
 ---
 
+> ⚠️ **One chunking caveat, verified by test.** `chunk.py` round-trips **byte-identical** on normal
+> prose at 6k and 100k words, including unicode. The one exception: a scene break encoded as *extra
+> blank lines alone* (three or more newlines) collapses to a single blank line **if it lands exactly on
+> a chunk boundary**. The word stream is never affected. If your manuscript marks scene breaks with
+> blank lines only, use a visible marker (`***`, `#`) instead — those round-trip exactly.
+
 ## The change-log contract — every analyze step outputs this shape
 
 The artifact between the two halves of every pass is specified, not freeform:

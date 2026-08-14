@@ -53,7 +53,7 @@ source of three things. Without it, reassign each one and say so in the output:
 logic check, and do not validate the three ratings against a document that does not exist. Silently
 validating invented numbers against a missing template is worse than not checking.
 
-List each missing item separately. Do not proceed with any steps below until all four required inputs are confirmed.
+List each missing item separately. Do not proceed until the **three required inputs** (dossier, character sheet, worldbuilding sheet) are confirmed. The plot template is optional — see the degradation branch above.
 
 If all inputs are present, confirm it briefly and proceed.
 
@@ -93,11 +93,11 @@ If no tropes doc was provided, skip this step and proceed to Step 2 without trop
 ```
 Using the above worldbuilding, characters, dossier, plot template, themes, and tropes, generate a simple outline for this book. Make sure to use the plot template to inform you on the kind of things that should happen in the chapters you are outlining.
 
-The summary for each chapter should be ONLY 2-3 sentences per chapter. The goal is not to flesh out every detail, but to get a general blueprint for the story as a whole. The outline should have the same number of chapters found in the plot template.
+The summary for each chapter should be ONLY 2-3 sentences per chapter. The goal is not to flesh out every detail, but to get a general blueprint for the story as a whole. The outline should have the same number of chapters found in the plot template. **If no template was supplied, derive the chapter count from the dossier's scope and genre convention, and state the number and your reasoning.**
 
 For each chapter, mention who the viewpoint character is. For first-person genres, all chapters will have the same viewpoint character. Do not mention whether the chapter is first person, third person, or the tense. Just name the viewpoint character.
 
-Additionally, for each chapter, include the Spice Level, Violence Level, and Swearing Level found in the plot template. These must match exactly what is in the plot template for each chapter. The 2-3 sentence description must be consistent with these ratings (if Violence Level is 1, do not describe an epic battle).
+Additionally, for each chapter, include the Spice Level, Violence Level, and Swearing Level found in the plot template (or the author-declared values if none was supplied). These must match exactly what is in the plot template for each chapter. **With no template, use the ratings the author declared once at the dependency check and apply them consistently — do not invent them per chapter.** The 2-3 sentence description must be consistent with these ratings (if Violence Level is 1, do not describe an epic battle).
 
 Format each chapter using this exact Markdown structure:
 

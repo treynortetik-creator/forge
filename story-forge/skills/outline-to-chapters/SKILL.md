@@ -454,7 +454,7 @@ Save the final chapter. Append it to the draft file. Advance to the next chapter
 
 `scripts/chapter_context.py`, pure stdlib. Two modes.
 
-**`last-words`:** Extract the last N words from a draft file. Splits on whitespace; never cuts mid-word. Used in the pre-loop (2K window) and Step 11 (20K window). Prints to stdout.
+**`last-words`:** Extract the last N words from a draft file. Splits on whitespace; never cuts mid-word. Used in **Step 1 (2K window, re-read every chapter)** and Step 11 (20K window). Prints to stdout.
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}"/skills/outline-to-chapters/scripts/chapter_context.py last-words draft.md --words 2000

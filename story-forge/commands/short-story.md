@@ -17,7 +17,7 @@ allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
 
 ## Before Starting: Establish the Project Directory
 
-Confirm `$ARGUMENTS` is a valid path. If the directory does not exist, create it with `mkdir -p`. All output files from steps 2 through 6 go here unless a skill's own rules specify otherwise. The voice spec goes to `story-forge/output/` per the voice skill's rules.
+Confirm `$ARGUMENTS` is a valid path. If the directory does not exist, create it with `mkdir -p`. All output files from steps 2 through 6 go here unless a skill's own rules specify otherwise. The voice spec is written **into the project directory** (`./voice-[name].md`) — that is where the `voice` skill puts it.
 
 ---
 
@@ -25,7 +25,7 @@ Confirm `$ARGUMENTS` is a valid path. If the directory does not exist, create it
 
 **Purpose:** Produce the author voice spec that short-story-draft consumes. Unlike the novel pipeline, this step is optional for short fiction. A story can anchor to the genre and tone stated in the dossier when no spec is available, but the prose quality will be lower.
 
-**Dependency check:** Search `story-forge/output/` for any file matching `voice-*.md`. If one exists, confirm with the user which spec to use, then skip to Step 2 with that file path in hand. Do not re-run the voice skill if a valid spec already exists.
+**Dependency check:** Search **the project directory** (`$ARGUMENTS`) for any file matching `voice-*.md`. If one exists, confirm with the user which spec to use, then skip to Step 2 with that file path in hand. Do not re-run the voice skill if a valid spec already exists.
 
 **If no voice spec is found:**
 
@@ -123,11 +123,11 @@ When it completes, report to the user: audit report path, any critical issues fl
 
 | Stage | Produced by | File location |
 |---|---|---|
-| Voice spec | voice | `story-forge/output/voice-[name].md` |
+| Voice spec | voice | `$ARGUMENTS/voice-[name].md` |
 | Short-story dossier | short-story-dossier | `$ARGUMENTS/short-story-dossier-[slug].md` |
 | Scene outline | short-story-outline | `$ARGUMENTS/[slug]-scene-outline.md` |
 | Draft | short-story-draft | `$ARGUMENTS/[slug]-draft.md` |
-| Edited draft | de-sloppifier | `$ARGUMENTS/[slug]-draft-edited.md` |
+| Edited draft | de-sloppifier | `$ARGUMENTS/[slug]-draft-deslopped.md` |
 | Logic audit | logic-check | `$ARGUMENTS/[slug]-logic-audit.md` |
 
 ---

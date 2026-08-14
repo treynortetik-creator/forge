@@ -104,7 +104,7 @@ Deliver the absolute path to the final output file.
 
 This chunker is adapted from the same pattern used by the de-sloppifier skill. The 1000-word default here matches the source n8n automation.
 
-Run `python3 scripts/chunk.py --help` for full usage.
+Run `python3 "${CLAUDE_PLUGIN_ROOT}"/skills/public-domain-cleanup/scripts/chunk.py --help` for full usage.
 
 ---
 

@@ -63,7 +63,7 @@ Pass each step's output forward to the next within the skill. Do not summarize o
 
 After story-hacker completes, Write the final document to:
 
-`story-forge/output/[title-kebab-case]-hacked.md`
+`$ARGUMENTS/[title-kebab-case]-hacked.md`
 
 where `[title-kebab-case]` is the comp title lowercased and hyphenated. Example: "Moby Dick" becomes `moby-dick-hacked.md`.
 

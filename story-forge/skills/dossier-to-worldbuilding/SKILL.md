@@ -32,7 +32,7 @@ needs — every element you keep costs context downstream. More than 20-25 is us
 
 ### Step 1: Classify and expand one element
 
-Classify into one of the twelve categories, then follow **that category's full profile format** from
+Classify into one of the eleven categories, then follow **that category's full profile format** from
 `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-categories.md`. Each has its own document
 structure — Hard Rules vs Soft Rules for a magic system, The Truth Behind the Myth for a deity,
 Details to Use in Prose for a culture or language.

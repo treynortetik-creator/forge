@@ -112,3 +112,15 @@ while doing it.
 
 Runs **last**: braindump → dossier → outline → draft → story-hacker → de-sloppifier → edit-pass →
 **clean-export**.
+
+### dossier-to-characters
+Builds the character bible **one character at a time** — extract roster, then generate → 10-point logic
+check (slider validation marked CRITICAL) → rewrite, per character, appending as it goes. Closes with an
+ensemble **relationship map** across the finished cast. Ported from the `Dossier to Characters`
+automation, whose per-item loop the single-pass version had flattened away.
+
+### dossier-to-worldbuilding
+Same shape for the world: flat element list, then per element classify → apply that category's full
+profile format → logic-check **against everything already written** → rewrite. That accumulating
+consistency read is what makes a world instead of a glossary. Run it after the character bible and give
+it that bible as context.

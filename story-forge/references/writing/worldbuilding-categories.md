@@ -124,9 +124,9 @@ End with a ## section called Narrative Implications with 3–5 bullets on confli
 
 ---
 
-## Gods/Dieties
+## Gods/Deities
 
-For Gods/Dieties:
+For Gods/Deities:
 
 Develop a rich, nuanced profile for this divine or supernatural entity. The most compelling gods in fiction are ambiguous — their nature reveals as much about mortals as it does about divinity.
 

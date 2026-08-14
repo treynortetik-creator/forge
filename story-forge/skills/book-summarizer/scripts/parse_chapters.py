@@ -31,7 +31,7 @@ from pathlib import Path
 
 def split_markdown(text: str) -> list[dict]:
     """Split on Markdown H1 lines (# Title)."""
-    pattern = re.compile(r"^#\s+(.+)$", re.MULTILINE)
+    pattern = re.compile(r"^#{1,6}[ \t]+(.+)$", re.MULTILINE)
     return _split_by_matches(text, pattern)
 
 
@@ -64,7 +64,7 @@ def split_html(text: str) -> list[dict]:
 def split_bare(text: str) -> list[dict]:
     """Split on bare 'Chapter N' / 'Chapter One' lines."""
     pattern = re.compile(
-        r"^(chapter\s+(?:\d+|[a-z]+(?:\s+[a-z]+)?)).*$",
+        r"^#{0,6}[ \t]*(chapter[ \t]+(?:\d+|[a-z]+(?:[ \t]+[a-z]+)?))[ \t]*.*$",
         re.IGNORECASE | re.MULTILINE,
     )
     return _split_by_matches(text, pattern)
@@ -86,13 +86,20 @@ def _split_by_matches(text: str, pattern: re.Pattern) -> list[dict]:
 
 
 def detect_strategy(text: str) -> str:
-    if re.search(r"^#\s+\S", text, re.MULTILINE):
+    if re.search(r"^#{1,6}[ \t]+\S", text, re.MULTILINE):
         return "markdown"
     if re.search(r"<h1\b", text, re.IGNORECASE):
         return "html"
     if re.search(r"^chapter\s+[\d\w]", text, re.IGNORECASE | re.MULTILINE):
         return "bare"
     return "markdown"  # fallback: try markdown (will return [] if nothing found)
+
+
+def _pos(v, name):
+    n = int(v)
+    if n <= 0:
+        raise SystemExit(f"ERROR: --{name} must be a positive integer (got {n})")
+    return n
 
 
 def main() -> None:
@@ -130,7 +137,7 @@ def main() -> None:
     splitters = {"markdown": split_markdown, "html": split_html, "bare": split_bare}
     chapters = splitters[strategy](text)
 
-    if not chapters:
+    if not chapters and args.strategy in (None, 'auto'):
         # If primary strategy found nothing, try the others in order
         for name, fn in splitters.items():
             if name == strategy:

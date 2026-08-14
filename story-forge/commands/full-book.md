@@ -17,7 +17,7 @@ allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
 
 ## Before Starting: Establish the Project Directory
 
-Confirm `$ARGUMENTS` is a valid path. If the directory does not exist, create it with `mkdir -p`. All output files from steps 2, 3, and 4 go here unless a skill's own rules specify otherwise. The voice spec goes to `story-forge/output/` per the voice skill's rules.
+Confirm `$ARGUMENTS` is a valid path. If the directory does not exist, create it with `mkdir -p`. All output files from steps 2, 3, and 4 go here unless a skill's own rules specify otherwise. The voice spec is written **into the project directory** (`./voice-[name].md`) — that is where the `voice` skill puts it.
 
 ---
 
@@ -25,13 +25,13 @@ Confirm `$ARGUMENTS` is a valid path. If the directory does not exist, create it
 
 **Purpose:** Produce the author voice spec that outline-to-chapters requires in Step 4.
 
-**Dependency check:** Search `story-forge/output/` for any file matching `voice-*.md`. If one exists, confirm with the user which spec to use, then skip to Step 2 with that file path in hand. Do not re-run the voice skill if a valid spec already exists.
+**Dependency check:** Search **the project directory** (`$ARGUMENTS`) for any file matching `voice-*.md`. If one exists, confirm with the user which spec to use, then skip to Step 2 with that file path in hand. Do not re-run the voice skill if a valid spec already exists.
 
 **If no voice spec is found:**
 
 > "No voice spec found. The outline-to-chapters skill requires one. Run the voice skill now to build it, or supply the path to an existing spec."
 
-If the user wants to run it now, invoke the **voice** skill. The voice skill will conduct its own dependency check and ask for writing samples if they are not present. Do not bypass that check. When the skill completes, note the output path (`story-forge/output/voice-[name].md`) and carry it into Step 4.
+If the user wants to run it now, invoke the **voice** skill. The voice skill will conduct its own dependency check and ask for writing samples if they are not present. Do not bypass that check. When the skill completes, note the output path (`$ARGUMENTS/voice-[name].md`) and carry it into Step 4.
 
 If the user wants to supply an existing spec file, read that path and carry it into Step 4.
 
@@ -56,6 +56,13 @@ Do not proceed to Step 3 without a resolved dossier file path.
 ---
 
 ## Step 3: Dossier to Outline (Conditional)
+
+> **Deeper alternative.** `dossier-to-outline` builds the character bible and world in **single passes**
+> — faithful to the automation it was ported from, and fine for a short or fast project. For a full
+> novel, run **`dossier-to-characters`** then **`dossier-to-worldbuilding`** first: they work
+> **one item at a time** with a per-item logic check, and worldbuilding re-reads the accumulating sheet
+> so later elements stay consistent with earlier ones. Then use Step 3 for the outline only.
+
 
 **Purpose:** Expand the dossier into three production documents: character bible, worldbuilding sheet, and chapter outline.
 
@@ -98,11 +105,65 @@ The skill appends each completed chapter to the draft file. When it completes it
 
 ---
 
+---
+
+## Step 3.5: Instrumented Outline Pass (Recommended)
+
+Invoke the **outline-generator** skill on the outline from Step 3.
+
+This is the only place in the plugin that carries the **6-dimension emotional audit**, the **anchored
+scene-slider rubric**, and the **7-category outline logic check**. Skipping it means those three
+instruments never run on your book.
+
+**Input:** the outline, character sheet and worldbuilding sheet from Step 3.
+**Output:** `$ARGUMENTS/[project-name]-outline.md`, re-emitted with per-chapter sliders and both audits
+applied.
+
+**If no genre plot template is available**, follow that skill's degradation branch — it reassigns
+chapter count to the dossier, asks the author to declare the three content ratings once, and disables
+the checks that would otherwise validate invented numbers against a document that does not exist.
+
+**This step is skippable but not silently.** If the user declines, say plainly which three instruments
+are being skipped.
+
+---
+
+## Step 5: Line Edit
+
+Invoke the **de-sloppifier** skill on the completed draft from Step 4.
+
+Three passes per ~1500-word chunk: pacing and paragraph shape, line editing, then AI-pattern removal.
+Follow that skill's own chunking instructions.
+
+**Input:** `$ARGUMENTS/[project-name]-draft.md`
+**Output:** `$ARGUMENTS/[project-name]-draft-deslopped.md`
+
+🔴 **Do not skip Step 4.5's post-wave repeat scan** (in `edit-pass`): independently edited chunks
+converge on the same replacement phrasing, so a clean per-chunk edit can still produce a dirty book.
+
+---
+
+## Step 6: Continuity Audit
+
+Invoke the **logic-check** skill on the de-slopped draft, passing the story bible from Steps 2 and 3.
+
+Six audit categories plus the chapter chronology layer. **Output the findings inline** — this is a
+report, not a rewrite.
+
+---
+
+## Step 7: Clean Export
+
+Invoke the **clean-export** skill on the final draft before it leaves the machine. Strips invisible
+provenance characters without altering a word.
+
+**Output:** `$ARGUMENTS/[project-name]-final.md`
+
 ## Artifact Summary
 
 | Stage | Produced by | File location |
 |---|---|---|
-| Voice spec | voice | `story-forge/output/voice-[name].md` |
+| Voice spec | voice | `$ARGUMENTS/voice-[name].md` |
 | Story dossier | braindump-to-dossier | `$ARGUMENTS/dossier-[slug].md` |
 | Character bible | dossier-to-outline | `$ARGUMENTS/[project]-characters.md` |
 | Worldbuilding sheet | dossier-to-outline | `$ARGUMENTS/[project]-worldbuilding.md` |
@@ -115,7 +176,7 @@ The skill appends each completed chapter to the draft file. When it completes it
 
 - Each skill runs its own dependency check. Do not skip or soft-pedal those checks. If a skill stops and asks for input, surface that question to the user and wait.
 - Steps are conditional at 2 and 3: if valid artifacts already exist on disk, the user can choose to reuse them and skip the build. Always confirm before reusing.
-- Step 4 is never skipped. It is the destination.
+- Step 4 produces the draft. **Steps 5-7 are what make it finished** — a draft is not done when the last chapter is written.
 
 > 🔴 **Three skills were missing from this chain and have been added.**
 > **`outline-generator`** carries the 6-dimension emotional audit, the anchored slider rubric and the
