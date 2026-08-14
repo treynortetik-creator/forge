@@ -40,8 +40,21 @@ so do not lump them together:
 
 ## Use it
 
+🔴 **`${CLAUDE_PLUGIN_ROOT}` is shell syntax and Python does not expand it.** The previous
+version of this block put it inside a string literal, where it becomes a literal directory
+named `${CLAUDE_PLUGIN_ROOT}` and the import fails. The variable is also unset in an ordinary
+shell, so the bash examples below resolve to `/scripts/...` unless the plugin runtime set it.
+Use this instead — it works in both cases:
+
 ```python
-import sys; sys.path.insert(0, "${CLAUDE_PLUGIN_ROOT}/scripts")
+import os, sys, glob
+root = os.environ.get("CLAUDE_PLUGIN_ROOT") or next(
+    iter(sorted(glob.glob(os.path.expanduser(
+        "~/.claude/plugins/cache/*/deck-forge/*")), reverse=True)), "")
+if not root:
+    sys.exit("deck-forge not found. Set CLAUDE_PLUGIN_ROOT to the plugin directory.")
+sys.path.insert(0, os.path.join(root, "scripts"))
+
 from deck_build import Deck, Theme
 
 d = Deck(Theme.load("theme.json"))          # or Theme() for the neutral default
