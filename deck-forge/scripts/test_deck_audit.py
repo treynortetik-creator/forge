@@ -284,14 +284,23 @@ _, alpha_ok = D._apply_transforms(base, _et.fromstring(
 check("alpha is reported unmodellable, not silently ignored", not alpha_ok)
 
 # D8 — --json and text must agree, always
+#
+# Invoke by ABSOLUTE path. A bare "deck_audit.py" made this block silently
+# cwd-dependent: from anywhere but scripts/ the interpreter exits 2 (file not
+# found) and the tool never runs at all. The agreement check still went green,
+# because 2 == 2 — an assertion passing on two processes that did not exist.
+# Any subprocess check whose failure mode is "both sides error identically"
+# must pin the path, or it is testing the shell, not the tool.
+AUDIT = str(Path(__file__).parent / "deck_audit.py")
 empty_f = TMPF = __import__("tempfile").mktemp(suffix=".pptx"); blank().save(TMPF)
 for mode in ("hard", "any"):
-    t = subprocess.run([sys.executable, "deck_audit.py", TMPF, "--fail-on", mode],
+    t = subprocess.run([sys.executable, AUDIT, TMPF, "--fail-on", mode],
                        capture_output=True).returncode
-    j = subprocess.run([sys.executable, "deck_audit.py", TMPF, "--fail-on", mode, "--json"],
+    j = subprocess.run([sys.executable, AUDIT, TMPF, "--fail-on", mode, "--json"],
                        capture_output=True).returncode
     check(f"--json agrees with text on --fail-on {mode}", t == j, f"text={t} json={j}")
     check(f"a zero-run deck FAILS under --fail-on {mode}", t == 1, f"got {t}")
+    check(f"...and the tool actually RAN under --fail-on {mode}", t in (0, 1), f"got {t}")
 
 # D5 — the master-placeholder link, tested by BEHAVIOUR not by grepping the source.
 # The old version searched deck_audit.py for the string "master placeholder", which
