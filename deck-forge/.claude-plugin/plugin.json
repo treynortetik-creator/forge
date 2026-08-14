@@ -1,0 +1,20 @@
+{
+  "name": "deck-forge",
+  "version": "0.1.0",
+  "description": "Build presentation decks that survive a Google Slides import, and measure them instead of eyeballing them: legibility at distance, WCAG contrast, native-chart detection.",
+  "author": {
+    "name": "treynortetik-creator"
+  },
+  "homepage": "https://github.com/treynortetik-creator/forge",
+  "repository": "https://github.com/treynortetik-creator/forge",
+  "license": "MIT",
+  "keywords": [
+    "powerpoint",
+    "pptx",
+    "google-slides",
+    "presentation",
+    "accessibility",
+    "wcag",
+    "legibility"
+  ]
+}

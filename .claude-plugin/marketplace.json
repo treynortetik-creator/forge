@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "forge",
-  "description": "Two Claude Code plugins for making things: design-forge for visual work, story-forge for long-form fiction. Both are built on the same idea — judgment stays with the model, and anything expressed as a number gets measured instead of eyeballed.",
+  "description": "Claude Code plugins for making things: design-forge for visual work, story-forge for long-form fiction, deck-forge for presentations. All built on the same idea — judgment stays with the model, and anything expressed as a number gets measured instead of eyeballed.",
   "owner": { "name": "Treynor Tetik" },
   "plugins": [
     {
@@ -23,6 +23,16 @@
       "license": "MIT",
       "author": { "name": "Treynor Tetik" },
       "keywords": ["writing", "fiction", "novel", "outlining", "editing", "anti-slop", "continuity"]
+    },
+    {
+      "name": "deck-forge",
+      "displayName": "Deck Forge",
+      "description": "Build decks from shape primitives so they survive a Google Slides import fully editable, then measure them: type legibility derived from angular subtense, WCAG contrast resolved against the real backdrop by z-order, and native-chart detection. The builder cannot express a native chart, so compliance is structural rather than advisory.",
+      "source": "./deck-forge",
+      "category": "productivity",
+      "license": "MIT",
+      "author": { "name": "Treynor Tetik" },
+      "keywords": ["powerpoint", "pptx", "google-slides", "presentation", "accessibility", "wcag", "legibility"]
     }
   ]
 }
