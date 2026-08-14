@@ -2,19 +2,28 @@
 
 Four Claude Code plugins for making things, and checking them.
 
-<p align="center">
-  <img src="media/forge-writes.gif" width="230" alt="Forge writing a novel by hand">
-  &nbsp;&nbsp;
-  <img src="media/forge-designs.gif" width="230" alt="Forge designing a landing page">
-</p>
+<table align="center">
+<tr>
+<td align="center"><img src="media/forge-writes.gif" width="180" alt="Forge writing a novel by hand"></td>
+<td align="center"><img src="media/forge-designs.gif" width="180" alt="Forge designing a landing page"></td>
+<td align="center"><img src="media/forge-decks.gif" width="180" alt="Forge laying out a chart from paper shapes"></td>
+<td align="center"><img src="media/forge-proofs.gif" width="180" alt="Forge finding the one bad frame on a lightbox"></td>
+</tr>
+<tr>
+<td align="center"><sub><b>story-forge</b><br>writes the book</sub></td>
+<td align="center"><sub><b>design-forge</b><br>designs the site</sub></td>
+<td align="center"><sub><b>deck-forge</b><br>builds the deck</sub></td>
+<td align="center"><sub><b>proof-forge</b><br>checks the export</sub></td>
+</tr>
+</table>
 
-<p align="center"><sub><b>Same guy.</b> He writes the book, he designs the site, and he builds the deck.</sub></p>
+<p align="center"><sub><b>Same guy.</b> He makes the thing, then he checks the thing.</sub></p>
 
 | | |
 |---|---|
 | **[design-forge](design-forge/)** | Visual work — an adversarial builder/critic loop, a measurement harness, a licence-cleared asset library, a scroll-film site builder |
 | **[story-forge](story-forge/)** | Long-form fiction — braindump to dossier, outlining, drafting, a three-pass line edit, a continuity audit |
-| **[deck-forge](deck-forge/)** | Presentations — a component library that cannot build a native chart, and a harness that measures legibility at distance and contrast against the real backdrop |
+| **[deck-forge](deck-forge/)** | Presentations — a component library that never builds a native chart, and a harness that measures legibility at distance and contrast against the real backdrop |
 | **[proof-forge](proof-forge/)** | Exports — compare two renders and mark exactly where they differ, on video, stills or audio |
 
 They share one idea: **judgment stays with the model, and anything expressed as a number gets measured
