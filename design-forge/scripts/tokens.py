@@ -129,8 +129,8 @@ def walk_dtcg(node, prefix=""):
 
 def walk_json(node, prefix="", depth=0):
     """Flatten nested JSON. MUST recurse into lists -- shadcn's palettes are arrays of
-    {scale,hex,rgb,hsl,oklch}, and skipping lists silently returned 6% of the file."""
-    """Generic nested-json flattener for Figma-shaped and vendor-shaped files."""
+    {scale,hex,rgb,hsl,oklch}, and skipping lists silently returned 6% of the file.
+    Also handles Figma-shaped and vendor-shaped files."""
     out = {}
     if depth > 8:
         return out
