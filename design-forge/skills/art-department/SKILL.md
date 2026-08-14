@@ -51,9 +51,9 @@ library/fonts/     a complete house stack as woff2, including the Poppins 800 mo
 ```
 
 ```bash
-python3 library/icon.py --search chart                             # find an icon
-python3 library/icon.py tabler:chart-bar --color '#1f2937'     # emit the SVG
-python3 library/fetch.py all                                      # refresh / extend
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/art-department/library/icon.py --search chart                             # find an icon
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/art-department/library/icon.py tabler:chart-bar --color '#1f2937'     # emit the SVG
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/art-department/library/fetch.py all                                      # refresh / extend
 ```
 
 Read `library/README.md` for the SVG-rasterization trap before you convert any icon to PNG.

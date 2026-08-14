@@ -45,7 +45,7 @@ Before iterating, collect from the provided files:
 Extract the continuity window with the helper:
 
 ```bash
-python3 skills/outline-to-chapters/scripts/chapter_context.py last-words <draft_file> --words 2000
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/outline-to-chapters/scripts/chapter_context.py last-words <draft_file> --words 2000
 ```
 
 Parse the outline into a list of chapter titles to iterate over. Confirm the list with the user if generating multiple chapters, then run Steps 1-13 for each chapter in order.
@@ -171,7 +171,7 @@ carry a window forward from a previous chapter.**
 Alternatively, get a fast heuristic via the helper and adjust manually:
 
 ```bash
-python3 skills/outline-to-chapters/scripts/chapter_context.py estimate --scene-type action
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/outline-to-chapters/scripts/chapter_context.py estimate --scene-type action
 ```
 
 ---
@@ -395,7 +395,7 @@ Banned families (in addition to `${CLAUDE_PLUGIN_ROOT}/references/writing/banned
 Extract the context window:
 
 ```bash
-python3 skills/outline-to-chapters/scripts/chapter_context.py last-words <draft_file> --words 20000
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/outline-to-chapters/scripts/chapter_context.py last-words <draft_file> --words 20000
 ```
 
 **System prompt:** Same as Step 5.
@@ -457,16 +457,16 @@ Save the final chapter. Append it to the draft file. Advance to the next chapter
 **`last-words`:** Extract the last N words from a draft file. Splits on whitespace; never cuts mid-word. Used in the pre-loop (2K window) and Step 11 (20K window). Prints to stdout.
 
 ```bash
-python3 skills/outline-to-chapters/scripts/chapter_context.py last-words draft.md --words 2000
-python3 skills/outline-to-chapters/scripts/chapter_context.py last-words draft.md --words 20000
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/outline-to-chapters/scripts/chapter_context.py last-words draft.md --words 2000
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/outline-to-chapters/scripts/chapter_context.py last-words draft.md --words 20000
 ```
 
 **`estimate`:** Suggest a word count target for a chapter given scene type, with the 1.25x inflation already applied. Use this as a quick heuristic and override with the LLM's output if they differ significantly.
 
 ```bash
-python3 skills/outline-to-chapters/scripts/chapter_context.py estimate --scene-type action
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/outline-to-chapters/scripts/chapter_context.py estimate --scene-type action
 # scene types: action, quiet, establishment, climax, dialogue
-python3 skills/outline-to-chapters/scripts/chapter_context.py --help
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/outline-to-chapters/scripts/chapter_context.py --help
 ```
 
 ---

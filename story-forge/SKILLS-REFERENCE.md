@@ -100,9 +100,9 @@ output and refuses to write if anything outside its target set differs.
 Preserves ZWJ + variation selectors by default so emoji don't break (`--strip-emoji-glue` to remove).
 
 ```bash
-python3 skills/clean-export/scripts/clean_text.py draft.md                    # report only
-python3 skills/clean-export/scripts/clean_text.py draft.md -o draft.clean.md
-python3 skills/clean-export/scripts/clean_text.py chapters/ -o out/
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/clean-export/scripts/clean_text.py draft.md                    # report only
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/clean-export/scripts/clean_text.py draft.md -o draft.clean.md
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/clean-export/scripts/clean_text.py chapters/ -o out/
 ```
 
 ⚠️ It does **not** remove statistical/token-choice watermarks (Claude's, from 2026-08-02). Those

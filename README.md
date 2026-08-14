@@ -42,7 +42,7 @@ Or clone and install locally:
 
 ```bash
 git clone https://github.com/treynortetik-creator/forge && cd forge
-claude plugin marketplace add .
+claude plugin marketplace add ./
 claude plugin install design-forge@forge
 ```
 

@@ -264,7 +264,7 @@ and swap only the generate/wait/download calls for that engine's CLI or API. In 
    **Audit the storyboard before you spend a credit — this check is free:**
 
    ```bash
-   python3 ~/.claude/skills/scroll-film-studio/scripts/vector-check.py <storyboard.json>   # must PASS
+   python3 ${CLAUDE_PLUGIN_ROOT}/skills/scroll-film-studio/scripts/vector-check.py <storyboard.json>   # must PASS
    ```
 
    It reads every clip prompt and fails the ones that contain both an inward and an
@@ -283,13 +283,13 @@ and swap only the generate/wait/download calls for that engine's CLI or API. In 
 
    ```bash
    # PREFERRED — Higgsfield, both ends pinned, per clip:
-   zsh ~/.claude/skills/scroll-film-studio/scripts/chain-step.sh <assets-dir> <clip-name> <start.png> <end.png> "<prompt>" [resolution] [prev-last.png]
+   zsh ${CLAUDE_PLUGIN_ROOT}/skills/scroll-film-studio/scripts/chain-step.sh <assets-dir> <clip-name> <start.png> <end.png> "<prompt>" [resolution] [prev-last.png]
    ```
 
    Only if there are no Higgsfield credits and a Kie key exists:
 
    ```bash
-   python3 ~/.claude/skills/scroll-film-studio/scripts/kie-chain.py <storyboard.json> <outdir>
+   python3 ${CLAUDE_PLUGIN_ROOT}/skills/scroll-film-studio/scripts/kie-chain.py <storyboard.json> <outdir>
    ```
 
    Needs a Kie.ai key in `KIE_API_KEY` or `~/.config/kie/key`. For multi-clip sequential
@@ -346,7 +346,7 @@ and swap only the generate/wait/download calls for that engine's CLI or API. In 
    Ask the provider for a current quote before generation. A scroll-film is silent, so
    leave audio off.
 3. **Continuity-gate the WHOLE film before you build anything** —
-   `zsh ~/.claude/skills/scroll-film-studio/scripts/continuity-gate.sh <frames-dir> 8` must PASS.
+   `zsh ${CLAUDE_PLUGIN_ROOT}/skills/scroll-film-studio/scripts/continuity-gate.sh <frames-dir> 8` must PASS.
    A seam gate and a continuity gate measure different things, and the seam gate alone
    will lie to you. Chaining sets each clip's start image to the previous clip's last
    frame, so the seams match *by construction* — they cannot fail. What escapes is the
@@ -358,7 +358,7 @@ and swap only the generate/wait/download calls for that engine's CLI or API. In 
 4. **Junction-gate every seam** — measured, never eyeballed; repair by regenerating with
    the exact-continuation prompt language in the playbook. Dissolves over bad seams are
    forbidden.
-5. **Assemble** with `~/.claude/skills/scroll-film-studio/scripts/assemble.sh` (drops duplicate junction frames, encodes
+5. **Assemble** with `${CLAUDE_PLUGIN_ROOT}/skills/scroll-film-studio/scripts/assemble.sh` (drops duplicate junction frames, encodes
    `-fps_mode vfr`, samples the seam colour). **Extract at the film's NATIVE frame rate** —
    a 72s film at 24fps is 1,728 frames, and shipping "about 300" of it makes the page scrub a
    4fps slideshow. That is a direct cause of visibly uneven motion, and it is invisible in code
@@ -414,7 +414,7 @@ Fan out independent pieces concurrently; keep the taste-bearing spine on yoursel
 fails.** `verify.js` and `shot.js` need `puppeteer-core` and a system Chrome/Chromium:
 
 ```bash
-cd ~/.claude/skills/scroll-film-studio/scripts && npm install
+cd ${CLAUDE_PLUGIN_ROOT}/skills/scroll-film-studio/scripts && npm install
 ```
 
 `node_modules` is deliberately not shipped in this skill, so a downloaded copy will throw
@@ -434,7 +434,7 @@ until the whole turn is killed — an agent that does this loses the entire buil
 error message, only a truncated transcript. Always `nohup … &`, then poll the port with
 curl, and `pkill` it when finished. The same goes for any long-running process.
 
-**Then `node ~/.claude/skills/scroll-film-studio/scripts/copy-gate.js site/index.html` — it must exit 0 before you ship.**
+**Then `node ${CLAUDE_PLUGIN_ROOT}/skills/scroll-film-studio/scripts/copy-gate.js site/index.html` — it must exit 0 before you ship.**
 Free, deterministic, no model. It fails the build if the page narrates its own concept
 at the visitor ("How to read this page", "as you scroll the frame narrows", "one
 continuous descent"), if placeholder text survived, or if a hand-drawn `<svg>` stands in
@@ -482,7 +482,7 @@ Protection) — point them there, don't change their security settings for them.
   (build recipes), `references/finishing.md` (**the craft that decides whether it looks
   expensive** — head-trim, chrome over footage, why pages go flat below the film, real
   brand logos, mobile as its own film, honest verification), `scripts/chain-step.sh`,
-  `~/.claude/skills/scroll-film-studio/scripts/assemble.sh`, `scripts/verify.js`, `scripts/copy-gate.js` (deterministic copy
+  `${CLAUDE_PLUGIN_ROOT}/skills/scroll-film-studio/scripts/assemble.sh`, `scripts/verify.js`, `scripts/copy-gate.js` (deterministic copy
   gate — must exit 0 to ship).
 
 ## OPERATIONAL TRAPS

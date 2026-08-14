@@ -29,7 +29,7 @@ If no input is supplied, stop here. Do not generate placeholder analysis.
 Run the chapter parser:
 
 ```bash
-python3 /path/to/story-forge/skills/book-summarizer/scripts/parse_chapters.py \
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/book-summarizer/scripts/parse_chapters.py \
   "<manuscript_path>" \
   --output /tmp/chapters.json
 ```

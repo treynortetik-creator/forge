@@ -35,7 +35,7 @@ Ask (or infer from context): is the target modern American English or British En
 Run the bundled chunker to split the source into ~1000-word segments, always breaking on paragraph boundaries:
 
 ```bash
-python3 <skill_dir>/scripts/chunk.py split <source_file> --words 1000 --output-dir ./pd-chunks/
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/public-domain-cleanup/scripts/chunk.py split <source_file> --words 1000 --output-dir ./pd-chunks/
 ```
 
 Note the chunk count. Confirm no chunk is empty before continuing.
@@ -82,7 +82,7 @@ Return clean Markdown text only. No commentary, no "cleaned version:" labels, no
 After all chunks are cleaned, stitch them back:
 
 ```bash
-python3 <skill_dir>/scripts/chunk.py reassemble ./pd-chunks-cleaned/ --output <source_name>-cleaned.md
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/public-domain-cleanup/scripts/chunk.py reassemble ./pd-chunks-cleaned/ --output <source_name>-cleaned.md
 ```
 
 ### Step 5. Final spot-check

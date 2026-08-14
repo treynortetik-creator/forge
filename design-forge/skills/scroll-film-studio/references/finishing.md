@@ -151,11 +151,11 @@ Closing the old `ImageBitmap`s matters — skipping it leaks GPU memory on every
   with this skill at `scripts/shot.js`. **One-time setup on a new machine:**
 
 ```bash
-cd ~/.claude/skills/scroll-film-studio/scripts && npm install   # once, pulls puppeteer-core
+cd ${CLAUDE_PLUGIN_ROOT}/skills/scroll-film-studio/scripts && npm install   # once, pulls puppeteer-core
 ```
 
 ```bash
-node ~/.claude/skills/scroll-film-studio/scripts/shot.js \
+node ${CLAUDE_PLUGIN_ROOT}/skills/scroll-film-studio/scripts/shot.js \
      http://localhost:PORT out.png 1440 900 0.35   # url, out, w, h, scrollFraction
 ```
 
