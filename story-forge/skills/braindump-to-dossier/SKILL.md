@@ -53,7 +53,19 @@ Provide all genre context first (tropes template, plot template), then the brain
 - Have original settings and premises (no default genre furniture)
 - Follow the genre tropes and overall plot structure from the templates
 - Adhere to the author's braindump: honor stated themes, images, characters, and anti-goals
-- Be no more than one paragraph each
+- Use the **three-part pitch format** — a one-paragraph blob is not a pitch:
+
+  ```
+  **Logline:** [1-2 sentences]
+  **Pitch:** [back-of-book style, 2-4 paragraphs, focused on character, conflict, stakes]
+  **Core promise to the reader:** [1 short paragraph: genre, mood, emotional payoff]
+  ```
+
+- **Name at least three specific, concrete hooks** — locations, objects, situations, dilemmas.
+  🔴 **Avoid AI-ish vagueness**: "a dark secret", "they must confront their past", "everything changes"
+  are placeholders, not hooks
+- The **logline is required**, not optional — `dossier-to-outline` consumes it downstream, and
+  flattening the pitch format is what previously severed that handoff
 - Be numbered and formatted in Markdown
 
 Run this step at high creative temperature. Prioritize variety across the 12: different entry points, different protagonist positions, different conflict angles. Convergence on the "safest" option defeats the purpose. If templates are absent, use built-in knowledge of the likely genre and note this.
@@ -62,7 +74,13 @@ Run this step at high creative temperature. Prioritize variety across the 12: di
 
 ## Step 2: Pick the Best Premise
 
-**Goal:** Evaluate all 12 against four specific criteria. Output only the winner, verbatim. No preamble. No analysis.
+**Goal:** Score every candidate on the **7-axis hook rubric** in
+`${CLAUDE_PLUGIN_ROOT}/references/writing/hook-rubric.md` — immediate curiosity, clear story promise,
+concrete stakes, distinctive protagonist, concept clarity, marketable angle, forward drive.
+
+**Write the evaluation out before choosing.** 2-4 pros and cons per candidate, the scores, then a 1-2
+paragraph rationale for the winner. Only then emit the winner verbatim. Externalising the reasoning is
+the point — a selection with no visible reasoning is unconstrained. Then evaluate against. Output only the winner, verbatim. No preamble. No analysis.
 
 **Evaluation criteria (apply in this order):**
 
@@ -108,7 +126,7 @@ Provide all context first (premise, templates, dossier, braindump), then the cri
 
 **Critique criteria:**
 
-- **Logical consistency** (even in fantasy or sci-fi, internal cause and effect must hold): flag "because the plot needs it" elements with no in-world justification, motivation gaps that would prevent the story from starting, character capabilities that contradict the worldbuilding, and worldbuilding rules that contradict each other. Reference [[plot-coherence]]'s six-category audit framework for the full checklist.
+- **Logical consistency** (even in fantasy or sci-fi, internal cause and effect must hold): flag "because the plot needs it" elements with no in-world justification, motivation gaps that would prevent the story from starting, character capabilities that contradict the worldbuilding, and worldbuilding rules that contradict each other. Reference `${CLAUDE_PLUGIN_ROOT}/references/writing/plot-coherence.md`'s six-category audit framework for the full checklist.
 
 - **Originality while maintaining genre tropes:** does this feel genuinely fresh, or is it a predictable execution of the most common version of the genre? Tropes are required; the specific execution of setting and character should not be generic.
 
@@ -148,12 +166,12 @@ Report to the user:
 
 These wiki notes document the underlying craft theory. Reference them, do not duplicate them here.
 
-- [[plot-coherence]]: the six-category logic-check framework behind Step 4's critique criteria (Premise Logic Check, Character-World Fit, Worldbuilding Coherence, Plot Setup Plausibility, Early-Stage Convenience Flags, Specific Fixes)
-- [[character-system]]: the character bible structure that downstream character development builds from the dossier's character seeds; the 15-slider rubric and MBTI/Enneagram profiles begin here
-- [[worldbuilding-method]]: the 12-category framework (Settings and Locations, Objects and Artifacts, Magic Systems, Groups and Races, etc.) that the worldbuilding automation expands from the dossier's one-sentence seeds
-- [[outlining-method]]: the five-automation chain context; this skill is Automation 1; the Outline Plan section of Step 3 is the direct handoff to Automation 4
-- [[anti-slop]] and `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md`: the dossier is a planning document, not prose, but vocabulary inflation applies throughout; the banned-words list at `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md` is a hard constraint; this skill must model what the pipeline teaches (no em-dashes, no inflated vocabulary, no AI-tell transitions)
-- [[voice-matching]]: not applicable at this stage; noted here so the producer stage does not prematurely lock in voice decisions that belong to a later pipeline step
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/plot-coherence.md`: the six-category logic-check framework behind Step 4's critique criteria (Premise Logic Check, Character-World Fit, Worldbuilding Coherence, Plot Setup Plausibility, Early-Stage Convenience Flags, Specific Fixes)
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md`: the character bible structure that downstream character development builds from the dossier's character seeds; the 15-slider rubric and MBTI/Enneagram profiles begin here
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md`: the 12-category framework (Settings and Locations, Objects and Artifacts, Magic Systems, Groups and Races, etc.) that the worldbuilding automation expands from the dossier's one-sentence seeds
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md`: the five-automation chain context; this skill is Automation 1; the Outline Plan section of Step 3 is the direct handoff to Automation 4
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` and `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md`: the dossier is a planning document, not prose, but vocabulary inflation applies throughout; the banned-words list at `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md` is a hard constraint; this skill must model what the pipeline teaches (no em-dashes, no inflated vocabulary, no AI-tell transitions)
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/voice-matching.md`: not applicable at this stage; noted here so the producer stage does not prematurely lock in voice decisions that belong to a later pipeline step
 
 ---
 

@@ -55,7 +55,7 @@ You are an expert literary analyst tasked with analyzing and summarizing a chapt
 Write a 5-6 sentence summary of the events. Use character names instead of pronouns. Summarize the direct events of the scene only; do not provide commentary. If the chapter contains multiple scenes (defined by a change in location, time, or perspective), split the summary into labeled sub-sections, one per scene. Chapters with many scenes may exceed 5-6 sentences; that is acceptable.
 
 **Section 2: Characters**
-List every character who physically appears in the scene (not characters merely referenced). For each character, describe: what actions they take, what happens to them, any physical descriptors mentioned in the text, and any demographic indicators the text provides (age, profession, etc.). End each character entry with their "Heart's Desire": the thing they most want in this scene. (See [[character-system]] for the Heart's Desire framework as a core motivation driver.)
+List every character who physically appears in the scene (not characters merely referenced). For each character, describe: what actions they take, what happens to them, any physical descriptors mentioned in the text, and any demographic indicators the text provides (age, profession, etc.). End each character entry with their "Heart's Desire": the thing they most want in this scene. (See `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md` for the Heart's Desire framework as a core motivation driver.)
 
 **Section 3: Setting**
 List the key settings in the scene. For each, explain how it serves the story: how it contributes to plot and how it contributes to character development. Cap this at 3-4 sentences per setting.
@@ -67,7 +67,7 @@ Identify the main source of conflict or tension in the scene. 1-2 sentences only
 List up to 3 tropes that are clearly evident. Do not force tropes that require interpretation. If fewer than 3 are clearly present, list fewer.
 
 **Section 6: Key Quotes**
-Select the top 3 verbatim quotes or passages from the chapter that would work as marketing material (back-cover copy, social media, reader magnets, ARC teasers). Quote them exactly as written. Do not paraphrase or clean them up. (See [[cover-blurb-and-sales-copy]] for what makes a quote convert in a marketing context.)
+Select the top 3 verbatim quotes or passages from the chapter that would work as marketing material (back-cover copy, social media, reader magnets, ARC teasers). Quote them exactly as written. Do not paraphrase or clean them up. (See **cover blurb and sales copy** for what makes a quote convert in a marketing context.)
 
 ---
 
@@ -136,7 +136,7 @@ The output from this skill feeds directly into marketing workflows. Keep the ana
 - Tropes are descriptive tools, not judgments. Name them plainly (e.g., "enemies-to-lovers tension", "mentor figure introduction").
 - If a chapter is very short (under 300 words, likely a prologue or interlude), note the word count in the Summary field and adjust the sentence count proportionally.
 
-For anti-slop discipline in the analysis prose itself, see [[anti-slop]]. The three-pass de-slopper belongs at the prose generation stage; this skill is analytical output, not generated narrative.
+For anti-slop discipline in the analysis prose itself, see `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md`. The three-pass de-slopper belongs at the prose generation stage; this skill is analytical output, not generated narrative.
 
 ---
 

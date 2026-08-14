@@ -37,7 +37,7 @@ The word "implement" is deliberate — "rewrite" triggers the model to start fro
 
 ## The Six Audit Checks
 
-The logic check in the [[story-hacker-prompts]] runs these six categories. Applies to any document — dossier, character bio, chapter plan, outline. Adjust the prompt's references to match what you are auditing.
+The logic check in the **story hacker prompts** runs these six categories. Applies to any document — dossier, character bio, chapter plan, outline. Adjust the prompt's references to match what you are auditing.
 
 **1. Premise Logic Check**
 - Does the core premise hold together internally?
@@ -102,23 +102,23 @@ After draft chapters: the chapter-level version checks continuity with previous 
 
 ## Pipeline Integration
 
-The [[chapter-generation-pipeline]] has two explicit chronology checks (step 8 after the scene briefs are generated, and step 11 after the first draft). The logic check prompt is the implementation of those steps. Run the full six-category version on the dossier pre-pipeline; run a lighter continuity-focused version on each scene brief to confirm it does not contradict what has already been written.
+The `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md` has two explicit chronology checks (step 8 after the scene briefs are generated, and step 11 after the first draft). The logic check prompt is the implementation of those steps. Run the full six-category version on the dossier pre-pipeline; run a lighter continuity-focused version on each scene brief to confirm it does not contradict what has already been written.
 
-See [[character-system]] for how character sliders and arc information flow into the character-world fit check — slider baselines establish what behavior is consistent for a character, which the logic check then validates against scenes.
+See `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md` for how character sliders and arc information flow into the character-world fit check — slider baselines establish what behavior is consistent for a character, which the logic check then validates against scenes.
 
-This note is the primary reference for the chronology check steps in [[chapter-generation-pipeline]].
+This note is the primary reference for the chronology check steps in `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md`.
 
-For scaling these same audit categories to a full completed manuscript in a single pass, see [[long-context-novel-writing]].
+For scaling these same audit categories to a full completed manuscript in a single pass, see **long context novel writing**.
 
 ## Related
 
-- [[story-hacker-prompts]] — the raw prompt library containing the six-category logic check prompt (already in body)
-- [[character-system]] — character slider baselines that the character-world fit check validates against (already in body)
-- [[chapter-generation-pipeline]] — chronology check steps 8 and 11 run this system per chapter (already in body)
-- [[long-context-novel-writing]] — scaling the same six audit categories to a full manuscript in one pass (already in body)
-- [[self-editing]] — the developmental revision pass where logic and coherence are assessed first in the revision pyramid
-- [[revision-process]] — the full revision pyramid; plot-coherence checks belong at the developmental level before any line editing
-- [[outlining-method]] — the third pre-draft logic check pass: catching contradictions before prose generation begins
-- [[worldbuilding-consistency]] — the iceberg principle and cause-and-effect systems that worldbuilding coherence checks enforce; primary target of the Worldbuilding Coherence audit category
-- [[antagonist-craft]] — the antagonist's off-page plan (agency between scenes) is a primary subject of the plot-coherence audit
-- [[scene-structure]] — causal logic at the scene level (stimulus→response, disaster→sequel) is the micro foundation that plot-coherence audits at manuscript scale
+- **story hacker prompts** — the raw prompt library containing the six-category logic check prompt (already in body)
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md` — character slider baselines that the character-world fit check validates against (already in body)
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md` — chronology check steps 8 and 11 run this system per chapter (already in body)
+- **long context novel writing** — scaling the same six audit categories to a full manuscript in one pass (already in body)
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/self-editing.md` — the developmental revision pass where logic and coherence are assessed first in the revision pyramid
+- **revision process** — the full revision pyramid; plot-coherence checks belong at the developmental level before any line editing
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md` — the third pre-draft logic check pass: catching contradictions before prose generation begins
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-consistency.md` — the iceberg principle and cause-and-effect systems that worldbuilding coherence checks enforce; primary target of the Worldbuilding Coherence audit category
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/antagonist-craft.md` — the antagonist's off-page plan (agency between scenes) is a primary subject of the plot-coherence audit
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/scene-structure.md` — causal logic at the scene level (stimulus→response, disaster→sequel) is the micro foundation that plot-coherence audits at manuscript scale

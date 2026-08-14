@@ -1,46 +1,60 @@
 ---
-title: Character System — Consistency and Depth Across a Book
-type: concept
-tags: [writing, ai-writing, characters, character-bible, n8n, automation]
-created: 2026-06-27
-updated: 2026-06-27
-source: YouTube — https://www.youtube.com/watch?v=f7g9smAe-xY "Fix AI Character Consistency with THIS Exact System" + https://www.youtube.com/watch?v=YEEbZSwun_w "This AI System Writes Better Characters Than 99% Authors" (Jason Hamilton / The Nerdy Novelist)
-status: living
+name: dossier-to-characters
+description: "Build the character bible from a story dossier, one character at a time. Extracts the roster, then runs generate, per-character logic check, and rewrite for each individual before moving to the next, then builds an ensemble relationship map across the finished cast. Use after braindump-to-dossier and before outlining. Triggers on character bible, character sheet, flesh out characters, build the cast."
+allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
 ---
 
-# Character System
+# Dossier to Characters
 
-The core problem: AI models have no loyalty to your characters. Every generation is a fresh guess based on whatever you gave it. A better prompt helps a little; it doesn't hold across 300 pages. What holds is a system built once and used every time.
+**Why this exists as its own skill.** The source automation loops **one character at a time** —
+generate, check, rewrite, append, next. Doing the whole cast in a single pass is not a shortcut, it is
+a different and worse operation: fifteen characters competing for attention inside one completion
+cannot each carry ten fields, fifteen validated sliders and a five-part arc, and a per-character
+checklist applied to a whole document degrades into a vibe check.
 
-## The Character Bible (Character Sheet)
+**Required input:** a story dossier (from `braindump-to-dossier`).
+**Optional:** a character template, genre tropes, author notes.
 
-A character bible is a structured written document covering every dimension an AI needs to stay consistent. It is separate from the story dossier — the dossier lists characters briefly, the bible fleshes each one out.
+---
 
-Core fields for a major character:
-- Physical description (precise and generatable — not "beautiful," but "fierce but kind, sharp features, military bearing")
-- Primary role in the story (protagonist, antagonist, love interest, henchman, etc.)
-- Personality profiles: MBTI, Enneagram, Clifton Strengths
-- Core motivation (heart's desire driving them through the whole book)
-- Background before the story begins
-- A quirk that does not directly serve the plot — this is what makes the character feel like a person rather than a function
-- Dialogue style and example lines in multiple emotional registers (relaxed, stressed, thoughtful, excited)
-- Slider levels (see below)
-- Character arc (how they begin, midpoint moment, climax moment, how they have changed by the end)
+## Step 0: Extract the roster
 
-Minor characters get 2–3 sentences: background, core desire, relationship to the plot.
+Read the dossier and produce a flat list of every character it names. **Account for all of them;
+invent none.** Confirm the list before proceeding — this is the loop's control variable.
 
-## The Slider Rubric
+Mark each as **major** or **minor**. Minor characters get 2-3 sentences and stop.
 
-Fifteen behavioral dimensions scored from -10 to +10 with behavioral anchors at each pole. These are baselines — they shift during scenes depending on tension.
+---
 
-### The 5-point anchor rubric
+## THE LOOP — run Steps 1-3 for EACH character, then append before starting the next
 
-**This is the real instrument.** Each slider is anchored at **-10, -5, 0, +5, +10** with a behavioural
-description, and you interpolate between them (-7 sits between -10 and -5). A two-anchor poles-only
-table is not enough to score against — without a defined 0 there is no neutral, and "baseline" becomes
-arbitrary.
+### Step 1: Expand one character
+
+For a **major** character produce: name · role · physical description (precise and generatable, not
+vague flattery) · background · personality profile · **heart\'s desire** (specific, not abstract —
+"she wants the High Priestess to say her name with respect", not "she wants to belong") · quirk ·
+dialogue samples in four registers (relaxed, stressed, thoughtful, excited) · **15 slider baselines**
+scored against the anchored rubric in
+`${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md` · a five-part character arc.
+
+Two standing constraints from the source, both load-bearing:
+
+> **"Your job is not to produce a happily ever after for each character, it is to be a brutal
+> storyteller."**
+> **"Do not invent major story information that is not included in the dossier."**
+
+### Step 2: Logic-check that one character
+
+Run this checklist against the single character just produced. **Item 5 is marked CRITICAL in the
+source and is the one most often skipped** — the model emits fifteen numbers and nothing ever
+validates them.
 
 ```
+=<character_template>
+[supplied]
+</character_template>
+
+<slider_rubric>
 Below is a 5-point rubric for each slider, mapped to -10, -5, 0, 5, 10. You can interpolate in-between (e.g., -7 as “between -10 and -5”).
 
 Stress / Calm
@@ -237,45 +251,121 @@ Shame / Self-Worth
 5: Healthy self-regard; recognizes flaws but believes in personal value, recovers from setbacks without collapsing.
 
 10: High self-worth; strongly confident, may edge into arrogance or blind spots about own flaws.
+</slider_rubric>
+
+<dossier>
+[supplied]
+</dossier>
+
+<author_notes>
+[supplied]
+</author_notes>
+
+## GENERATED CHARACTER PROFILE TO CHECK:
+[supplied]
+
+## YOUR CHECKLIST - Flag ANY issues for major characters (minor characters do not need the same level of information):
+
+1. **Dossier Consistency**: Does every element (description, role, motivation, background, quirk, dialogue) align with the character's role in the Dossier? No contradictions with plot position, relationships, or story events?
+
+2. **Author Notes Alignment**: Does the profile honor specific instructions from Author Notes (if any)
+
+3. **Character Template Fit**: Does the profile feel appropriate for the genre and fit the description of this character's role in the Character Template (if any)
+
+4. **Personality Profiles Plausibility**:
+   - Myers-Briggs, Enneagram, Clifton Strengths: Do they make sense together? (e.g., no INTJ Enneagram 7w8 unless justified)
+   - Do they support the core motivation and role?
+
+5. **Slider Levels VALIDATION** (CRITICAL):
+   - **Range**: All sliders between -10 and 10, whole numbers only?
+   - **Internal Consistency**: Do slider values align with each other and profile description? (e.g., Extroverted 9 shouldn't have "prefers solitude" quirk)
+   - **Rubric Match**: Does the character's description/behavior match the rubric for those slider values? Quote rubric if mismatched.
+   - **Dossier Fit**: Do baselines make sense for their story role? (e.g., protagonist unlikely to have baseline Submission 9)
+
+6. **Background & Motivation Logic**:
+   - Background explains current traits/motivation without plot holes.
+   - Core motivation drives believable actions in the story context.
+   - Quirk is genuinely unique/interesting, not generic or contradictory. But also isn't distracting and have the potential to take away from the plot.
+
+7. **Dialogue Style**: Matches personality profiles, sliders, and role.
+
+8. **Character Arc**: Make sure the character arc is logical and consistent, and serves the overall story (especially for the protagonist)
+
+8. **Major vs Minor**: Correct format used based on Dossier prominence? Major characters should have more information, while minor characters should just have 2-3 sentences.
+
+9. **Plausibility**: No logical impossibilities.
+
+## OUTPUT FORMAT:
+
+Output a list of anything you might flag and create an improvement plan on how to improve the character bio. Remember that only major characters should have a lot of info. Minor characters should still only have 2-3 sentences each.
+This is a complex task. You are not allowed to perform at a mediocre level. You are performing a rigorous LOGIC CHECK on a generated character profile for either a major or minor character (the major characters will have more information). Your job is to ensure it is **100% consistent, plausible, and logical**, as well as consistent with the Story Dossier, Author Notes, Character Template, etc.
 ```
 
+Output a change list only. Do not rewrite here.
 
-The full 5-point anchor rubric is above, in this file. It is not deferred anywhere.
+### Step 3: Rewrite that one character
 
-## The Character Generation Automation (n8n)
+Implement **only** the flagged changes. Change nothing else. Append the finished character to the
+bible, then return to Step 1 for the next one.
 
-Jason Hamilton's n8n automation loops through all characters in the story dossier and produces a full bible for each. The process:
+---
 
-**Inputs:** story dossier, genre tropes (condensed to one sentence per trope to save tokens), character template, themes template, slider rubric, author notes.
+## Step 4: Relationship map — after the loop drains
 
-**Per-character loop (3 steps):**
-1. Full character sheet generation — runs the character prompt with all context, produces the complete sheet including MBTI/Enneagram/Clifton Strengths, slider baselines, and character arc
-2. Logic check — runs a second prompt checking: consistency with the dossier, alignment with genre templates, personality profile plausibility, slider level fit, motivation logic, dialogue style match, arc consistency; outputs an improvement plan
-3. Implementation — takes the original sheet + the improvement plan, implements only the flagged changes, leaves everything else unchanged
+Re-read the **assembled** bible and produce a typed relationship map across the whole cast. This step
+structurally requires a complete roster, which is why it runs last and why it cannot exist in a
+single-pass version of this skill.
 
-**System prompt directive:** "This is a complex task. You are not allowed to perform at a mediocre level. You are an expert developmental editor and storyteller." Jason reports this phrase noticeably improves output on thinking models.
+```
+=<full_character_sheet>
+[supplied]
+</full_character_sheet>
 
-**After all characters complete:** a relationship dynamics step generates a JSON relationship map — type (rivalry, romance, ally, mentor/mentee, etc.), strength (strong/moderate/weak), direction (bidirectional or A-to-B), and evidence drawn from the character sheets and dossier. Used downstream when outlining to track how characters interact across scenes.
+<dossier>
+[supplied]
+</dossier>
 
-## Visual Continuity (for AI Video/Images)
+<instructions>
+Given the above list of characters, I want you to create a full relationships map for all of the character enseamble.
 
-From the f7g9smAe-xY "Continuity Ladder" — five rungs for holding character consistency when generating video clips or images:
+Critical Rules:
+- ONLY use info from the sheet + dossier + logical inferences (e.g., protagonist-antagonist tension from roles/motivations/sliders). Do NOT invent new plot details.
+- Base on: explicit mentions (e.g., "rival to X"), roles (protagonist vs henchman), overlapping motivations/backgrounds, slider contrasts (high dominance vs submission implies tension), story roles.
+- Cover ALL characters (majors + minors). Include self-relationships if relevant (e.g., internal conflict).
+- Types: friendship, romance, rivalry, family, mentor-mentee, ally, enemy, neutral/colleague, betrayal potential. Use "complex" for mixed.
+- Strength: strong (deep bond), moderate, weak/one-sided.
+- Direction: bidirectional (mutual) or A→B (one-way, e.g., admiration).
 
-1. **Visual Bible** — written document describing the character in precise, generatable terms (not "beautiful," but specifics like exact coloring, clothing, build, distinctive features)
-2. **Reference Sheet** — one clean casting image showing multiple angles, expressions, and costume details; the model stops imagining and starts referencing
-3. **Start Frame / Key Frame** — a first-frame image for each clip; reuse the character sheet images as the anchor
-4. **Tool Identity Feature** — platform-specific identity lock (e.g., Higgsfield's character identity tool)
-5. **Director Review** — generate one clip, check it, *then* scale; never scale bad results
+ALSO INCORPORATE:
+- Dossier context: [INSERT DOSSIER SUMMARY HERE if available, e.g., [supplied]]
+- Genre tropes: [INSERT CONDENSED TROPES HERE, e.g., [supplied]]
 
-The principle generalizes: for prose, the character bible is the equivalent of the visual bible. Build it once, reference it for every scene.
+OUTPUT ONLY valid JSON array of relationships, e.g.:
+[
+  {
+    "characterA": "Exact Name",
+    "characterB": "Exact Name",
+    "type": "rivalry",
+    "strength": "strong",
+    "direction": "bidirectional",
+    "evidence": "1-2 sentence justification from sheet (quote sliders/roles/motivations)"
+  }
+]
+</instructions>This is a complex task. You are not allowed to perform at a mediocre level. You are a relationship mapper for a story's character ensemble.
+```
 
-## Pipeline Integration
+**Cover every character, majors and minors.** Infer from slider contrasts — high dominance against
+high submission implies tension. **Use only what is in the sheet and dossier; do not invent new plot
+details.**
 
-In `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md`, the character system feeds directly into:
-- Step 2 (Character Selector) — the full bible is what the selector loads before any scene
-- Step 6 (Character Scene Brief) — character emotional state and behavioral notes for *this specific scene* come from the slider rubric + arc position
-- Step 12 (Style Check) — character voice consistency check compares dialogue against the dialogue style and example lines in the bible
+---
 
-See `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` for how the desloppifier's voice-check step uses the character bible to flag off-character moments during line editing.
+## Output
 
-For the motivation-layer architecture (Ghost/Wound/Lie/Weakness) that feeds the character arc field, see `${CLAUDE_PLUGIN_ROOT}/references/writing/character-motivation.md`. For how MBTI, Enneagram, and the 12 narrative archetypes work as a layered system, see **archetypes**. For ensemble cast management and the relationship map JSON structure, see **ensemble and relationships**. For the six-lever method of making each character's dialogue sound distinct on the page, see **distinct character voices**. For the drift failure mode specific to multi-session/multi-agent AI drafting, where the bible exists but nothing forces each pass to check against it, and the audit checklist that catches it, see **character consistency drift audit**.
+`[project-name]-characters.md` in the project directory: the per-character profiles in roster order,
+followed by a `## Relationships Dynamic` section carrying the map.
+
+## Related
+
+`braindump-to-dossier` (produces the input) · `dossier-to-worldbuilding` (run after this, and give it
+this bible as context) · `references/writing/character-system.md` (the anchored slider rubric)

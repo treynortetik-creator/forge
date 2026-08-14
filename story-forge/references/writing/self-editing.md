@@ -10,7 +10,7 @@ status: living
 
 # Self-Editing for Fiction Writers — Browne & King Method
 
-A distilled methodology from Browne & King's craft guide. Rewritten as an actionable editing checklist for use in Style Check and Rewrite passes. Not a reproduction — the framing, language, and order are original. See also [[anti-slop]], [[chapter-generation-pipeline]], [[revision-process]] (the full pyramid this note's line-editing pass belongs to), [[beta-readers-and-critique]] (the external feedback layer), and [[autocrit]] (the pattern-analysis complement — AutoCrit catches manuscript-wide repetition and pacing data; this note handles scene-level mechanics).
+A distilled methodology from Browne & King's craft guide. Rewritten as an actionable editing checklist for use in Style Check and Rewrite passes. Not a reproduction — the framing, language, and order are original. See also `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md`, `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md`, **revision process** (the full pyramid this note's line-editing pass belongs to), **beta readers and critique** (the external feedback layer), and **autocrit** (the pattern-analysis complement — AutoCrit catches manuscript-wide repetition and pacing data; this note handles scene-level mechanics).
 
 ---
 
@@ -104,8 +104,8 @@ The single posture underlying every technique: readers are intelligent. Explaini
 
 ## Pipeline Integration
 
-This note powers the **Style Check** and **Rewrite** passes in [[chapter-generation-pipeline]] — specifically the RUE scan, dialogue mechanics pass, and proportion review — operating alongside [[anti-slop]] (AI slop removal) and de-sloppifier's Pass 3 list (phrase blocklist). Run these in sequence: first generate the chapter, then RUE/mechanics (this note), then anti-slop, then banned-words.
+This note powers the **Style Check** and **Rewrite** passes in `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md` — specifically the RUE scan, dialogue mechanics pass, and proportion review — operating alongside `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` (AI slop removal) and de-sloppifier's Pass 3 list (phrase blocklist). Run these in sequence: first generate the chapter, then RUE/mechanics (this note), then anti-slop, then banned-words.
 
-The opening chapter gets a specialized revision pass beyond this checklist: see [[openings-and-first-pages]] for the agent stop-reading trigger list and the five structural opening patterns to fix before the manuscript leaves draft.
+The opening chapter gets a specialized revision pass beyond this checklist: see **openings and first pages** for the agent stop-reading trigger list and the five structural opening patterns to fix before the manuscript leaves draft.
 
-For the developmental tier of the revision pyramid — full-manuscript structural analysis, character arc audits, and pacing evaluation run as a single holistic pass — see [[long-context-novel-writing]], which covers how to use a 1M-context model for these tasks.
+For the developmental tier of the revision pyramid — full-manuscript structural analysis, character arc audits, and pacing evaluation run as a single holistic pass — see **long context novel writing**, which covers how to use a 1M-context model for these tasks.

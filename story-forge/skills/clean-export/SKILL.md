@@ -71,5 +71,5 @@ braindump → dossier → outline → draft → story-hacker → de-sloppifier �
 Always last. Anything earlier and later steps re-introduce characters.
 
 ## Related
-- [[de-sloppifier]] — the three-pass voice cleanup; the real watermark degrader
-- [[edit-pass]] · [[voice]] — the passes immediately before this one
+- the `de-sloppifier` skill — the three-pass voice cleanup; the real watermark degrader
+- **edit pass** · the `voice` skill — the passes immediately before this one

@@ -9,7 +9,7 @@ allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
 
 **Orchestration command.** This command chains four skills in sequence, passing artifacts on disk between them. The individual skills hold the real prompts and craft logic. This layer handles sequencing, dependency gating, and artifact routing only.
 
-**Chain order:** voice (if needed) → braindump-to-dossier → dossier-to-outline → outline-to-chapters
+**Chain order:** voice (if needed) → braindump-to-dossier → dossier-to-outline → **outline-generator** → outline-to-chapters → **de-sloppifier** → **logic-check**
 
 **Project directory:** `$ARGUMENTS` (where dossier, character bible, worldbuilding sheet, outline, and draft files are written). If not supplied, ask for it before proceeding.
 
@@ -116,5 +116,13 @@ The skill appends each completed chapter to the draft file. When it completes it
 - Each skill runs its own dependency check. Do not skip or soft-pedal those checks. If a skill stops and asks for input, surface that question to the user and wait.
 - Steps are conditional at 2 and 3: if valid artifacts already exist on disk, the user can choose to reuse them and skip the build. Always confirm before reusing.
 - Step 4 is never skipped. It is the destination.
+
+> 🔴 **Three skills were missing from this chain and have been added.**
+> **`outline-generator`** carries the 6-dimension emotional audit, the anchored slider rubric and the
+> 7-category logic check — none of which exist anywhere else in the plugin, so the default pipeline
+> ran without them entirely.
+> **`de-sloppifier`** and **`logic-check`** were also absent, which meant a completed `/full-book` run
+> handed back a **raw, un-line-edited draft** with no pointer to what came next. A draft is not
+> finished when the last chapter is written.
 - The human review pause at the end of Step 3 is mandatory, not optional.
 - Do not chain steps without confirming the prior step's output file was actually written. Use Bash to verify the file exists and is non-empty before advancing.

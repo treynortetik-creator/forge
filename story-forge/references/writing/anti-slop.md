@@ -80,50 +80,50 @@ Run last so earlier passes do not reintroduce the patterns this pass removes.
 
 ## Connection to the Pipeline
 
-The [[chapter-generation-pipeline]]'s Style Check step (step 11) runs a simplified version of these passes. The full desloppifier automation is for post-draft cleanup after a chapter is already written.
+The `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md`'s Style Check step (step 11) runs a simplified version of these passes. The full desloppifier automation is for post-draft cleanup after a chapter is already written.
 
 The de-sloppifier's Pass 3 list list is a companion artifact — feed it directly to the prose generator in the First Draft step (step 9) as the `<prohibited_words>` block so slop patterns are blocked at generation rather than requiring cleanup.
 
-[[voice-matching]] addresses the upstream cause (AI defaulting to average prose); anti-slop addresses the downstream symptom (catching what slips through).
+`${CLAUDE_PLUGIN_ROOT}/references/writing/voice-matching.md` addresses the upstream cause (AI defaulting to average prose); anti-slop addresses the downstream symptom (catching what slips through).
 
-See [[humanizing-ai-prose]] for the full theory layer — why LLMs produce these patterns (low perplexity, low burstiness, RLHF essay shapes) and how voice injection + constraint prompting integrate with this desloppifier into a complete three-method approach.
+See `${CLAUDE_PLUGIN_ROOT}/references/writing/humanizing-ai-prose.md` for the full theory layer — why LLMs produce these patterns (low perplexity, low burstiness, RLHF essay shapes) and how voice injection + constraint prompting integrate with this desloppifier into a complete three-method approach.
 
-See [[ai-prompting-for-fiction]] (section 4 — Iterative Refinement) for the two-pass improvement-plan + implementation pattern that wraps these editing passes into a structured AI workflow.
+See **ai prompting for fiction** (section 4 — Iterative Refinement) for the two-pass improvement-plan + implementation pattern that wraps these editing passes into a structured AI workflow.
 
-The manuscript-level revision process that orchestrates all these passes — the full pyramid from developmental to proofread — lives in [[revision-process]]. External feedback that identifies what slipped through self-editing belongs to [[beta-readers-and-critique]].
+The manuscript-level revision process that orchestrates all these passes — the full pyramid from developmental to proofread — lives in **revision process**. External feedback that identifies what slipped through self-editing belongs to **beta readers and critique**.
 
 ## Related
 
-- [[humanizing-ai-prose]] — the theory layer: why LLMs produce low-burstiness, negative parallelism, and RLHF essay shapes; this note is the mechanic, that note is the diagnosis
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/humanizing-ai-prose.md` — the theory layer: why LLMs produce low-burstiness, negative parallelism, and RLHF essay shapes; this note is the mechanic, that note is the diagnosis
 - de-sloppifier's Pass 3 list — companion artifact: the prohibited-phrase list fed at generation to prevent slop before it starts; anti-slop is the downstream cleanup when it gets through anyway
-- [[voice-matching]] — the upstream fix: voice injection addresses root cause; anti-slop addresses the downstream symptom
-- [[chapter-generation-pipeline]] — steps 12 (Style Check) and 13 (Rewrite) run this system on every chapter
-- [[revision-process]] — the full revision pyramid; the desloppifier belongs at the line-editing level
-- [[beta-readers-and-critique]] — the external feedback layer that catches what self-editing and the desloppifier miss
-- [[ai-prompting-for-fiction]] — section 4 (Iterative Refinement) covers the improvement-plan + implementation pattern that wraps these passes into a structured AI workflow
-- [[self-editing]] — Browne & King's RUE, passive voice, and dialogue mechanics; runs alongside the desloppifier as the human-judgment layer
-- [[show-dont-tell]] — SDT violations (emotion labels, filter words, redundant internalization) overlap substantially with Pass 2 and Pass 3 targets
-- [[deep-pov-and-psychic-distance]] — filter word elimination and abstract emotion replacement are the same discipline described at higher resolution; the filter-word lists in both notes should stay synchronized
-- [[autocrit]] — AI-assisted pattern analysis tool that runs genre-benchmarked pacing, repetition, and word-choice detection in the same Style Check pass
-- [[agnostic-two-model-deslop-detection]] — the detection-stage upgrade: run the tells with zero false-positive guards through two independent models, union the flags, and let a human judge with verbatim receipts
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/voice-matching.md` — the upstream fix: voice injection addresses root cause; anti-slop addresses the downstream symptom
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md` — steps 12 (Style Check) and 13 (Rewrite) run this system on every chapter
+- **revision process** — the full revision pyramid; the desloppifier belongs at the line-editing level
+- **beta readers and critique** — the external feedback layer that catches what self-editing and the desloppifier miss
+- **ai prompting for fiction** — section 4 (Iterative Refinement) covers the improvement-plan + implementation pattern that wraps these passes into a structured AI workflow
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/self-editing.md` — Browne & King's RUE, passive voice, and dialogue mechanics; runs alongside the desloppifier as the human-judgment layer
+- **show dont tell** — SDT violations (emotion labels, filter words, redundant internalization) overlap substantially with Pass 2 and Pass 3 targets
+- **deep pov and psychic distance** — filter word elimination and abstract emotion replacement are the same discipline described at higher resolution; the filter-word lists in both notes should stay synchronized
+- **autocrit** — AI-assisted pattern analysis tool that runs genre-benchmarked pacing, repetition, and word-choice detection in the same Style Check pass
+- **agnostic two model deslop detection** — the detection-stage upgrade: run the tells with zero false-positive guards through two independent models, union the flags, and let a human judge with verbatim receipts
 
 ## The order/ledger/counting meta-tell (Treynor's law, 2026-07-16)
-"I am going to tell it in order, because the order is the only part that means anything." Kill on sight, every voice. LLMs reach for order/ledger/account/arithmetic as narrative framing and fake profundity in everything they draft. The distinction: concrete counting of concrete things by a character built for it = fine; the telling framing ITSELF as ordered/kept/accounted = the tell. No in-character exemption. See de-sloppifier's Pass 3 list, [[humanizing-ai-prose]].
+"I am going to tell it in order, because the order is the only part that means anything." Kill on sight, every voice. LLMs reach for order/ledger/account/arithmetic as narrative framing and fake profundity in everything they draft. The distinction: concrete counting of concrete things by a character built for it = fine; the telling framing ITSELF as ordered/kept/accounted = the tell. No in-character exemption. See de-sloppifier's Pass 3 list, `${CLAUDE_PLUGIN_ROOT}/references/writing/humanizing-ai-prose.md`.
 
 ## The vague-"thing" tell (Treynor's law, 2026-07-16)
-Overusing "thing" instead of naming the thing. AI hedging masquerading as plainness. Audit "thing/something/everything" density every pass; name the noun or cut. One deliberate dodge can be voice; a habit is a fingerprint. See the [[#The order/ledger/counting meta-tell (Treynor's law, 2026-07-16)|order/ledger meta-tell]] treatment in the same sweep. PROTECTED class (2026-07-19): tag deliberate withholds and reveal machinery BEFORE the sweep — a narrator refusing to name an unrevealed thing is design, not hedging, and a blind sweep destroys reveal ladders.
+Overusing "thing" instead of naming the thing. AI hedging masquerading as plainness. Audit "thing/something/everything" density every pass; name the noun or cut. One deliberate dodge can be voice; a habit is a fingerprint. See the **** treatment in the same sweep. PROTECTED class (2026-07-19): tag deliberate withholds and reveal machinery BEFORE the sweep — a narrator refusing to name an unrevealed thing is design, not hedging, and a blind sweep destroys reveal ladders.
 
 ## The chest-cold family (author's law, 2026-07-19)
-Emotion or object + "sat/settled/sits" + a body location ("it sat in my chest, cold and wrong," "dread settled in her stomach"), plus "cold" as an emotion descriptor (cold dread, cold certainty, went cold). Ban the pattern, not just the instance. Physical cold (weather, ice, a morgue) is untouched. Sibling: "held breath / let the breath out" as emotional shorthand — ration to near-zero. From the 131-edit author hand-pass, 2026-07-18; see [[draft-time-doctrine]], de-sloppifier's Pass 3 list.
+Emotion or object + "sat/settled/sits" + a body location ("it sat in my chest, cold and wrong," "dread settled in her stomach"), plus "cold" as an emotion descriptor (cold dread, cold certainty, went cold). Ban the pattern, not just the instance. Physical cold (weather, ice, a morgue) is untouched. Sibling: "held breath / let the breath out" as emotional shorthand — ration to near-zero. From the 131-edit author hand-pass, 2026-07-18; see **draft time doctrine**, de-sloppifier's Pass 3 list.
 
 ## The coat-class garment-generic (author's law, 2026-07-19)
-"Coat" as the model's default garment on every extra. Where a garment is generic set-dressing, name a specific one (parka, mittens, scarf) or cut the garment; keep only garments doing plot or character work. Run a per-chapter "coat" census, then judge each hit — the pattern generalizes to any default-noun class the model leans on (mug, folder, sedan). See [[draft-time-doctrine]].
+"Coat" as the model's default garment on every extra. Where a garment is generic set-dressing, name a specific one (parka, mittens, scarf) or cut the garment; keep only garments doing plot or character work. Run a per-chapter "coat" census, then judge each hit — the pattern generalizes to any default-noun class the model leans on (mug, folder, sedan). See **draft time doctrine**.
 
 ## The first-beat rule (author's law, 2026-07-19)
-When an image lands, stop. The AI habit: unfold the image across two more re-describing clauses, then re-run the chapter's imagery in a trailing recap at the paragraph's end. Cut everything after the first landing; if the cut needs a button, use an established motif of the story, never fresh imagery. Same discipline as one-pass-per-insight (show-then-tell doubles), extended from meaning to imagery. See [[sentence-craft-and-rhythm]], [[draft-time-doctrine]].
+When an image lands, stop. The AI habit: unfold the image across two more re-describing clauses, then re-run the chapter's imagery in a trailing recap at the paragraph's end. Cut everything after the first landing; if the cut needs a button, use an established motif of the story, never fresh imagery. Same discipline as one-pass-per-insight (show-then-tell doubles), extended from meaning to imagery. See **sentence craft and rhythm**, **draft time doctrine**.
 
 ## Aphorism discipline (author's law, 2026-07-19)
-An aphorism survives only when it contains a concrete mechanism and the scene around it proves the claim. Generic-clever dies; crude-concrete lives. An aphorism must never grade itself ("the truest thing," "the realest part"). One per scene; one proved beats three asserted. Companion cap: never cut the first rhetorical reversal in a paragraph, always cut the third (antithesis density). Extends the portable-aphorism ration in [[discourse-level-ai-tells]]; see [[draft-time-doctrine]].
+An aphorism survives only when it contains a concrete mechanism and the scene around it proves the claim. Generic-clever dies; crude-concrete lives. An aphorism must never grade itself ("the truest thing," "the realest part"). One per scene; one proved beats three asserted. Companion cap: never cut the first rhetorical reversal in a paragraph, always cut the third (antithesis density). Extends the portable-aphorism ration in **discourse level ai tells**; see **draft time doctrine**.
 
 ## Cross-voice idiom contamination (author's law, 2026-07-19)
-Multi-POV books: each narrator owns exclusive idiom families, and a signature construction leaking into the other narrator's chapters is a defect even when the sentence is good. Merges and multi-agent edit waves are the main contamination vector — run a both-directions verification pass after every one. See [[distinct-character-voices]], [[draft-time-doctrine]].
+Multi-POV books: each narrator owns exclusive idiom families, and a signature construction leaking into the other narrator's chapters is a defect even when the sentence is good. Merges and multi-agent edit waves are the main contamination vector — run a both-directions verification pass after every one. See **distinct character voices**, **draft time doctrine**.

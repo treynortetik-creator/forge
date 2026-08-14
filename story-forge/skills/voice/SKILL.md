@@ -39,9 +39,34 @@ With the samples in hand, run the following extraction prompt verbatim (from `${
 
 The output is a structured report covering: sentence length ranges, vocabulary tier, dialogue tag patterns, POV habits, characteristic constructions, and recurring syntactic moves. Capture this as the raw fingerprint.
 
+
+### Step 1.5, Register Sampling — do not skip this
+
+🔴 **The most commonly skipped stage, and the one that makes the difference.** Handing a model 6,000
+unbroken words and asking "what is this author's style" returns an **average**. A voice is most visible
+in **how it changes between registers** — the same writer is a different instrument in a quiet
+descriptive passage than in an argument or a fight. Averaging that away is how you get a style sheet
+that describes nobody.
+
+From **each** sample (up to three; three beats one), extract passages **verbatim**:
+
+| Register | What to look for | Length |
+|---|---|---|
+| **Calm / descriptive** | Quieter narration, description, interiority. Little dialogue, little action | ~400 words |
+| **Dialogue** | A real exchange between characters | ~400 words |
+| **Action / high drama** | The most kinetic or highest-stakes passage available | ~400 words |
+| **Comedy** *(conditional)* | **Only if the work is genuinely comic.** Omit entirely otherwise — do not manufacture one | ~400 words |
+
+**Quote them exactly.** Paraphrasing here destroys the evidence the next step reasons over. If a
+register is genuinely absent from a sample, say so and move on rather than inventing filler.
+
+**Step 2 consumes these extracts, not the raw samples.**
+
 ### Step 2, 13-Dimension Style Sheet Pass
 
-Still using the same samples, run the full style guide generator prompt from `${CLAUDE_PLUGIN_ROOT}/references/writing/style-guide-prompt.md`. The exact prompt verbatim:
+Using **the register extracts from Step 1.5** (not the raw samples), generate the full style sheet. The instrument below is a condensed form of the source automation's
+`Create the Style Sheet` node; the fuller method, including why the two stages exist, is in
+`${CLAUDE_PLUGIN_ROOT}/references/writing/style-guide-prompt.md`:
 
 > You are going to be given writing samples from an author. Draft a prose style sheet giving instructions on how to write like these samples, including small verbatim snippets from the samples as examples. The style sheet is for an LLM to write fiction in the same style. Frame the response as INSTRUCTION (not observation). Rules: (1) base all observations ONLY on the provided samples; (2) describe patterns in general terms AND give specific quoted examples; (3) cover ONLY the 13 elements listed below. Output in Markdown using the exact `# Style Guide` -> `## 1. Narrative Rhythm` structure, each section with the specified sub-bullets (Summary/Key traits, POV distance/Evidence, etc.). For POV, address distance only, not first/third person. For punctuation, explicitly forbid em dashes and name substitutes. End with the do/avoid checklist (complete sentences). Focus on prose style, not characters or plot. Be thorough.
 

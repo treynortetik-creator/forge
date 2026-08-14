@@ -1,6 +1,6 @@
 # story-forge Skills Reference
 
-Your book-creation pipeline, rebuilt as a Claude Code plugin from the recovered n8n automations. Fourteen skills plus four chaining commands. Claude runs each skill; small python helpers handle the deterministic glue (chunking, wordcount, file assembly).
+Your book-creation pipeline, rebuilt as a Claude Code plugin from the recovered n8n automations. Seventeen skills plus four chaining commands. Claude runs each skill; small python helpers handle the deterministic glue (chunking, wordcount, file assembly).
 
 Every consuming skill has a **dependency check**: if it needs a world, a voice, an outline, or a dossier that does not exist yet, it stops and tells you which upstream skill to run first, instead of guessing.
 

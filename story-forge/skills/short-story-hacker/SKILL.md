@@ -58,7 +58,7 @@ List every character who appears. For each character, cover all of:
 - Heart's Desire: what is the deepest thing they want most?
 - Heart's Desire arc: does the desire change over the course of the story? Do they get what they wanted? Do they learn their heart's desire was not truly what they needed? Or do they get it and find it was not what they expected?
 
-The Heart's Desire is the engine behind every character decision. See [[character-system]] for how this driver connects to the full character arc and the slider dimensions that show how desire shapes behavior under pressure.
+The Heart's Desire is the engine behind every character decision. See `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md` for how this driver connects to the full character arc and the slider dimensions that show how desire shapes behavior under pressure.
 
 ---
 
@@ -81,7 +81,7 @@ Identify the inciting incident. Then answer:
 - How does it affect the protagonist internally?
 - Does the inciting incident rip the protagonist's Heart's Desire away from them? If so, explain how.
 
-See [[plot-coherence]] for the craft principle here: the inciting incident should follow from cause and create a "but" or "therefore," not an "and then." Convenience inciting incidents (random, unearned) are a coherence failure, not a genre feature.
+See `${CLAUDE_PLUGIN_ROOT}/references/writing/plot-coherence.md` for the craft principle here: the inciting incident should follow from cause and create a "but" or "therefore," not an "and then." Convenience inciting incidents (random, unearned) are a coherence failure, not a genre feature.
 
 ---
 
@@ -132,9 +132,9 @@ What is the denouement? What loose ends are tied up? How does the closing beat d
 
 Identify 5-6 passages of excellent prose. For each, reproduce it verbatim, then add one brief note on what makes it work: sentence rhythm, word precision, image specificity, dialogue compression, etc.
 
-Before calling a passage "excellent," cross-check it against [[anti-slop]] and `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md`. If a passage uses banned-word patterns (inflated vocabulary, negative parallelisms, em-dash abuse, abstract emotion without grounding), flag it as "strong but slop-adjacent" and explain why. An author's prose can be excellent in craft and still carry AI-pattern tells worth naming.
+Before calling a passage "excellent," cross-check it against `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` and `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md`. If a passage uses banned-word patterns (inflated vocabulary, negative parallelisms, em-dash abuse, abstract emotion without grounding), flag it as "strong but slop-adjacent" and explain why. An author's prose can be excellent in craft and still carry AI-pattern tells worth naming.
 
-Apply the forensic lens from [[voice-matching]]: sentence length range, vocabulary tier, how description is distributed, how dialogue is tagged. A passage earns the "excellent" label when it demonstrates architectural choices, not just pleasant rhythm.
+Apply the forensic lens from `${CLAUDE_PLUGIN_ROOT}/references/writing/voice-matching.md`: sentence length range, vocabulary tier, how description is distributed, how dialogue is tagged. A passage earns the "excellent" label when it demonstrates architectural choices, not just pleasant rhythm.
 
 ---
 
@@ -188,6 +188,6 @@ If the user asks for the output as a saved file, Write it to their specified pat
 ## Iteration Notes
 
 - Source: the "Analyze Each Short Story" node of an n8n short-story analysis automation (archived at `references/writing/book-automation-workflows.md`). The source ran this analysis on each H2-delimited section of a Google Doc anthology via Gemini 3 Pro on OpenRouter. This skill treats the full story as a single input instead of batching by header.
-- The 11-section structure maps directly to the prompt criteria in that source node, with prose-quality standards added from [[anti-slop]], `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md`, and [[voice-matching]].
+- The 11-section structure maps directly to the prompt criteria in that source node, with prose-quality standards added from `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md`, `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md`, and `${CLAUDE_PLUGIN_ROOT}/references/writing/voice-matching.md`.
 - For batch analysis of multiple stories in one session, run this skill once per story.
-- For downstream use: the Characters output feeds [[character-system]] character bibles; the Magic Sword and Try/Fail Cycles feed the [[outlining-method]] five-automation chain; Prose Examples can seed a [[voice-matching]] extraction session.
+- For downstream use: the Characters output feeds `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md` character bibles; the Magic Sword and Try/Fail Cycles feed the `${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md` five-automation chain; Prose Examples can seed a `${CLAUDE_PLUGIN_ROOT}/references/writing/voice-matching.md` extraction session.

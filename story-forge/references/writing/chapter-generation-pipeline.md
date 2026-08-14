@@ -10,9 +10,9 @@ status: living
 
 # Chapter Generation Pipeline (Jason Hamilton / Story Hacker)
 
-The backbone of Jason's n8n book-writing system. The final automation in a five-automation chain. It takes the completed [[outlining-method]] output (outline + character sheet + worldbuilding sheet) and generates each chapter of the novel through a 13-step per-chapter loop. The 13 steps below run in order for every chapter.
+The backbone of Jason's n8n book-writing system. The final automation in a five-automation chain. It takes the completed `${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md` output (outline + character sheet + worldbuilding sheet) and generates each chapter of the novel through a 13-step per-chapter loop. The 13 steps below run in order for every chapter.
 
-See also: [[worldbuilding-method]], [[story-hacker-prompts]], de-sloppifier's Pass 3 list, [[ai-fiction-workflows]], [[ai-prompting-for-fiction]], [[json-super-prompts]], [[claude-build]], [[jason-structure-extraction]], [[storyhacker-pipeline-architecture]]
+See also: `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md`, **story hacker prompts**, de-sloppifier's Pass 3 list, **ai fiction workflows**, **ai prompting for fiction**, **json super prompts**, **claude build**, **jason structure extraction**, **storyhacker pipeline architecture**
 
 ---
 
@@ -101,7 +101,7 @@ See also: [[worldbuilding-method]], [[story-hacker-prompts]], de-sloppifier's Pa
 
 **What it does:** Produces character-level information specifically as it applies to THIS scene — not the character's overall profile, but who they are at this exact moment.
 
-**Input:** Full outline, selected characters (Step 2), selected plot (Step 1), last 2,000 words of existing draft, slider rubric (see [[story-hacker-prompts]]).
+**Input:** Full outline, selected characters (Step 2), selected plot (Step 1), last 2,000 words of existing draft, slider rubric (see **story hacker prompts**).
 
 **Key behaviors:**
 - **Removes future details.** A character sheet contains events and revelations from the whole book. If the scene is chapter 3, the brief strips out anything that happens in chapters 10+. Critical for mystery/thriller where revealing a murderer's identity in the character brief would leak it into the prose.
@@ -116,7 +116,7 @@ See also: [[worldbuilding-method]], [[story-hacker-prompts]], de-sloppifier's Pa
 
 **Input:** Selected worldbuilding (Step 3), current chapter plot, full outline.
 
-**Key behavior:** Ensures the worldbuilding brief contains no spoilers or information that the POV character could not yet know. Standardized formatting per element category (see [[worldbuilding-method]] for the category list and profile format).
+**Key behavior:** Ensures the worldbuilding brief contains no spoilers or information that the POV character could not yet know. Standardized formatting per element category (see `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md` for the category list and profile format).
 
 ---
 
@@ -214,5 +214,5 @@ This means the majority of active time (the editing and outline refinement) happ
 - **Two chronology checks, not one.** One on the brief (before writing), one on the prose (after writing). Different failure modes.
 - **Cheap models for selection/parsing tasks.** Gemini Flash (or equivalent) handles Plot Selector, Character Selector, Worldbuilding Selector, and Wordcount Estimator. Reserve expensive models (Claude Opus, Gemini Pro) for First Draft and the Rewrites.
 - **The 25% word count inflation** is a systematic correction for the model's tendency to undershoot. Build it in, don't fight it manually each time.
-- **No line editing in this automation.** The pipeline intentionally omits deep line editing (anti-AI-slop passes). Jason treats that as a separate automation and/or manual pass. The [[story-hacker-prompts]] doc has the two-step improvement plan for line editing.
-- **This pipeline uses rolling context by design.** The selector + 2K/20K rolling window approach was built for models under 200K tokens. With a 1M-context model, the full manuscript can be held in context — not for generation (cost/speed), but for post-draft consistency audits and developmental editing passes. See [[long-context-novel-writing]] for when to switch strategies.
+- **No line editing in this automation.** The pipeline intentionally omits deep line editing (anti-AI-slop passes). Jason treats that as a separate automation and/or manual pass. The **story hacker prompts** doc has the two-step improvement plan for line editing.
+- **This pipeline uses rolling context by design.** The selector + 2K/20K rolling window approach was built for models under 200K tokens. With a 1M-context model, the full manuscript can be held in context — not for generation (cost/speed), but for post-draft consistency audits and developmental editing passes. See **long context novel writing** for when to switch strategies.

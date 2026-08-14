@@ -12,7 +12,7 @@ status: living
 
 These are the recovered n8n workflow exports behind the documented Story Hacker / book-creation pipeline. Ten JSON files were found in `references/writing/book-automation-workflows.md` and cataloged 2026-06-29. The raw JSON files are preserved there; this note captures what each one does, how it works, and how they connect.
 
-The implementations correspond to the architecture described in [[storyhacker-pipeline-architecture]] and use the prompt techniques cataloged in [[story-hacker-prompts]].
+The implementations correspond to the architecture described in **storyhacker pipeline architecture** and use the prompt techniques cataloged in **story hacker prompts**.
 
 ---
 
@@ -112,7 +112,7 @@ The implementations correspond to the architecture described in [[storyhacker-pi
 
 **Model:** Alternates Claude Sonnet 4.6 and Gemini 3.1 Pro across the six analysis/rewrite nodes; high timeout settings (700 seconds) with retry logic.
 
-**Prompt technique:** Three-stage separation of concerns is the core architecture. Each audit node explicitly does not rewrite; it produces a change log. Each rewrite node implements only the changes listed, nothing more. The pacing audit uses a burstiness framing (short sentences for shock, mixed cadence for narrative). The De-sloppify node has an explicit "ALWAYS REMOVE EM DASHES, ALL OF THEM" instruction embedded. This implements the same anti-slop rules documented in [[anti-slop]] and de-sloppifier's Pass 3 list.
+**Prompt technique:** Three-stage separation of concerns is the core architecture. Each audit node explicitly does not rewrite; it produces a change log. Each rewrite node implements only the changes listed, nothing more. The pacing audit uses a burstiness framing (short sentences for shock, mixed cadence for narrative). The De-sloppify node has an explicit "ALWAYS REMOVE EM DASHES, ALL OF THEM" instruction embedded. This implements the same anti-slop rules documented in `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` and de-sloppifier's Pass 3 list.
 
 ---
 
@@ -194,16 +194,16 @@ The editing workflow (7) is downstream of any generation pipeline and operates i
 
 ## Maps to Existing Notes
 
-- [[storyhacker-pipeline-architecture]] documents the architecture these workflows implement. This catalog note provides the ground-truth implementation details that note was written without.
-- [[factory-workflow-vs-storyhacker-pipeline]] records that these workflows are reference architecture, not the process that drafted G. Rench; read it before assuming any of this ran in production.
-- [[chapter-generation-pipeline]] describes the 13-step per-chapter loop that workflow 5 implements. Nodes 1-3 = selectors; 4 = Wordcount Estimator; 5-7 = scene briefs; 8 = Chronology Check; 9 = Scene Brief Rewrite; 10 = First Draft; 11 = Chronology Check 2; 12 = Style Check; 13 = Rewrite.
-- [[story-hacker-prompts]] is the prompt library. These n8n exports are the automation wrappers that deploy those prompts.
-- [[anti-slop]] and de-sloppifier's Pass 3 list both feed directly into workflows 5 and 7. Workflow 7 (De-sloppifier) is the automated implementation of the three-pass process described in anti-slop.
-- [[outlining-method]] describes what the Advanced Outline Generator (workflow 4) builds, including the slider framework.
-- [[self-editing]] describes the principles that workflow 7's three editing passes implement.
+- **storyhacker pipeline architecture** documents the architecture these workflows implement. This catalog note provides the ground-truth implementation details that note was written without.
+- **factory workflow vs storyhacker pipeline** records that these workflows are reference architecture, not the process that drafted G. Rench; read it before assuming any of this ran in production.
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md` describes the 13-step per-chapter loop that workflow 5 implements. Nodes 1-3 = selectors; 4 = Wordcount Estimator; 5-7 = scene briefs; 8 = Chronology Check; 9 = Scene Brief Rewrite; 10 = First Draft; 11 = Chronology Check 2; 12 = Style Check; 13 = Rewrite.
+- **story hacker prompts** is the prompt library. These n8n exports are the automation wrappers that deploy those prompts.
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` and de-sloppifier's Pass 3 list both feed directly into workflows 5 and 7. Workflow 7 (De-sloppifier) is the automated implementation of the three-pass process described in anti-slop.
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md` describes what the Advanced Outline Generator (workflow 4) builds, including the slider framework.
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/self-editing.md` describes the principles that workflow 7's three editing passes implement.
 
 ---
 
 ## Related
 
-[[storyhacker-pipeline-architecture]] [[chapter-generation-pipeline]] [[story-hacker-prompts]] [[outlining-method]] [[anti-slop]] de-sloppifier's Pass 3 list [[self-editing]]
+**storyhacker pipeline architecture** `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md` **story hacker prompts** `${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md` `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` de-sloppifier's Pass 3 list `${CLAUDE_PLUGIN_ROOT}/references/writing/self-editing.md`

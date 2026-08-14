@@ -110,7 +110,7 @@ Run `python3 scripts/chunk.py --help` for full usage.
 
 ## Connection to the Pipeline
 
-The cleaned output is plain Markdown source, ready to feed downstream story-forge skills. If the text is being adapted rather than reproduced verbatim, the next step is typically voice work: see the [[voice-matching]] note in the writing wiki. If AI-generated prose based on this source enters the pipeline later, see [[anti-slop]] for the cleanup pass that applies to generated content (a different problem from what this skill solves).
+The cleaned output is plain Markdown source, ready to feed downstream story-forge skills. If the text is being adapted rather than reproduced verbatim, the next step is typically voice work: see the `${CLAUDE_PLUGIN_ROOT}/references/writing/voice-matching.md` note in the writing wiki. If AI-generated prose based on this source enters the pipeline later, see `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` for the cleanup pass that applies to generated content (a different problem from what this skill solves).
 
 ---
 

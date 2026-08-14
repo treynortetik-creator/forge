@@ -88,7 +88,7 @@ Write the scene prose from the brief. Target the word budget from the outline.
 - **Enter late.** Begin at the last possible moment. Strip the scene opening of its own explanation. The reader understands enough to follow, and no more. No transit, no waking up, no scene-setting preamble before the action starts.
 - **Leave early.** End the scene before the aftermath settles. Cut at the turn (the moment of the yes-but or no-and beat), not after the reaction to it has played out.
 - **Crowd and leap (Le Guin).** Dense, interconnected within what matters; bold leaps over what does not. Trust the reader to fill the gap. Do not explain transitions.
-- **Register lock.** The narrator's register does not break. For deadpan dark comedy: the prose tone applies equal pitch to violence, comedy, and mundane detail. The narrator processes murder with the same affect as a scheduling conflict. Do not shift tone to signal importance. Per [[dark-comedy-crime-craft]] and Highsmith's equal-pitch principle: one register, applied without exception.
+- **Register lock.** The narrator's register does not break. For deadpan dark comedy: the prose tone applies equal pitch to violence, comedy, and mundane detail. The narrator processes murder with the same affect as a scheduling conflict. Do not shift tone to signal importance. Per `${CLAUDE_PLUGIN_ROOT}/references/writing/dark-comedy-crime-craft.md` and Highsmith's equal-pitch principle: one register, applied without exception.
 - **Heart's desire on the first page.** Scene 1 only: the protagonist's heart's desire is visible to the reader before the inciting event. Use the placement specified in the opening spec.
 - **Payload first line.** Scene 1 only: use the payload first line from the opening spec verbatim. Do not improve it here.
 - **Last line.** Final scene only: use the last line from the ending spec verbatim. Do not improve it here.
@@ -180,13 +180,13 @@ These apply across all generation in this skill:
 
 ## Craft References
 
-- [[short-story-form]]: enter late and leave early (Scene Steps A and B), Le Guin's crowd-and-leap compression (Scene Step B), the compressed try/fail cycle mechanics, the single-sitting form constraints
-- [[short-story-openings-and-endings]]: the payload first line and opening contract (Scene 1), the four ending moves (final scene), the Chekhov's Gun accounting (assembly check), the opening-ending loop
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/short-story-form.md`: enter late and leave early (Scene Steps A and B), Le Guin's crowd-and-leap compression (Scene Step B), the compressed try/fail cycle mechanics, the single-sitting form constraints
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/short-story-openings-and-endings.md`: the payload first line and opening contract (Scene 1), the four ending moves (final scene), the Chekhov's Gun accounting (assembly check), the opening-ending loop
 - the Wulf Moon method: the heart's desire on the first page (Scene 1), the magic sword deployment at the climax, the escalation engine for try/fail beats (things get worse)
-- [[dark-comedy-crime-craft]]: the register-lock requirement, the deadpan narration mechanism, the fused-register principle (both jobs simultaneously), Highsmith's equal-pitch principle, the Puchner elision-of-reaction rule (leave the reaction out)
-- [[voice-matching]]: the voice spec the drafting step consumes; the forensic fingerprint and 13-dimension style sheet that govern sentence rhythm and vocabulary tier
-- [[anti-slop]] and `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md`: the constraint-prompting layer; the em-dash ban; the prohibited vocabulary list
-- [[dialogue-beats-vs-tags]]: the Ping Pong dialogue drill; when action beats replace dialogue tags; the said/asked default
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/dark-comedy-crime-craft.md`: the register-lock requirement, the deadpan narration mechanism, the fused-register principle (both jobs simultaneously), Highsmith's equal-pitch principle, the Puchner elision-of-reaction rule (leave the reaction out)
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/voice-matching.md`: the voice spec the drafting step consumes; the forensic fingerprint and 13-dimension style sheet that govern sentence rhythm and vocabulary tier
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` and `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md`: the constraint-prompting layer; the em-dash ban; the prohibited vocabulary list
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/dialogue-beats-vs-tags.md`: the Ping Pong dialogue drill; when action beats replace dialogue tags; the said/asked default
 
 ---
 

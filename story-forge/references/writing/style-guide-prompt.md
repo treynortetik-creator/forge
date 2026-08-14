@@ -52,18 +52,33 @@ observation** — write "do X", never "the author tends to X". A model cannot ac
    A rule without an example is unusable; an example without a rule is unactionable.
 3. **Cover only the thirteen dimensions below.** Not plot, not character, not theme. Prose only.
 
-### The thirteen dimensions
+### The thirteen dimensions — each with its own instrument
 
-Narrative rhythm · psychic distance (close vs distant — **distance only**, never first-vs-third
-person, which is a fixed structural choice not a style one) · formality · overall tone · emotional
-range · average sentence length and rhythm · paragraphing · reading grade level · dialogue style ·
-sentence openings · clause structure and complexity · punctuation habits · emphasis and cadence tricks
-(the author's signature moves).
+🔴 **Do not give all thirteen the same output shape.** Each asks for something different, and the
+sub-fields below are what force the model to commit instead of hedge. A sheet that says "moderately
+formal-ish" is unusable downstream.
+
+| # | Dimension | What it must produce |
+|---|---|---|
+| 1 | Narrative rhythm | Summary (1-2 sentences) + 3-5 rhythmic habits, each with a quoted example |
+| 2 | Psychic distance | **Distance only** — close vs distant, show-vs-tell, deep POV. **Never** first-vs-third person; that is a fixed structural choice, not a style one. Give the evidence |
+| 3 | Formality | **Pick one of five: very informal / informal / neutral / formal / very formal.** Not a range |
+| 4 | Overall tone | **3-5 adjectives, each with a brief explanation** + **tone stability**: does it hold, or shift noticeably? |
+| 5 | Emotional range | **Narrow / moderate / wide**, in 2-3 sentences, plus the common emotions with examples |
+| 6 | Sentence length & rhythm | Average, and the pattern of variation |
+| 7 | Paragraphing | Plus **paragraph function**: one idea per paragraph, frequent breaks for emphasis, or long blended paragraphs? |
+| 8 | Reading grade level | **A specific grade. Not a range.** |
+| 9 | Dialogue style | Tag habits, beat usage. Push toward "said"/"asked" plus action beats |
+| 10 | Sentence openings | **Distinctive habits** — sentence-initial And/But/So — and for each, rule it **preserve / eliminate / mix in occasionally.** The verdict is the deliverable, not the observation |
+| 11 | Clause structure | **Stacking vs splitting**, and subordination patterns (*because, although, even though*) |
+| 12 | Punctuation habits | Inventory **commas, semicolons, colons, parentheses, ellipses, question marks, exclamation marks** — then **explicitly forbid em-dashes and name the substitutes** |
+| 13 | Emphasis & cadence | The author's signature moves |
 
 ### Output shape
 
-Markdown, one `##` section per dimension, each carrying a one-to-two sentence **Summary** and a
-**Key traits** bullet list of three to five specific habits, each with a quoted example.
+Markdown, one `##` section per dimension, **each following its own row in the table above** — the
+sub-fields differ by dimension and that is the point. Dimension 1's Summary + Key-traits shape is not
+the template for the other twelve.
 
 Close with a **Summarised Style Rules** checklist: **8-15 "do" rules** and **8-15 "avoid" rules**,
 written as complete imperative sentences a model can follow without reading the rest of the sheet.

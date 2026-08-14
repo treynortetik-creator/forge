@@ -2,7 +2,7 @@
 
 A long-form fiction pipeline, built as a Claude Code plugin.
 
-It is the same system documented in the writing wiki ([[chapter-generation-pipeline]], [[anti-slop]], [[story-hacker-prompts]], [[voice-matching]]) and recovered from the n8n book-automation exports (`references/writing/book-automation-workflows.md`, cataloged in `${CLAUDE_PLUGIN_ROOT}/references/writing/book-automation-workflows.md`). The n8n version orchestrated LLM calls externally. This version runs natively in Claude Code, where the agent **is** the orchestrator, so it is smarter, can read the craft wiki while it works, and does not need n8n.
+It is the same system documented in the writing wiki (`${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md`, `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md`, **story hacker prompts**, `${CLAUDE_PLUGIN_ROOT}/references/writing/voice-matching.md`) and recovered from the n8n book-automation exports (`references/writing/book-automation-workflows.md`, cataloged in `${CLAUDE_PLUGIN_ROOT}/references/writing/book-automation-workflows.md`). The n8n version orchestrated LLM calls externally. This version runs natively in Claude Code, where the agent **is** the orchestrator, so it is smarter, can read the craft wiki while it works, and does not need n8n.
 
 ## Architecture
 

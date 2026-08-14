@@ -41,7 +41,7 @@ Originated with Hemingway's theory of omission — that omitted material, when t
 
 A worldbuilding bible is the author's reference document — the submerged 90% made explicit for yourself, not for readers. Its job is to prevent contradictions, store decisions, and let you return to a project after months away without re-deriving everything from the manuscript.
 
-The bible belongs in [[worldbuilding-method]]'s Google Doc output (or equivalent persistent document), not in the manuscript itself.
+The bible belongs in `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md`'s Google Doc output (or equivalent persistent document), not in the manuscript itself.
 
 **Twelve standard sections (from Dabble Writer, 2025; River Editor, 2026):**
 
@@ -62,7 +62,7 @@ The bible belongs in [[worldbuilding-method]]'s Google Doc output (or equivalent
 
 Not all sections apply to every genre. A contemporary thriller may only need three or four. Fill what is narratively load-bearing; leave the rest blank.
 
-**Organizational principle:** depth over density. A bible entry that answers "what does this mean for the story" beats an encyclopedic entry that answers nothing. Every element should have a "Purpose and Function in the Story" field (drawn from the Story Hacker location profile format in [[worldbuilding-method]]).
+**Organizational principle:** depth over density. A bible entry that answers "what does this mean for the story" beats an encyclopedic entry that answers nothing. Every element should have a "Purpose and Function in the Story" field (drawn from the Story Hacker location profile format in `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md`).
 
 **Consistency maintenance:** establish the rule in the bible before it appears in the manuscript. If a rule changes mid-draft, document the change and date it. The bible is a living document; what matters is that it reflects the current state of the world, not the original intent.
 
@@ -80,7 +80,7 @@ The difference between adequate and great worldbuilding is the web of cause-and-
 - Religion (how the supernatural is interpreted)
 - Social class (who benefits and who is harmed)
 
-If the element doesn't ripple through at least three domains, it is either not a foundational element (fine — not everything needs to be) or you haven't extrapolated it deeply enough. This aligns with Sanderson's Third Law extrapolation technique (see [[magic-systems-sanderson-laws]]).
+If the element doesn't ripple through at least three domains, it is either not a foundational element (fine — not everything needs to be) or you haven't extrapolated it deeply enough. This aligns with Sanderson's Third Law extrapolation technique (see **magic systems sanderson laws**).
 
 ---
 
@@ -103,7 +103,7 @@ Culture is not decoration. It is the set of shared behaviors, values, and assump
 11. Death practices — burial, mourning, beliefs about what happens after
 12. Symbols and emblems — icons that unify a culture and carry emotional weight
 
-**Outside-in vs. inside-out construction:** outside-in develops cultural elements as needed while drafting (faster to start, risks gaps and contradictions). Inside-out builds the full culture before drafting (slower to start, more coherent). The Story Hacker [[worldbuilding-method]] uses inside-out via automation.
+**Outside-in vs. inside-out construction:** outside-in develops cultural elements as needed while drafting (faster to start, risks gaps and contradictions). Inside-out builds the full culture before drafting (slower to start, more coherent). The Story Hacker `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md` uses inside-out via automation.
 
 **Culture-character connection:** culture shapes the character's baseline assumptions. When those assumptions are violated — by another culture, by the plot, by a character who breaks norms — conflict is automatically generated. Characters who are fully embedded in their culture behave predictably and feel real; characters who are culturally displaced generate natural dramatic tension.
 
@@ -155,33 +155,33 @@ Philip Pullman built the Magisterium by borrowing institutional logic from the C
 
 2. **Breaking a rule requires a narrative reason.** Not a plot convenience — a reason the world itself would generate. If magic normally costs blood and suddenly doesn't, the reason must be built into the story, not the author's need to resolve a scene.
 
-3. **Logic-check against established elements.** When a new worldbuilding element is introduced, run the systemic cascade test: does this contradict anything already established? The Story Hacker [[worldbuilding-method]]'s Loop Step 2 (Logic Check) formalizes this as an explicit AI audit pass.
+3. **Logic-check against established elements.** When a new worldbuilding element is introduced, run the systemic cascade test: does this contradict anything already established? The Story Hacker `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md`'s Loop Step 2 (Logic Check) formalizes this as an explicit AI audit pass.
 
-4. **Characters cannot know the future of their world.** A worldbuilding bible that includes plot-spoiling information must be filtered before feeding into scene generation. The [[chapter-generation-pipeline]]'s Step 7 (Worldbuilding Scene Brief) specifically removes future-leaning worldbuilding details to prevent accidental foreshadowing.
+4. **Characters cannot know the future of their world.** A worldbuilding bible that includes plot-spoiling information must be filtered before feeding into scene generation. The `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md`'s Step 7 (Worldbuilding Scene Brief) specifically removes future-leaning worldbuilding details to prevent accidental foreshadowing.
 
-5. **Consistency beats completeness.** A world with one firmly consistent rule is more immersive than a world with fifty poorly tracked rules. Choose the depth-over-breadth principle from [[magic-systems-sanderson-laws]] Third Law and apply it to the whole bible.
+5. **Consistency beats completeness.** A world with one firmly consistent rule is more immersive than a world with fifty poorly tracked rules. Choose the depth-over-breadth principle from **magic systems sanderson laws** Third Law and apply it to the whole bible.
 
 ---
 
 ## Connection to the Story Hacker Pipeline
 
-The [[worldbuilding-method]] automation generates a bible structured around the 12 worldbuilding categories. The three-step per-element loop (Expand → Logic Check → Rewrite) operationalizes the consistency rules above:
+The `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md` automation generates a bible structured around the 12 worldbuilding categories. The three-step per-element loop (Expand → Logic Check → Rewrite) operationalizes the consistency rules above:
 - **Expand** applies cause-and-effect extrapolation (systemic cascade thinking)
 - **Logic Check** runs the consistency audit against prior elements
 - **Rewrite** implements targeted fixes rather than starting over
 
-The [[chapter-generation-pipeline]]'s worldbuilding branch (Steps 3 and 7) then ensures only the consistent, non-spoiling slice of the bible enters each chapter's generation context. Consistency is enforced at the chapter level, not just the world level.
+The `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md`'s worldbuilding branch (Steps 3 and 7) then ensures only the consistent, non-spoiling slice of the bible enters each chapter's generation context. Consistency is enforced at the chapter level, not just the world level.
 
-For [[plot-coherence]] auditing, the systemic consistency of world-rules is one of the primary audit dimensions: does every plot event follow from the world's established logic?
+For `${CLAUDE_PLUGIN_ROOT}/references/writing/plot-coherence.md` auditing, the systemic consistency of world-rules is one of the primary audit dimensions: does every plot event follow from the world's established logic?
 
 ---
 
 ## Related
 
-- [[worldbuilding-method]] — the Story Hacker automation that operationalizes these principles in an n8n loop; generates the bible from the story dossier
-- [[magic-systems-sanderson-laws]] — Sanderson's Laws as the design framework for the magic/technology layer of any world bible; Third Law extrapolation technique connects directly to cause-and-effect systemic thinking here
-- [[plot-coherence]] — the manuscript-level logic audit; worldbuilding consistency violations surface here
-- [[chapter-generation-pipeline]] — Steps 3 and 7 (Worldbuilding Selector and Scene Brief) enforce per-chapter iceberg discipline
-- [[outlining-method]] — the story dossier that feeds the worldbuilding automation; identifies which worldbuilding elements need to be profiled
-- [[character-system]] — culture shapes character baselines; cultural violation = automatic conflict generation
-- [[story-grid]] — the Story Grid's "five commandments of storytelling" require a world whose logic can generate obligatory scenes; worldbuilding consistency is a precondition for Story Grid compliance
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md` — the Story Hacker automation that operationalizes these principles in an n8n loop; generates the bible from the story dossier
+- **magic systems sanderson laws** — Sanderson's Laws as the design framework for the magic/technology layer of any world bible; Third Law extrapolation technique connects directly to cause-and-effect systemic thinking here
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/plot-coherence.md` — the manuscript-level logic audit; worldbuilding consistency violations surface here
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md` — Steps 3 and 7 (Worldbuilding Selector and Scene Brief) enforce per-chapter iceberg discipline
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md` — the story dossier that feeds the worldbuilding automation; identifies which worldbuilding elements need to be profiled
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md` — culture shapes character baselines; cultural violation = automatic conflict generation
+- **story grid** — the Story Grid's "five commandments of storytelling" require a world whose logic can generate obligatory scenes; worldbuilding consistency is a precondition for Story Grid compliance

@@ -38,7 +38,7 @@ Constructions like "Not just a tool, but a partner" / "Not about survival — ab
 
 Wikipedia flags these exact forms: *"Not just X, but also Y"*, *"Not X, but Y"*, *"X rather than Y"* as negative parallelism markers.
 
-The [[anti-slop]] Desloppifier (Pass 3) targets and removes them from finished drafts.
+The `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` Desloppifier (Pass 3) targets and removes them from finished drafts.
 
 ### 2. Rule-of-Three Abuse
 
@@ -48,9 +48,9 @@ Human writers use triads selectively, when the number three has emotional or rhe
 
 ### 3. Em-Dash Overuse
 
-The em dash is not wrong — it is a real punctuation tool for sudden shifts, interruptions, and emphasis spikes (see [[sentence-craft-and-rhythm]]). AI overuses it because RLHF training rewarded complex, multi-clause sentences, and the em dash became the model's preferred mechanism for packaging them. A typical AI-generated page will contain three to six em dashes; a typical human-written literary page contains zero to two.
+The em dash is not wrong — it is a real punctuation tool for sudden shifts, interruptions, and emphasis spikes (see **sentence craft and rhythm**). AI overuses it because RLHF training rewarded complex, multi-clause sentences, and the em dash became the model's preferred mechanism for packaging them. A typical AI-generated page will contain three to six em dashes; a typical human-written literary page contains zero to two.
 
-The [[anti-slop]] Desloppifier (Pass 3) removes all em dashes as a target, landing at "a few" after the pass. That is the right calibration: setting the goal to "remove all" counteracts the model's bias enough to hit normal human usage.
+The `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` Desloppifier (Pass 3) removes all em dashes as a target, landing at "a few" after the pass. That is the right calibration: setting the goal to "remove all" counteracts the model's bias enough to hit normal human usage.
 
 The McSweeney's piece "The Em Dash Responds to the AI Allegations" (Greg Mania, 2025) is a useful cultural marker — the satire is funny because the overuse is real.
 
@@ -67,13 +67,13 @@ The craft fix is not prompting the AI to "stop being sycophantic." It is prompti
 
 ### 5. Cadence Sameness — Low Burstiness
 
-Even when individual sentences are well-crafted, AI output tends toward uniform sentence length and structure across a passage. The model lacks the writerly instinct to break a pattern right before it becomes comfortable. This is what [[sentence-craft-and-rhythm]] calls burstiness deficit: no shocks, no dramatic shorts, no long accumulations followed by a single-word sentence.
+Even when individual sentences are well-crafted, AI output tends toward uniform sentence length and structure across a passage. The model lacks the writerly instinct to break a pattern right before it becomes comfortable. This is what **sentence craft and rhythm** calls burstiness deficit: no shocks, no dramatic shorts, no long accumulations followed by a single-word sentence.
 
 **Burstiness** (the metric): measures variance in sentence length across a passage. High-burstiness text alternates between short bursts and long flowing sequences in response to emotional content. Low-burstiness text holds the same approximate length throughout, regardless of what is happening in the scene.
 
 **Perplexity** (the related metric): measures how predictable the vocabulary choices are. Low perplexity = common words in expected combinations. High perplexity = unexpected word choices, lower statistical probability. Human writers naturally produce higher-perplexity text than AI, though paradoxically well-edited human prose sometimes scores low perplexity too (the detector-paradox problem documented in *TechTimes*, June 2026).
 
-The practical fix is described in [[sentence-craft-and-rhythm]] (section 6) and targeted by Pass 1 of the [[anti-slop]] Desloppifier.
+The practical fix is described in **sentence craft and rhythm** (section 6) and targeted by Pass 1 of the `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` Desloppifier.
 
 ### 6. Safe Flat Transitions
 
@@ -85,7 +85,7 @@ Human prose creates connections through juxtaposition, sentence rhythm, and the 
 
 "She felt overwhelmed." "He was overcome with grief." "A wave of something she couldn't name washed over her." These name emotional states without anchoring them in observable, sensory, or physical detail. They are technically telling-not-showing, but the AI-specific version is more mechanical: the model produces the emotional summary because it follows the scene's content logically, not because it makes a craft decision to name rather than show.
 
-The [[anti-slop]] Pass 3 flags abstract emotional language for replacement with physical/sensory/observable detail. This connects directly to the deep POV material in [[deep-pov-and-psychic-distance]].
+The `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` Pass 3 flags abstract emotional language for replacement with physical/sensory/observable detail. This connects directly to the deep POV material in **deep pov and psychic distance**.
 
 ### 8. Vocabulary Inflation
 
@@ -115,9 +115,9 @@ The human move: let the entrance be plain. Release the credentials and the cynic
 
 The upstream fix. Instead of correcting AI prose after generation, constrain the model's output by providing a forensic description of the author's actual sentence patterns, vocabulary tier, and structural defaults before generation begins.
 
-Full technique: [[voice-matching]]. The two-step method — (1) feed the model 2,000–5,000 words of your edited fiction and extract a voice fingerprint, (2) convert that fingerprint into a reusable skill — produces a constraint set that routes the model away from generic toward author-specific patterns.
+Full technique: `${CLAUDE_PLUGIN_ROOT}/references/writing/voice-matching.md`. The two-step method — (1) feed the model 2,000–5,000 words of your edited fiction and extract a voice fingerprint, (2) convert that fingerprint into a reusable skill — produces a constraint set that routes the model away from generic toward author-specific patterns.
 
-Short-form version from [[story-hacker-prompts]]: collect 6,000 words of your prose, run through the style-sheet prompt, get a prose style sheet. Use for quick projects; build the full skill for a series.
+Short-form version from **story hacker prompts**: collect 6,000 words of your prose, run through the style-sheet prompt, get a prose style sheet. Use for quick projects; build the full skill for a series.
 
 The voice skill addresses the root cause. Constraint prompting and multi-pass deslop address what escapes the voice skill.
 
@@ -135,7 +135,7 @@ Constraint prompting specifies **what the model cannot do** rather than just wha
 
 Additional fiction-specific constraints:
 - "Characters may not fully articulate what they mean. Leave subtext." (Targets sycophancy bleed-through.)
-- "Vary sentence beginnings. Do not open three consecutive sentences with the same subject." (Targets structural sameness from [[sentence-craft-and-rhythm]].)
+- "Vary sentence beginnings. Do not open three consecutive sentences with the same subject." (Targets structural sameness from **sentence craft and rhythm**.)
 - "Use the following prohibited words list." (Feed de-sloppifier's Pass 3 list directly.)
 - "No em dashes." (Targets em-dash overuse during generation rather than requiring a cleanup pass.)
 
@@ -143,7 +143,7 @@ From CreativIndie's fiction-specific framework: add a **scene checklist constrai
 
 ### Method 3 — Multi-Pass Deslop
 
-The downstream fix. After generation, run the three-pass Desloppifier from [[anti-slop]] in sequence:
+The downstream fix. After generation, run the three-pass Desloppifier from `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` in sequence:
 
 - **Pass 1** — Sentence and paragraph pacing: targets burstiness deficit, filler transitions, formulaic paragraph architecture
 - **Pass 2** — Line editing: targets adverbs, weak dialogue tags, passive voice, clichés, stock emotional idioms, redundancies
@@ -151,7 +151,7 @@ The downstream fix. After generation, run the three-pass Desloppifier from [[ant
 
 **Critical rule:** Pass 3 runs last. Earlier passes can reintroduce Pass 3 patterns. The instruction at each pass is always "implement only the suggested changes" — never "rewrite."
 
-The [[anti-slop]] note contains the full target list for each pass and the implementation detail.
+The `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` note contains the full target list for each pass and the implementation detail.
 
 ---
 
@@ -165,7 +165,7 @@ This matters for humanization work: the goal is not to pass a detector. The goal
 
 ## Part 4 — Pipeline Integration
 
-In the [[chapter-generation-pipeline]]:
+In the `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md`:
 - Voice injection and constraint prompting apply at **Step 10 (First Draft)** — before prose is generated
 - Pass 1 and Pass 2 of the desloppifier apply at **Step 12 (Style Check)**
 - Pass 3 (the core desloppifier) applies at **Step 13 (Rewrite)**
@@ -175,12 +175,12 @@ In the [[chapter-generation-pipeline]]:
 
 ## Related
 
-- [[anti-slop]] — The 7 strategic rules + the full 3-pass Desloppifier implementation; this note is the theory, anti-slop is the mechanic
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` — The 7 strategic rules + the full 3-pass Desloppifier implementation; this note is the theory, anti-slop is the mechanic
 - de-sloppifier's Pass 3 list — The prohibited vocabulary catalog; fed as a constraint at generation and scanned at Style Check
-- [[voice-matching]] — Voice fingerprint extraction and skill creation; the upstream fix that addresses root cause rather than symptoms
-- [[sentence-craft-and-rhythm]] — Burstiness as a rhythm metric; the diagnostic and structural fixes for flat cadence
-- [[story-hacker-prompts]] — The quick-form style-sheet approach; the short path to voice injection
-- [[chapter-generation-pipeline]] — The end-to-end pipeline this note's three methods integrate into (Steps 10, 12, 13)
-- [[self-editing]] — Browne & King on RUE, dialogue mechanics, and the trust-the-reader posture that anti-slop methods enforce
-- [[deep-pov-and-psychic-distance]] — Physical/sensory grounding as the fix for abstract emotional language (AI tell #7)
-- [[README]] — The full writing system map; this note is part of the Style Check / Rewrite cluster
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/voice-matching.md` — Voice fingerprint extraction and skill creation; the upstream fix that addresses root cause rather than symptoms
+- **sentence craft and rhythm** — Burstiness as a rhythm metric; the diagnostic and structural fixes for flat cadence
+- **story hacker prompts** — The quick-form style-sheet approach; the short path to voice injection
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md` — The end-to-end pipeline this note's three methods integrate into (Steps 10, 12, 13)
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/self-editing.md` — Browne & King on RUE, dialogue mechanics, and the trust-the-reader posture that anti-slop methods enforce
+- **deep pov and psychic distance** — Physical/sensory grounding as the fix for abstract emotional language (AI tell #7)
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/README.md` — The full writing system map; this note is part of the Style Check / Rewrite cluster

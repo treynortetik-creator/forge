@@ -82,25 +82,25 @@ Bickham notes that the strength of the long-form story depends entirely on wheth
 
 ## How It Plugs Into Our Pipeline
 
-This framework underwrites the Scene Brief steps in [[chapter-generation-pipeline]]: every brief specifies a Goal (what the viewpoint character enters with), the nature of the Conflict, the Disaster endpoint, and the Sequel beat that bridges to the next scene — which maps directly to Bickham's required inputs before prose generation begins. See also [[outlining-method]] for how the scene-sequel chain feeds chapter-level structure.
+This framework underwrites the Scene Brief steps in `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md`: every brief specifies a Goal (what the viewpoint character enters with), the nature of the Conflict, the Disaster endpoint, and the Sequel beat that bridges to the next scene — which maps directly to Bickham's required inputs before prose generation begins. See also `${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md` for how the scene-sequel chain feeds chapter-level structure.
 
-At the description level, the MRU chain governs how setting is delivered on the page: environmental details are motivating stimuli, and the character's perceptual response is the reaction. See [[setting-and-place]] for the full application, and [[exposition-and-infodumps]] for how this chain prevents worldbuilding delivery from breaking the story frame.
+At the description level, the MRU chain governs how setting is delivered on the page: environmental details are motivating stimuli, and the character's perceptual response is the reaction. See **setting and place** for the full application, and **exposition and infodumps** for how this chain prevents worldbuilding delivery from breaking the story frame.
 
-The scene's structural container (Goal → Conflict → Disaster) is where macro-level tension lives: see [[stakes-and-tension]] for the Story Grid Five Commandments, which map directly onto this structure and add the Crisis/Climax distinction. For the emotional layer within the scene — what the character feels under the surface of the goal-conflict sequence — see [[emotional-craft]].
+The scene's structural container (Goal → Conflict → Disaster) is where macro-level tension lives: see **stakes and tension** for the Story Grid Five Commandments, which map directly onto this structure and add the Crisis/Climax distinction. For the emotional layer within the scene — what the character feels under the surface of the goal-conflict sequence — see **emotional craft**.
 
 ## Related
 
-- [[pacing]] — the scene/sequel chain is the primary pacing mechanism at the macro level; see there for scene/sequel ratio, sagging middle, and escalation patterns
-- [[micro-tension]] — micro-tension lives inside the conflict beat of each scene unit; scene structure provides the container, micro-tension provides the texture
-- [[character-arcs]] — the Sequel (Emotion→Thought→Decision→Action) is where arc transformation happens beat by beat; scene structure is arc structure at the micro level
-- [[dialogue-craft]] — dialogue operates inside the scene's Goal→Conflict structure; the scene disaster often lives inside a dialogue exchange
-- [[deep-pov-and-psychic-distance]] — the MRU presupposes Level 4–5 psychic distance; stimulus→internalization→response runs through the character's immediate perception
-- [[point-of-view]] — the scene runs from the viewpoint character's goal and perception; POV choice governs what goal, conflict, and disaster are visible to the reader
-- [[show-dont-tell]] — scene-level showing operates on the conflict beat; the goal and disaster endpoints are Weiland's "High Moment" candidates
-- [[chapter-hooks]] — the scene's Disaster endpoint is where chapter hooks live; the Sequel's Decision often becomes the hook for the next scene
-- [[chapter-generation-pipeline]] — every Scene Brief specifies the Goal, Conflict nature, Disaster endpoint, and bridging Sequel beat (already linked in body)
-- [[exposition-and-infodumps]] — the MRU chain governs how setting is delivered without breaking story frame (already linked in body)
-- [[emotional-craft]] — the Sequel (Emotion→Thought→Decision) is where Maass's third-level emotion work happens (already linked in body)
-- [[stakes-and-tension]] — the Story Grid Five Commandments map directly onto scene structure (already linked in body)
-- [[fight-and-action-scene-craft]]: applies Goal, Conflict, Disaster to physical confrontation specifically, ranking choreography (asymmetry, weapons, momentum) below the thought, dialogue, and environment layering that keeps a fight from reading as pure blow-by-blow
-- [[lamb-method-scene-craft]]: a complementary post-draft audit checklist (Nancy Lamb's 10 steps) for catching what Goal, Conflict, Disaster compliance alone misses, dead ends, cast bloat, flatlined stakes
+- **pacing** — the scene/sequel chain is the primary pacing mechanism at the macro level; see there for scene/sequel ratio, sagging middle, and escalation patterns
+- **micro tension** — micro-tension lives inside the conflict beat of each scene unit; scene structure provides the container, micro-tension provides the texture
+- **character arcs** — the Sequel (Emotion→Thought→Decision→Action) is where arc transformation happens beat by beat; scene structure is arc structure at the micro level
+- **dialogue craft** — dialogue operates inside the scene's Goal→Conflict structure; the scene disaster often lives inside a dialogue exchange
+- **deep pov and psychic distance** — the MRU presupposes Level 4–5 psychic distance; stimulus→internalization→response runs through the character's immediate perception
+- **point of view** — the scene runs from the viewpoint character's goal and perception; POV choice governs what goal, conflict, and disaster are visible to the reader
+- **show dont tell** — scene-level showing operates on the conflict beat; the goal and disaster endpoints are Weiland's "High Moment" candidates
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-hooks.md` — the scene's Disaster endpoint is where chapter hooks live; the Sequel's Decision often becomes the hook for the next scene
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md` — every Scene Brief specifies the Goal, Conflict nature, Disaster endpoint, and bridging Sequel beat (already linked in body)
+- **exposition and infodumps** — the MRU chain governs how setting is delivered without breaking story frame (already linked in body)
+- **emotional craft** — the Sequel (Emotion→Thought→Decision) is where Maass's third-level emotion work happens (already linked in body)
+- **stakes and tension** — the Story Grid Five Commandments map directly onto scene structure (already linked in body)
+- **fight and action scene craft**: applies Goal, Conflict, Disaster to physical confrontation specifically, ranking choreography (asymmetry, weapons, momentum) below the thought, dialogue, and environment layering that keeps a fight from reading as pure blow-by-blow
+- **lamb method scene craft**: a complementary post-draft audit checklist (Nancy Lamb's 10 steps) for catching what Goal, Conflict, Disaster compliance alone misses, dead ends, cast bloat, flatlined stakes

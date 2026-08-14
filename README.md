@@ -85,7 +85,7 @@ fifty-five. A green report means *conformant on the axes measured* — not *acce
 
 <img src="media/forge-writes.gif" width="180" align="right" alt="">
 
-Fifteen skills and four chaining commands, from a braindump through to a manuscript that has been
+Seventeen skills and four chaining commands, from a braindump through to a manuscript that has been
 line-edited, continuity-audited, and stripped of invisible provenance characters.
 
 The editing half is shared with design-forge: **`de-sloppifier`** (a three-pass line edit),

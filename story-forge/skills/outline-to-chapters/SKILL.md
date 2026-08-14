@@ -40,7 +40,7 @@ Before iterating, collect from the provided files:
 - Full worldbuilding sheet
 - Full outline
 - Tense (from user input above)
-- Last 2,000 words of the existing draft (empty string if this is chapter 1)
+- ~~Last 2,000 words of the existing draft~~ — **moved into Step 1.** See the 🔴 note below.
 
 Extract the continuity window with the helper:
 
@@ -50,6 +50,13 @@ python3 skills/outline-to-chapters/scripts/chapter_context.py last-words <draft_
 
 Parse the outline into a list of chapter titles to iterate over. Confirm the list with the user if generating multiple chapters, then run Steps 1-13 for each chapter in order.
 
+> 🔴 **The 2,000-word window is re-read at the START OF EVERY CHAPTER, not once here.**
+> The source automation fetches it as the first action of each loop iteration, immediately after the
+> previous chapter was appended to the draft. Computing it once in Pre-Loop means chapter 2 onward all
+> draft against a stale predecessor — and it feeds **five** separate prompts (Steps 5, 6, 7, 8, 10), so
+> the whole chapter is built on the wrong context. **It fails silently and reads as ordinary drift.**
+> Note the tell: the 20,000-word window in Step 11 *is* re-fetched per chapter. The asymmetry was the bug..
+
 ---
 
 ## Per-Chapter Loop: Steps 1-13
@@ -57,6 +64,18 @@ Parse the outline into a list of chapter titles to iterate over. Confirm the lis
 ---
 
 ### Step 1: Plot Selector
+
+**FIRST, before anything else in this step — refresh the continuity window.** The previous chapter was
+appended to the draft at the end of the last iteration, so re-read it now:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/outline-to-chapters/scripts/chapter_context.py \
+  last-words <draft_file> --words 2000
+```
+
+Returns empty on chapter 1 (the draft file does not exist yet), which is the correct state. **Do not
+carry a window forward from a previous chapter.**
+
 
 **Purpose:** Extract only this chapter's plot information from the full outline, verbatim. Keeps later steps focused; avoids diluting context with irrelevant chapters. Use a cheap/fast model for this step.
 
@@ -183,7 +202,7 @@ python3 skills/outline-to-chapters/scripts/chapter_context.py estimate --scene-t
 > want the same thing and say everything they mean produce the flat, agreeable, on-the-nose dialogue
 > that reads as machine-written. The unsaid thing is what subtext is made of.
 >
-> **Beats and Blocking:** Draft 12-18 scene beats covering the important details of the scene. Beats focus on plot, what happens.
+> **Beats and Blocking:** Draft 12-18 scene beats covering the important details of the scene. **Beats focus exclusively on plot — what happens.** 🔴 **Do not establish sensory detail here.** That is the drafting step's job; a beat list that carries atmosphere is doing two jobs badly and inflates the count.
 >
 > ⚠️ **Do not exceed 18 beats.** At 20-25 beats for a 2,500-word chapter you are writing roughly one
 > beat per 100 words, which mechanically forbids a **sequel beat** — the reaction, thought and decision
@@ -241,7 +260,7 @@ python3 skills/outline-to-chapters/scripts/chapter_context.py estimate --scene-t
 >
 > Do not include any preamble, commentary, or anything other than what is asked for.
 
-The full 5-point rubric for each slider (anchor descriptions at -10, -5, 0, 5, 10) lives in [[character-system]]. Include it in the context when running this step.
+The full 5-point anchor rubric lives in `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md`. **Load it into context before running this step** — the interpolation instruction below is meaningless without it.
 
 ---
 
@@ -287,7 +306,9 @@ The full 5-point rubric for each slider (anchor descriptions at -10, -5, 0, 5, 1
 
 **Prompt:**
 
-> You have the previous chapter text (if any), the full outline, and the combined scene brief, the plot brief, character brief, and worldbuilding brief from Steps 5, 6, and 7. Run a "chronology check" to confirm the scene brief is chronologically consistent with the full outline and with what has already been written.
+> You have the previous chapter text (if any), the full outline, the combined scene brief (plot + character + worldbuilding from Steps 5, 6, 7) **and — critically — the raw Character Selector and Worldbuilding Selector outputs from Steps 2 and 3.**
+
+> 🔴 **Include the raw selector outputs.** Without them this check can only compare the brief against the outline. With them it can catch a brief that *mangled a source profile* — which is the failure it exists to find. Category 1 (plot details revealed too early, secret motivations) is unanswerable without the profiles. Run a "chronology check" to confirm the scene brief is chronologically consistent with the full outline and with what has already been written.
 >
 > Flag any issues in these categories:
 >
@@ -345,7 +366,7 @@ The word "implement" is deliberate. "Rewrite" triggers the model to start from s
 - Scene breaks: `***`
 - Chapter title: H1 heading using numerals, not spelled-out numbers
 
-See [[anti-slop]] for why each constraint exists. The three-method humanization stack is: voice injection (voice spec feeds Step 10), constraint prompting (the rules above), and multi-pass deslop (the [[de-sloppifier]] skill, run separately after all chapters are drafted).
+See `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` for why each constraint exists. The three-method humanization stack is: voice injection (voice spec feeds Step 10), constraint prompting (the rules above), and multi-pass deslop (the the `de-sloppifier` skill skill, run separately after all chapters are drafted).
 
 **Draft-Time Doctrine (write like the edit).** Include this block in the Step 10 prompt context. Extracted from a 131-edit author hand-pass (2026-07-18); it encodes what a line edit would otherwise cut, so the draft never contains it:
 
@@ -454,13 +475,13 @@ python3 skills/outline-to-chapters/scripts/chapter_context.py --help
 
 This skill implements the pipeline documented in the writing wiki. Read these notes before modifying any step:
 
-- [[chapter-generation-pipeline]], the authoritative 13-step reference, design principles, and practical cadence
-- [[character-system]], the full 15-slider rubric with 5-point anchors; the character bible structure fed into Steps 2 and 6
-- [[plot-coherence]], the six logic-check categories that inform Steps 8 and 11; the two-step audit-then-implement pattern
-- [[voice-matching]], the voice extraction method that produces the voice spec prerequisite; why generic prose happens
-- [[anti-slop]], the constraint rationale for Step 10; the three-method humanization stack
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md`, the authoritative 13-step reference, design principles, and practical cadence
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md`, the full 15-slider rubric with 5-point anchors; the character bible structure fed into Steps 2 and 6
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/plot-coherence.md`, the six logic-check categories that inform Steps 8 and 11; the two-step audit-then-implement pattern
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/voice-matching.md`, the voice extraction method that produces the voice spec prerequisite; why generic prose happens
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md`, the constraint rationale for Step 10; the three-method humanization stack
 - `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md`, the prohibited-words list used as `<prohibited_words>` block in Step 10
-- [[worldbuilding-method]], the category structure and profile format of the worldbuilding sheet used in Steps 3 and 7
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md`, the category structure and profile format of the worldbuilding sheet used in Steps 3 and 7
 
 ---
 
@@ -470,5 +491,5 @@ This skill implements the pipeline documented in the writing wiki. Read these no
 - The word "implement" in Steps 9 and 13 is critical. "Rewrite" instructs the model to start from scratch. "Implement" keeps changes targeted.
 - Steps 1-3 are selection tasks, use cheaper, faster models. Steps 5-7, 10, 11, 13 require full-capability models.
 - Recommended cadence: generate 2-3 chapters, stop and edit those chapters, update the outline for the next set, then generate. Bulk-generating the whole book in one pass produces a worse draft.
-- The [[de-sloppifier]] skill is a separate pass intended for post-draft cleanup. This pipeline intentionally omits deep line editing.
+- The the `de-sloppifier` skill skill is a separate pass intended for post-draft cleanup. This pipeline intentionally omits deep line editing.
 - On first run, test one chapter end-to-end before committing to a full book run.

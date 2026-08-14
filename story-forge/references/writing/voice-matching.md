@@ -51,14 +51,14 @@ Claude Cowork will run baseline vs. skill comparisons automatically when buildin
 
 ## Connections
 
-The voice skill is the foundation that all prose generation in [[chapter-generation-pipeline]] depends on — particularly the First Draft step (step 10) and the Style Check step (step 12). Without it, the model defaults to generic output regardless of how detailed the scene brief is.
+The voice skill is the foundation that all prose generation in `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md` depends on — particularly the First Draft step (step 10) and the Style Check step (step 12). Without it, the model defaults to generic output regardless of how detailed the scene brief is.
 
-The [[story-hacker-prompts]] style sheet prompt (collect 6,000 words → run through Claude → get prose style sheet) is the simplified single-session version of this same extraction method — the operational instrument is the style-sheet instrument in `voice`, the 13-dimension generator that outputs LLM writing instructions in a specific author's voice. Use the style sheet for quick projects; build a full voice skill for a series.
+The **story hacker prompts** style sheet prompt (collect 6,000 words → run through Claude → get prose style sheet) is the simplified single-session version of this same extraction method — the operational instrument is the style-sheet instrument in `voice`, the 13-dimension generator that outputs LLM writing instructions in a specific author's voice. Use the style sheet for quick projects; build a full voice skill for a series.
 
 The de-sloppifier's Pass 3 list list works alongside the voice skill — the skill says "write like this author"; the banned list says "never use these patterns regardless."
 
-See [[claude-build]] for how to implement and store voice skills inside Claude Cowork.
+See **claude build** for how to implement and store voice skills inside Claude Cowork.
 
-See [[humanizing-ai-prose]] for the full theory of why AI defaults to generic prose — the root causes (low perplexity, low burstiness, RLHF-trained patterns) that voice matching is designed to counteract, and how voice injection integrates with constraint prompting and multi-pass deslop as the three-method humanization stack.
+See `${CLAUDE_PLUGIN_ROOT}/references/writing/humanizing-ai-prose.md` for the full theory of why AI defaults to generic prose — the root causes (low perplexity, low burstiness, RLHF-trained patterns) that voice matching is designed to counteract, and how voice injection integrates with constraint prompting and multi-pass deslop as the three-method humanization stack.
 
-See [[ai-prompting-for-fiction]] for the full map of prompting techniques this voice-extraction process plugs into — particularly sections 3 (Few-Shot) and 6 (Temperature/Style Steering). See [[json-super-prompts]] for how the `<prose_style_example>` and `<style_sheet>` tags that carry the voice into generation prompts are structured.
+See **ai prompting for fiction** for the full map of prompting techniques this voice-extraction process plugs into — particularly sections 3 (Few-Shot) and 6 (Temperature/Style Steering). See **json super prompts** for how the `<prose_style_example>` and `<style_sheet>` tags that carry the voice into generation prompts are structured.

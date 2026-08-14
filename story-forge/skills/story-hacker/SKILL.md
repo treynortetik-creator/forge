@@ -45,7 +45,7 @@ List every character who physically appears in the scene. For each:
 - Demographic indicators mentioned (age, etc.)
 - Their "Heart's Desire" in this scene: the one thing they want most right now
 
-Reference [[character-system]] for the Heart's Desire framing.
+Reference `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md` for the Heart's Desire framing.
 
 **3. Setting**
 Bullet list of key settings in the scene. For each setting, explain in 3-4 sentences: how it contributes to the plot, and how it contributes to character development. If it does neither, say so briefly.
@@ -149,13 +149,13 @@ Bulleted list of all main characters. For each:
 - Primary demographics (gender, apparent age, etc.)
 - 3-4 sentence arc summary: beginning fatal flaw, initial wants, underlying needs, and the change from first introduction to end. If a character has no arc, say so and explain their structural role instead.
 
-Reference [[character-system]] for arc architecture (beginning state, midpoint activation, climax moment, end state).
+Reference `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md` for arc architecture (beginning state, midpoint activation, climax moment, end state).
 
 **4. Character Archetypes**
 Bulleted list of archetypes present (e.g., the Herald, the Shapeshifter, the Threshold Guardian). Label each with the character name. Note which archetypes are typically paired and whether this story pairs them that way.
 
 **5. Theme**
-Identify the single central theme. In 2-3 sentences: state the theme, explain why you chose it over other candidates, and note where it is stated or demonstrated in Act 1 (per Blake Snyder's "Theme Stated" beat, documented in [[save-the-cat-beats]]). Connect the theme to the protagonist's arc: what they must learn or overcome is usually the theme made personal.
+Identify the single central theme. In 2-3 sentences: state the theme, explain why you chose it over other candidates, and note where it is stated or demonstrated in Act 1 (per Blake Snyder's "Theme Stated" beat, documented in `${CLAUDE_PLUGIN_ROOT}/references/writing/save-the-cat-beats.md`). Connect the theme to the protagonist's arc: what they must learn or overcome is usually the theme made personal.
 
 **6. Plot Devices and Foreshadowing**
 Bulleted list covering:
@@ -168,7 +168,7 @@ Bulleted list covering:
 Four labeled items. For each, answer the sub-questions fully.
 
 - **Inciting Incident:** What happens? What problem does it create? How does it affect the protagonist externally and internally? Does it strip away their Heart's Desire or primary want? How?
-- **Midpoint:** What is the midpoint event? Is it a false victory or false defeat? How does it force the protagonist to look inward and commit more deeply to resolving the conflict? Reference [[save-the-cat-beats]] for the passive-to-proactive shift that defines this beat.
+- **Midpoint:** What is the midpoint event? Is it a false victory or false defeat? How does it force the protagonist to look inward and commit more deeply to resolving the conflict? Reference `${CLAUDE_PLUGIN_ROOT}/references/writing/save-the-cat-beats.md` for the passive-to-proactive shift that defines this beat.
 - **Climax:** What happens? What outcome (positive, negative, or bittersweet)? What change did the protagonist need to make to reach this point? How were they forced to try again after an earlier failure? What changes result for characters and world?
 - **Denouement:** What loose ends are tied? How does the resolution demonstrate the changes in characters and world?
 
@@ -254,7 +254,7 @@ Write a plot-structure summary that could serve as a chapter outline template fo
 
 - Primary scene purpose: advances plot / reveals character / builds world / reinforces theme / combination
 - Flag "multi-function" scenes delivering more than one purpose simultaneously
-- Flag which structural beat(s) this scene fulfills from the following list (not every scene hits a named beat; only flag what clearly applies): Hook, Inciting Incident, Refusal of the Call, First Plot Point, B Story Introduction, First Pinch Point, Midpoint, Second Pinch Point, All Is Lost Moment, Giving Up, Pep Talk, Climax, Denouement. Reference [[save-the-cat-beats]] for beat definitions when flagging.
+- Flag which structural beat(s) this scene fulfills from the following list (not every scene hits a named beat; only flag what clearly applies): Hook, Inciting Incident, Refusal of the Call, First Plot Point, B Story Introduction, First Pinch Point, Midpoint, Second Pinch Point, All Is Lost Moment, Giving Up, Pep Talk, Climax, Denouement. Reference `${CLAUDE_PLUGIN_ROOT}/references/writing/save-the-cat-beats.md` for beat definitions when flagging.
 - Ratings (numbers only, no explanations): Scene Intensity: [N] / Spice Level: [N] / Violence Level: [N] / Swearing Level: [N]
 
 **Output format for Pass 3:**
@@ -290,7 +290,7 @@ All output is prose that will be read by a working writer. Apply the same standa
 - No abstract emotion labeling without concrete grounding (say what the scene does, not that it "creates tension").
 - Active voice throughout.
 
-Reference [[anti-slop]] for the full pattern list. The analysis itself should not model the patterns it is designed to help writers avoid.
+Reference `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` for the full pattern list. The analysis itself should not model the patterns it is designed to help writers avoid.
 
 ---
 
@@ -299,4 +299,4 @@ Reference [[anti-slop]] for the full pattern list. The analysis itself should no
 - This skill was ported from an n8n automation (Book/Script Story Hacking 3) that ran chapter chunks through a loop, appending summaries to a Google Doc before firing the two analysis passes. The Claude Code version runs sequentially in one session.
 - The Spice, Violence, and Swearing rubrics are fixed from the source automation. Do not modify the scale anchors without updating this SKILL.md.
 - The structural beats list in Pass 3 uses Save the Cat terminology. If the source material clearly follows a different framework (Story Grid, Hero's Journey), note the mapping in the Analysis section rather than forcing STC labels.
-- The "Heart's Desire" field in Pass 1 Characters maps directly to the same field in [[character-system]]. Keeping terminology consistent makes it easier to feed the output of this skill into the character-building or outlining skills downstream.
+- The "Heart's Desire" field in Pass 1 Characters maps directly to the same field in `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md`. Keeping terminology consistent makes it easier to feed the output of this skill into the character-building or outlining skills downstream.

@@ -48,7 +48,7 @@ Using the dossier, produce a fleshed-out character bible covering every characte
 6. A quirk, hobby, or trait that does not fit neatly into the plot but makes the character feel like a real person
 7. Dialogue style: how they talk, what they reach for, what they avoid
 8. Dialogue samples in four registers: relaxed, stressed, thoughtful, excited. These samples do not have to come from this story; they exist to demonstrate vocal pattern
-9. Slider baselines (see [[character-system]]): rate each of the 15 behavioral dimensions on a -10 to +10 scale with brief behavioral notes at this character's baseline. Dimensions: Stress/Calm, Fear/Courage, Suspicion/Trust, Callous/Empathic, Impulsivity/Self-Control, Dominance/Submission, Pessimism/Optimism, Introverted/Extroverted, Gut/Logic, Detail-Focused/Big-Picture, Cautious/Risk-Taker, Seriousness/Humor, Deception/Honesty, Stability/Sensitivity, Shame/Self-Worth
+9. Slider baselines (see `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md`): rate each of the 15 behavioral dimensions on a -10 to +10 scale with brief behavioral notes at this character's baseline. Dimensions: Stress/Calm, Fear/Courage, Suspicion/Trust, Callous/Empathic, Impulsivity/Self-Control, Dominance/Submission, Pessimism/Optimism, Introverted/Extroverted, Gut/Logic, Detail-Focused/Big-Picture, Cautious/Risk-Taker, Seriousness/Humor, Deception/Honesty, Stability/Sensitivity, Shame/Self-Worth
 10. Character arc: how they begin, what pushes them into the plot, a midpoint moment, a climax moment, how they have changed by the last page
 
 **For each minor character:** 1-2 sentences covering background, core desire, and relationship to the plot.
@@ -76,7 +76,7 @@ Using the dossier, produce a fleshed-out character bible covering every characte
 
 No preamble, no commentary, nothing outside this format.
 
-Craft note: the slider rubric is fully documented in [[character-system]]. The motivation architecture (Ghost/Wound/Lie/Weakness) lives in [[character-motivation]]. Every major character's heart's desire must be specific and emotional, not functional.
+Craft note: the slider rubric is fully documented in `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md`. The motivation architecture (Ghost/Wound/Lie/Weakness) lives in `${CLAUDE_PLUGIN_ROOT}/references/writing/character-motivation.md`. Every major character's heart's desire must be specific and emotional, not functional.
 
 ### Step 1.2, Critique
 
@@ -119,7 +119,11 @@ Using the dossier, produce a fleshed-out worldbuilding sheet covering all settin
 - Religion and Beliefs
 - Languages
 
-For each element: 3-4 sentences of specific, concrete detail. Write each profile to feel lived in and three-dimensional, not like a stage backdrop. Cover physical reality, emotional resonance, the people or forces connected to it, and its role in the story. See the full category-specific profile format in [[worldbuilding-method]].
+For each element: **classify it, then follow that category's full profile format** from
+`${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-categories.md`. Each category has its own
+document structure — Hard Rules vs Soft Rules for a magic system, The Truth Behind the Myth for a
+deity, Details to Use in Prose for a culture. **3-4 generic sentences per element produces a
+glossary, not a world.** Minimum 3-4 sentences per section where the format calls for prose. Write each profile to feel lived in and three-dimensional, not like a stage backdrop. Cover physical reality, emotional resonance, the people or forces connected to it, and its role in the story. See the full category-specific profile format in `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md`.
 
 **Format:**
 
@@ -136,7 +140,7 @@ For each element: 3-4 sentences of specific, concrete detail. Write each profile
 
 No preamble, no commentary. Only the categories and elements this story actually needs.
 
-Craft note: every element should serve the story, not just exist for texture. The worldbuilding-scope-creep risk is real: if the dossier over-identifies elements, trim before generating so downstream context stays lean. See [[worldbuilding-method]] for the full format; see [[worldbuilding-consistency]] for the iceberg principle and cause-and-effect rules.
+Craft note: every element should serve the story, not just exist for texture. The worldbuilding-scope-creep risk is real: if the dossier over-identifies elements, trim before generating so downstream context stays lean. See `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md` for the full format; see `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-consistency.md` for the iceberg principle and cause-and-effect rules.
 
 ### Step 2.2, Critique
 
@@ -168,7 +172,7 @@ Per chapter, produce:
 
 - A summary of approximately 100 words in paragraph form. Use specific details, not vague allusions. Write it as if handing it to a ghostwriter to produce the first draft.
 - Viewpoint character (name only)
-- Scene sliders (1-10 scale) for each of: Tension, Dread, Emotional Intimacy, Relationship Tension, Pacing Energy, Humor. See [[outlining-method]] for full slider definitions.
+- Scene sliders (1-10 scale) for each of: Tension, Dread, Emotional Intimacy, Relationship Tension, Pacing Energy, Humor. **Full anchor definitions: `${CLAUDE_PLUGIN_ROOT}/references/writing/scene-sliders.md`. Load it before scoring** — otherwise you are inventing six numbers per chapter against nothing.
 - **The chapter contract** — four fields, described below. This is the part that decides whether the
   book is any good, and it is the part every generic outline omits.
 
@@ -220,13 +224,13 @@ book sags and no amount of drafting skill will save it.
 
 No preamble, no commentary.
 
-Craft note: the outline is a blueprint for human review before chapter generation begins. Specific details now prevent drift later. See [[outlining-method]] for the full system; see [[plot-coherence]] for the six audit categories that run next.
+Craft note: the outline is a blueprint for human review before chapter generation begins. Specific details now prevent drift later. See `${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md` for the full system; see `${CLAUDE_PLUGIN_ROOT}/references/writing/plot-coherence.md` for the six audit categories that run next.
 
 ### Step 3.2, Critique
 
 Read the full outline and produce an improvement plan. Critique against these criteria:
 
-**Plot coherence (from [[plot-coherence]]):**
+**Plot coherence (from `${CLAUDE_PLUGIN_ROOT}/references/writing/plot-coherence.md`):**
 - Premise Logic: does the core premise hold together internally? Are stakes and conflicts consistent with stated world rules?
 - Character-World Fit: do characters' roles, goals, and capabilities make sense in this world? Do motivations align with the premise?
 - Worldbuilding Coherence: do world elements support the premise without internal contradiction?
@@ -288,4 +292,4 @@ These apply across all generation steps in this skill:
 - After chapter generation begins, loop back and update the outline for the next 2-3 chapters with specifics gathered from chapters already written.
 - The character bible is a living document: update slider baselines and arc position notes as the draft reveals things the bible missed.
 - The worldbuilding sheet carries forward across a series; only new elements introduced in later books need to be added.
-- This skill feeds directly into the `outline-to-chapters` skill (chapter generation pipeline). See [[chapter-generation-pipeline]] for what the pipeline expects from these output documents.
+- This skill feeds directly into the `outline-to-chapters` skill (chapter generation pipeline). See `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md` for what the pipeline expects from these output documents.

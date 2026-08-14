@@ -76,7 +76,7 @@ Most fully realized antagonist figures blend categories: a human villain who *al
 
 ## Villain Psychology: The Ghost→Wound→Lie Structure
 
-A villain has the same internal architecture as a protagonist (see [[character-motivation]]). The difference is not structure — it is the *response* to the Wound and the *depth* of investment in the Lie.
+A villain has the same internal architecture as a protagonist (see `${CLAUDE_PLUGIN_ROOT}/references/writing/character-motivation.md`). The difference is not structure — it is the *response* to the Wound and the *depth* of investment in the Lie.
 
 Apply the hierarchy:
 - **Ghost**: the event that broke the villain's worldview or opened the wound
@@ -86,7 +86,7 @@ Apply the hierarchy:
 
 The Lie is what separates a compelling villain from a cardboard one. A villain who believes "the only safety is total control" will behave consistently, predictably, and disturbingly — their actions follow from the Lie without needing to be individually justified.
 
-The Riso Enneagram health levels (see [[archetypes]]) provide psychological grounding for villain behavior. An unhealthy Type 3 Achiever doesn't become evil arbitrarily — they descend through levels: from driven, to image-obsessed, to ruthlessly deceptive, to sociopathic. The descent has internal logic.
+The Riso Enneagram health levels (see **archetypes**) provide psychological grounding for villain behavior. An unhealthy Type 3 Achiever doesn't become evil arbitrarily — they descend through levels: from driven, to image-obsessed, to ruthlessly deceptive, to sociopathic. The descent has internal logic.
 
 ### Four Techniques for a Sympathetic Villain
 
@@ -123,7 +123,7 @@ Not all opposition lives in a single character. The antagonist can be a web:
 - **Systemic antagonism** — the institution, culture, or rules that would oppose the protagonist even if no individual willed it. Provides resistance in scenes where a human antagonist would be implausible.
 - **Internal antagonism** — the protagonist's own Lie and Weakness operating as an antagonistic force. In the second act's lowest moments, the protagonist is often their own worst enemy.
 
-Distributed antagonism is harder to track in outline (see [[outlining-method]]) but more realistic — most real obstacles are not a single person's malice but a convergence of systems, individuals, and internal failures.
+Distributed antagonism is harder to track in outline (see `${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md`) but more realistic — most real obstacles are not a single person's malice but a convergence of systems, individuals, and internal failures.
 
 ---
 
@@ -141,10 +141,10 @@ A powerful antagonist forces the protagonist to *grow* to meet them. The Story G
 
 ## Related
 
-- [[character-motivation]] — the Ghost→Wound→Lie→Weakness structure applied to antagonists
-- [[archetypes]] — the Shadow archetype; Riso's unhealthy Enneagram levels for villain psychology
-- [[character-arcs]] — how arc type (positive, negative, flat) defines the protagonist-antagonist relationship
-- [[ensemble-and-relationships]] — proxy antagonists as ensemble members; adversary type distribution across a cast
-- [[scene-structure]] — antagonist agency in scene-level conflict design
-- [[story-grid]] — antagonist formidability as driver of protagonist growth; forces of antagonism framework
-- [[plot-coherence]] — tracking antagonist's off-page plan across the manuscript
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/character-motivation.md` — the Ghost→Wound→Lie→Weakness structure applied to antagonists
+- **archetypes** — the Shadow archetype; Riso's unhealthy Enneagram levels for villain psychology
+- **character arcs** — how arc type (positive, negative, flat) defines the protagonist-antagonist relationship
+- **ensemble and relationships** — proxy antagonists as ensemble members; adversary type distribution across a cast
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/scene-structure.md` — antagonist agency in scene-level conflict design
+- **story grid** — antagonist formidability as driver of protagonist growth; forces of antagonism framework
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/plot-coherence.md` — tracking antagonist's off-page plan across the manuscript

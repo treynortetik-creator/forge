@@ -66,7 +66,7 @@ Not every beat maps to a distinct scene. In short form, beats 3 and 4 may share 
 
 **Word-band reference:** for a 5,000 to 7,000 word story, the typical distribution is one setup scene (600 to 800 words), two to three try/fail scenes (700 to 1,000 words each), one climax scene (800 to 1,200 words), one validation scene (400 to 600 words). The exact count depends on how many try/fail cycles the premise requires. One full try/fail cycle before the climax is the minimum. Two is common. Three risks the length band.
 
-**For dark-comedy and crime stories:** note at each scene how both the comic and the dark register operate simultaneously. Flag any scene where only one register is active. The goal is the fused register at every beat, not alternating between comic and dark scenes. Per [[dark-comedy-crime-craft]]: each scene performs both jobs at once (the Coen Rule applied to scene architecture).
+**For dark-comedy and crime stories:** note at each scene how both the comic and the dark register operate simultaneously. Flag any scene where only one register is active. The goal is the fused register at every beat, not alternating between comic and dark scenes. Per `${CLAUDE_PLUGIN_ROOT}/references/writing/dark-comedy-crime-craft.md`: each scene performs both jobs at once (the Coen Rule applied to scene architecture).
 
 ---
 
@@ -76,7 +76,7 @@ Not every beat maps to a distinct scene. In short form, beats 3 and 4 may share 
 
 Produce all of the following:
 
-**Payload first line.** Write the actual opening line of the story. It must simultaneously deliver voice, the genre signal, and the story's central tension or character position. Apply the enter-late principle from [[short-story-form]]: enter mid-consequence, not mid-routine. No waking up, no weather, no mirror. Reference [[short-story-openings-and-endings]] for what a payload first line does and what it does not do.
+**Payload first line.** Write the actual opening line of the story. It must simultaneously deliver voice, the genre signal, and the story's central tension or character position. Apply the enter-late principle from `${CLAUDE_PLUGIN_ROOT}/references/writing/short-story-form.md`: enter mid-consequence, not mid-routine. No waking up, no weather, no mirror. Reference `${CLAUDE_PLUGIN_ROOT}/references/writing/short-story-openings-and-endings.md` for what a payload first line does and what it does not do.
 
 **First-paragraph orientation.** Three to five sentences describing what the first paragraph establishes after the opening line: where and when, who this is, what pressure is already active. Per Walker Percy's coma-patient principle: orient the reader on all three axes (who, where, when) within the first paragraph, through scene and implication, not explanation.
 
@@ -90,7 +90,7 @@ Produce all of the following:
 
 **Goal:** Design the ending before the draft stage. The opening is the contract; the ending pays it. Choose one ending move and design the closing scene around it.
 
-**Select one ending move (from [[short-story-openings-and-endings]]):**
+**Select one ending move (from `${CLAUDE_PLUGIN_ROOT}/references/writing/short-story-openings-and-endings.md`):**
 
 1. **Recollection and meditation.** The character reflects on before and after. The ending opens outward in time and implication.
 2. **Suspended symbolic action.** The story ends on an unresolved gesture, an image held rather than a conclusion delivered. The reader carries the image forward.
@@ -183,11 +183,11 @@ These apply across all generation in this skill:
 ## Craft References
 
 - the Wulf Moon method: the 8-Point Plot (Step 1), the heart's desire on the first page (Step 2), the magic sword arc (Steps 1 and 3), the escalation principle (THINGS GET WORSE, the escalation engine)
-- [[short-story-form]]: the compressed try/fail cycle mechanics, enter late and leave early, the scene budget constraints, the unity-of-effect governing principle
-- [[short-story-openings-and-endings]]: the four ending moves (Step 3), the payload first line and opening contract (Step 2), the surprising-yet-inevitable test, the Chekhov's Gun accounting
-- [[dark-comedy-crime-craft]]: the fused-register requirement, the Coen Rule for scene architecture, the two ironic ending modes (Dahl vs. Coen/Highsmith), the moral witness, the retroreading test for the crime twist
-- [[information-control-and-foreshadowing]]: the Chekhov's Gun mechanism; the misdirection-vs-withholding distinction for fair-play twists
-- [[chapter-hooks]]: the yes-but/no-and cycle mechanics behind the try/fail beat tagging
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/short-story-form.md`: the compressed try/fail cycle mechanics, enter late and leave early, the scene budget constraints, the unity-of-effect governing principle
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/short-story-openings-and-endings.md`: the four ending moves (Step 3), the payload first line and opening contract (Step 2), the surprising-yet-inevitable test, the Chekhov's Gun accounting
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/dark-comedy-crime-craft.md`: the fused-register requirement, the Coen Rule for scene architecture, the two ironic ending modes (Dahl vs. Coen/Highsmith), the moral witness, the retroreading test for the crime twist
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/information-control-and-foreshadowing.md`: the Chekhov's Gun mechanism; the misdirection-vs-withholding distinction for fair-play twists
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-hooks.md`: the yes-but/no-and cycle mechanics behind the try/fail beat tagging
 
 ---
 

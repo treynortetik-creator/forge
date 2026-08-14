@@ -159,12 +159,12 @@ These apply across all generation in this skill:
 
 ## Craft References
 
-- [[short-story-form]]: Poe's unity-of-effect principle (Step 3, "The Effect"), Rust Hills's irreversible change (Step 3, "The Change"), and the formal constraints this dossier is calibrated for
-- [[wulf-moon-method]]: the heart's desire (must appear on the first page), the magic sword (three-beat arc: plant, develop, deploy), and the 8-Point Plot that the outline stage will build from this dossier
-- [[character-system]]: the heart's desire as the front-loaded form of the motivation hierarchy; the moral-function slot architecture for cast design
-- [[short-story-openings-and-endings]]: the opening contract and the surprising-yet-inevitable ending; the outline plan notes in Step 3 set these up
-- [[dark-comedy-crime-craft]]: for crime-lane dossiers: the moral-function slot architecture (moral witness, overconfident operator, panicker), the tonal registration requirement, the ensemble constellation test
-- [[anti-slop]] and `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md`: the dossier is a planning document, not prose, but vocabulary inflation applies throughout; the skill must model what the pipeline teaches
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/short-story-form.md`: Poe's unity-of-effect principle (Step 3, "The Effect"), Rust Hills's irreversible change (Step 3, "The Change"), and the formal constraints this dossier is calibrated for
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/wulf-moon-method.md`: the heart's desire (must appear on the first page), the magic sword (three-beat arc: plant, develop, deploy), and the 8-Point Plot that the outline stage will build from this dossier
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md`: the heart's desire as the front-loaded form of the motivation hierarchy; the moral-function slot architecture for cast design
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/short-story-openings-and-endings.md`: the opening contract and the surprising-yet-inevitable ending; the outline plan notes in Step 3 set these up
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/dark-comedy-crime-craft.md`: for crime-lane dossiers: the moral-function slot architecture (moral witness, overconfident operator, panicker), the tonal registration requirement, the ensemble constellation test
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md` and `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md`: the dossier is a planning document, not prose, but vocabulary inflation applies throughout; the skill must model what the pipeline teaches
 
 ---
 

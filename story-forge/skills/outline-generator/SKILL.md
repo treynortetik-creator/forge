@@ -10,7 +10,7 @@ allowed-tools: [Read, Write, Edit, Glob]
 
 You are an expert developmental editor who thinks structurally and emotionally at the same time. You do not pad, flatten, or vague-ify. You build a tight, honest map of the story so the author can approve it before a single draft word is written.
 
-This skill is step 4 in the five-automation chain documented in the writing wiki ([[outlining-method]]). It depends on the dossier (step 1), character sheet (step 2), and worldbuilding sheet (step 3).
+This skill is step 4 in the five-automation chain documented in the writing wiki (`${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md`). It depends on the dossier (step 1), character sheet (step 2), and worldbuilding sheet (step 3).
 
 ---
 
@@ -38,8 +38,20 @@ genre-correct, it is not required to produce an outline. Each chapter in the tem
 > "This skill needs [missing item]. Build it first by running `dossier-to-outline`, or provide the
 > file directly."
 
-**A missing plot template is NOT a stop.** Proceed on built-in genre knowledge and note in the output
-that no template was supplied, so the beats are generic rather than genre-tuned.
+**A missing plot template is NOT a stop — but it IS a degradation, and you must handle it explicitly.**
+
+🔴 The template is consumed by four of the source automation's seven agents and is the **exclusive**
+source of three things. Without it, reassign each one and say so in the output:
+
+| Supplied by the template | With no template |
+|---|---|
+| **Chapter count** | Derive from the dossier's scope and genre convention. **State the number and your reasoning.** |
+| **Per-chapter Spice / Violence / Swearing levels** | **Ask the author to declare them once**, then apply consistently. Do not invent per chapter. |
+| **Structural beats** | Fall back to built-in genre knowledge |
+
+⚠️ **And neutralise the checks that depend on it:** skip "Plot Template Consistency" in the Step 6
+logic check, and do not validate the three ratings against a document that does not exist. Silently
+validating invented numbers against a missing template is worse than not checking.
 
 List each missing item separately. Do not proceed with any steps below until all four required inputs are confirmed.
 
@@ -164,6 +176,9 @@ Using the text of the original outline and the improvement plan, implement the s
 
 ## Step 5: Add Per-Chapter Sliders
 
+> The same rubric is also published standalone at
+> `${CLAUDE_PLUGIN_ROOT}/references/writing/scene-sliders.md` so `dossier-to-outline` can reach it.
+
 **Purpose:** Score every chapter across six scene-level dimensions. These numbers feed the chapter-generation pipeline (specifically the Character Scene Brief step) so tone and pacing are controlled at generation rather than left to the model's discretion. Scene sliders are distinct from character personality sliders: character sliders track who a person is; scene sliders control how the chapter should feel.
 
 **Prompt:**
@@ -255,7 +270,7 @@ Measures the presence and weight of humor, lightness, or comic energy in the sce
 
 **Purpose:** Catch contradictions, logic failures, premature reveals, and slider inconsistencies before they get buried in prose. Output is an improvement plan only; do not rewrite in this step.
 
-See [[plot-coherence]] for the craft theory behind what "coherent" means and why this check catches what it catches.
+See `${CLAUDE_PLUGIN_ROOT}/references/writing/plot-coherence.md` for the craft theory behind what "coherent" means and why this check catches what it catches.
 
 **Checklist:**
 
@@ -339,7 +354,7 @@ Before running the chapter-generation pipeline, review the outline. This is the 
 - Expand the 2-3 sentence summaries for chapters you have strong opinions about before passing them to the chapter writer
 - As you generate chapters later, return to the next 2 chapters in this outline and add specifics before triggering each batch
 
-See [[outlining-method]] for the full rationale for why human review happens here rather than later in the pipeline.
+See `${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md` for the full rationale for why human review happens here rather than later in the pipeline.
 
 ---
 
@@ -347,12 +362,12 @@ See [[outlining-method]] for the full rationale for why human review happens her
 
 Read these when working, not as reference only:
 
-- [[outlining-method]]: the five-automation chain this skill belongs to; full rationale and design decisions for each step
-- [[plot-coherence]]: the six logic-check categories and the craft theory behind what a coherent plot actually requires
-- [[anti-slop]]: slop patterns that emerge even at the outline-summary level; apply the banned-words constraint to summary text if it reads generic
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md`: the five-automation chain this skill belongs to; full rationale and design decisions for each step
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/plot-coherence.md`: the six logic-check categories and the craft theory behind what a coherent plot actually requires
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/anti-slop.md`: slop patterns that emerge even at the outline-summary level; apply the banned-words constraint to summary text if it reads generic
 - `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md`: the hard prohibited-words list; feed as a constraint block at Step 2 if outline prose is reading like AI output
-- [[voice-matching]]: relevant if the author has an established voice that should carry through even the short 2-3 sentence summaries
-- [[character-system]]: character slider baselines feed into the Emotional Check and Logic Check; know what behavior is "in character" before flagging inconsistencies
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/voice-matching.md`: relevant if the author has an established voice that should carry through even the short 2-3 sentence summaries
+- `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md`: character slider baselines feed into the Emotional Check and Logic Check; know what behavior is "in character" before flagging inconsistencies
 
 ---
 
