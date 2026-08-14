@@ -138,6 +138,46 @@ check("addition-only is not a deletion",
       not [x for x in E.classify("A short line.", "A short line. And another one here.")
            if x["severity"] == "DELETION"])
 
+# ── named entities ────────────────────────────────────────────────────────────
+# The docstring promised proper-noun/named-entity detection from day one and the code
+# never implemented it, so deleting a whole co-host company from a three-company event
+# announcement returned "Nothing dangerous found" and exit 0. Half of these tests are
+# false-positive controls, because the first working version fired on a sentence join:
+# an entity whose IDENTITY depends on its position will break on joins, splits and
+# reorders, which are the three commonest line edits there are.
+
+def _ents(b, a):
+    return [x["detail"] for x in E.classify(b, a)
+            if x["severity"] == "DELETION" and x["kind"] == "named entity"]
+
+check("a deleted co-host company is caught",
+      _ents("Co-hosted by SafelyYou, August Health and PalCare.",
+            "Co-hosted by SafelyYou and PalCare.") == ["August Health"])
+check("a deleted venue name is caught",
+      _ents("Drinks at Winter's Jazz Club on the 20th.",
+            "Drinks at the club on the 20th.") == ["Winter's Jazz Club"])
+check("a multi-word name is reported ONCE, not once per word",
+      len(_ents("Meeting at Winter's Jazz Club tonight.",
+                "Meeting at the venue tonight.")) == 1)
+check("a deleted CamelCase brand is caught",
+      _ents("The vendor is PalCare and it works.", "The vendor works.") == ["PalCare"])
+
+check("FP: repeated name replaced by a pronoun is NOT a deletion",
+      _ents("Mara flicked ash. Mara did not look up. Mara said it anyway.",
+            "Mara flicked ash. She did not look up. She said it anyway.") == [])
+check("FP: rewording a sentence opener is NOT a deletion",
+      _ents("Join Chelsea Kelly at the club.", "Meet Chelsea Kelly at the club.") == [])
+check("FP: joining two sentences is NOT a deletion",
+      _ents("Chelsea Kelly runs it. Scott Stegman signed it.",
+            "Chelsea Kelly runs it and Scott Stegman signed it.") == [])
+check("FP: splitting a sentence is NOT a deletion",
+      _ents("Chelsea Kelly runs it and Scott Stegman signed it.",
+            "Chelsea Kelly runs it. Scott Stegman signed it.") == [])
+check("FP: a name moving to the front of a sentence is NOT a deletion",
+      _ents("We met Scott Stegman there.", "Scott Stegman met us there.") == [])
+check("FP: a bare month is not an entity",
+      _ents("The show runs in August at the hall.", "The show runs later at the hall.") == [])
+
 print(f"\n{RUN - len(FAILS)}/{RUN} passed")
 if FAILS:
     print("FAILED: " + ", ".join(FAILS))

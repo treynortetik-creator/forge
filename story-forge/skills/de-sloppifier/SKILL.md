@@ -46,8 +46,24 @@ It classifies every change and escalates only the two classes that can destroy m
 
 | Severity | What it catches |
 |---|---|
-| 🔴 **DELETION** | a citation, quote, cross-reference (`See Table 3`) or number that existed before and does not exist after |
+| 🔴 **DELETION** | a citation, quote, cross-reference (`See Table 3`), number, or **named entity** that existed before and does not exist after |
 | ⚠️ **MEANING** | a negation flipped, a hedge removed, a quantifier widened (*most → all*), or a whole sentence deleted rather than rewritten |
+
+**Named entities use a harder bar than the rest: only a drop to zero counts.** Losing one of five
+`Mara`s is Pass 2 doing its job, since it explicitly tells you to swap a repeated character name for
+a pronoun. Losing the *last* `August Health` from a three-co-host announcement is the catastrophe.
+Numbers keep the per-occurrence rule, because a repeated figure is a restated fact rather than a
+restated name.
+
+🔴 **This check did not exist until 2026-08-14, though the docstring had promised it since day one.**
+Deleting an entire partner company from a co-hosted event announcement returned *"Nothing dangerous
+found"* and exit 0. If you are extending this tool, note that the first working version compared
+multi-word phrases and fired a false deletion when two sentences were **joined** — the join moved a
+name off a sentence opener, which changed the phrase and made the old one vanish. **Any rule whose
+entity identity depends on position will break on joins, splits and reorders, which are the three
+commonest line edits there are.** It now compares tokens and checks presence across the whole
+after-text. Six of the ten tests covering this are false-positive controls, and that ratio is
+deliberate.
 
 **It deliberately reports nothing for style, typo, punctuation or whitespace changes.** The job is to
 make the dangerous 2% findable, not to re-review the safe 98% — a report that flags everything gets

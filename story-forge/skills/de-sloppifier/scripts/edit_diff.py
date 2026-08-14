@@ -17,7 +17,8 @@ human reviewing a 90,000-word diff will not catch it.
 So: diff before against after, classify every change, and escalate only the two
 classes that can destroy meaning —
 
-    DELETION  a citation, number, quote, proper noun or named entity vanished
+    DELETION  a citation, number, quote, cross-reference, or named entity vanished
+              (entities only when EVERY occurrence is gone -- see entity_candidates)
     MEANING   a negation flipped, a hedge was removed, or a quantifier changed
 
 Everything else (typo, style, punctuation, whitespace) is reported as a count and
@@ -71,6 +72,39 @@ QUOTE = re.compile(r"[\"“][^\"”]{12,}[\"”]"
 XREF = re.compile(r"\b(?:see|per|in|from)\s+(?:Table|Figure|Fig\.|Chapter|Section|Appendix)\s*\d+"
                   r"|\b(?:Table|Figure|Fig\.|Chapter|Section|Appendix)\s+\d+", re.I)
 
+# Named entities. The module docstring promised these from the beginning and the code
+# never checked them, so deleting an entire co-host company from a three-company event
+# announcement returned "Nothing dangerous found" and exit 0. That is the single most
+# expensive edit this tool exists to catch, and it was the one class it was blind to.
+#
+# Two shapes, both chosen to keep false positives near zero:
+#   1. TWO OR MORE consecutive capitalised words -- "August Health", "Winter's Jazz Club",
+#      "Chelsea Kelly", "McClurg Court". A single leading capital cannot trigger this,
+#      which is what keeps ordinary sentence-initial words out.
+#   2. A single token carrying an internal capital or all-caps -- "SafelyYou", "PalCare",
+#      "NIC", "iPhone". These are unambiguous even standing alone.
+# A bare capitalised word with neither property is NOT an entity here. "Join" and "The"
+# would drown the signal, and a lone surname that vanishes usually takes its first name
+# with it, which shape 1 already catches.
+_CAPWORD = r"[A-Z][a-z'’\-]+"
+ENTITY = re.compile(
+    r"\b(?:" + _CAPWORD + r"(?:\s+(?:of|and|the|for|de|von|van))?\s+" + _CAPWORD +
+    r"(?:\s+" + _CAPWORD + r")*"                       # 2+ capitalised words
+    r"|[A-Za-z]+[A-Z][A-Za-z]*"                        # SafelyYou, PalCare, McClurg
+    r"|[A-Z]{2,}"                                      # NIC, PPTX
+    r")\b")
+# Sentence-initial words are capitalised by grammar, not by being names. If a match
+# starts a sentence, drop its first token before comparing: otherwise rewriting
+# "Join Chelsea Kelly" to "Meet Chelsea Kelly" reads as a deleted entity.
+_SENT_START = re.compile(r"(?:^|[.!?\"“'’)\]]\s+)$")
+# Connectors and calendar words carry no identity on their own. "August" is exempt only
+# as a bare token; "August Health" still registers through its second word.
+_ENTITY_STOP = {"the", "and", "for", "of", "de", "von", "van",
+                "january", "february", "march", "april", "may", "june", "july",
+                "august", "september", "october", "november", "december",
+                "monday", "tuesday", "wednesday", "thursday", "friday",
+                "saturday", "sunday"}
+
 NEGATION = re.compile(r"\b(?:not|never|no|cannot|can't|won't|doesn't|didn't|isn't|aren't|"
                       r"wasn't|weren't|shouldn't|wouldn't|couldn't|nor|neither)\b", re.I)
 HEDGE = re.compile(r"\b(?:may|might|could|possibly|perhaps|appears?|seems?|suggests?|likely|"
@@ -121,6 +155,40 @@ def norm_numbers(text):
     return _multiset(out)
 
 
+def entity_candidates(text):
+    """Capitalised TOKENS that are load-bearing names, mapped to the phrase they came from.
+
+    Tokens, not phrases, and presence checked against the whole after-text -- because
+    both alternatives are position-dependent and edits move words across sentence
+    boundaries constantly. Keying on the phrase meant joining two sentences rewrote
+    "Stegman" into "Scott Stegman", and the old key vanishing read as a deleted name on
+    an edit that deleted nothing. Any rule that changes an entity's identity based on
+    where it sits will fire on sentence joins, splits and reorders, which are the three
+    most common line edits there are.
+
+    A token qualifies when it belongs to a run of 2+ capitalised words, or carries an
+    internal capital / is all-caps. Tokens that OPEN a sentence are excluded, since they
+    are capitalised by grammar: that is what keeps "Join" out when "Join Chelsea Kelly"
+    becomes "Meet Chelsea Kelly".
+    """
+    out = {}
+    for m in ENTITY.finditer(text):
+        phrase = m.group(0).strip()
+        opens = bool(_SENT_START.search(text[:m.start()]))
+        for i, tok in enumerate(phrase.split()):
+            if i == 0 and opens and not (re.search(r"[a-z][A-Z]", tok) or tok.isupper()):
+                continue                      # capitalised only because it starts a sentence
+            if len(tok) < 3 or tok.lower() in _ENTITY_STOP:
+                continue
+            out.setdefault(tok, phrase)
+    return out
+
+
+def capitalised_tokens(text):
+    """Every capitalised token anywhere in the text, regardless of role."""
+    return {m.group(0) for m in re.finditer(r"\b[A-Z][\w'’\-]*", text)}
+
+
 def classify(before, after):
     """Return findings, ordered most-dangerous-first."""
     findings = []
@@ -138,6 +206,25 @@ def classify(before, after):
                 "why": (f"a {label} present before the edit is absent after it"
                         + (f" ({n} occurrences lost)" if n > 1 else "")),
             })
+
+    # Entities use a HARDER bar than numbers: only a drop to ZERO counts. Losing one of
+    # five "Mara"s is the de-sloppifier doing its job -- Pass 2 explicitly tells it to
+    # swap a repeated character name for a pronoun -- and fiction is this plugin's home
+    # turf, so a per-occurrence rule would make the DEFAULT gate unusable exactly where
+    # it is used most. Losing the LAST "August Health" from a three-co-host announcement
+    # is the catastrophe. Numbers keep the per-occurrence rule because a repeated figure
+    # is a restated fact, not a restated name.
+    cand, still_there = entity_candidates(before), capitalised_tokens(after)
+    lost_by_phrase = {}                  # one finding per NAME, not per word of the name
+    for tok in sorted(k for k in cand if k not in still_there):
+        lost_by_phrase.setdefault(cand[tok], []).append(tok)
+    for phrase, toks in sorted(lost_by_phrase.items()):
+        findings.append({
+            "severity": "DELETION", "kind": "named entity", "detail": phrase,
+            "why": ("this name appears nowhere after the edit"
+                    if len(toks) > 1 or toks[0] == phrase else
+                    f"the name {toks[0]!r} appears nowhere after the edit"),
+        })
 
     lost_nums = norm_numbers(before) - norm_numbers(after)
     for item, n in sorted(lost_nums.items()):
