@@ -28,18 +28,19 @@ Needs `python-pptx` (`pip3 install python-pptx`). Exit 1 on a hard failure.
 | Check | Fails when | Why it is not a matter of taste |
 |---|---|---|
 | `nativeCharts` | a real PowerPoint chart exists | it becomes a **static image** on Google Slides import, permanently |
-| `legibility` | a run is below the computed floor | derived from angular subtense, not from folklore |
+| `legibility` | a run is below the computed floor | ANSI/INFOCOMM V202.01 §4.3.1, with the provenance caveat below |
 | `contrast` | below 4.5:1, or 3:1 for large text | WCAG 1.4.3, computed against the **actual** backdrop |
-
-**Large text in a deck is 18pt, or 14pt bold.** The familiar 24px / 18.66px figures are
-those same sizes in CSS pixels at 96dpi. A `.pptx` is measured in points, so applying the
-pixel numbers to points is a 1.333x error that holds everything between 18pt and 24pt to
-4.5:1 when the spec asks 3:1. This harness shipped with exactly that bug, copied from its
-browser sibling where the pixel figures are correct.
 | `offSlide` | geometry crosses the slide edge | includes shapes nested in groups, in slide coordinates |
 | `emptyPlaceholder` | a placeholder was left blank | ships as "Click to add text" |
 | `unresolvedSize` | no size anywhere in the chain | reported separately; never silently assumed |
 | `unmeasured` | contrast could not be computed | **not a pass** — say so rather than guessing |
+
+**Large text in a deck is 18pt, or 14pt bold.** The familiar 24px / 18.5px figures are
+those same sizes in CSS pixels at 96dpi — the point values are WCAG's primary definition and
+the pixels are derived from them. A `.pptx` is measured in points, so applying the pixel
+numbers to points is a 1.333x error that holds everything between 18pt and 24pt to 4.5:1 when
+the spec asks 3:1. This harness shipped with exactly that bug, copied from its browser sibling
+where the pixel figures are correct.
 
 ## The three traps it is built around
 
@@ -50,22 +51,50 @@ master placeholder → master `txStyles` → 18pt default — and tells you whic
 the answer. Text colour resolves through the same chain.
 
 **2. Points are not a physical size.** A point is a document unit; its height on the wall
-depends entirely on how large the slide is projected. Treating points as inches gives a
-~185pt floor for a 30ft room, off by an order of magnitude. The real chain:
+depends entirely on how large the slide is projected. Treating points as inches gives a ~185pt
+floor for a 30ft room, off by an order of magnitude. The real chain:
 
 ```
-fraction_of_image = (pt / 72) * 0.70 / slide_height_in     # 0.70 = cap height
-physical_cap_in   = fraction_of_image * screen_height_in
-require             physical_cap_in >= viewing_distance_in / 200
+fraction_of_image = (pt / 72) * glyph_ratio / slide_height_in
+physical_glyph_in = fraction_of_image * screen_height_in
+require             physical_glyph_in >= viewing_distance_in / 200
 ```
 
-Derive screen height from the AV **4/6/8 rule** (farthest viewer at most 4x, 6x or 8x the
-screen height away, for analytical / basic / passive viewing) and **the viewing distance
-cancels** — screen size scales with room depth. The floor becomes a property of the viewing
-need and the slide's aspect, not the room. On a 7.5in-tall slide it lands at **23.1pt for
-basic viewing**, which is where the folk "minimum 24pt" rule came from.
+**Where each half comes from, stated honestly:**
 
-Pass `--screen-height` (inches) with `--room-depth` to measure a real room instead.
+- **The /200 is standards-backed.** ANSI/INFOCOMM V202.01:2016 §4.3.1 gives `IH = FV / (200 × %EH)`
+  and names 200 "the Acuity Factor for Basic Decision Making", derived in §6.1.2 from a 17.25
+  arcminute minimum resolvable angle.
+- ⚠️ **The 4/6/8 rule is NOT in the standard.** It appears zero times in V202.01. AVIXA's own
+  CTS-Prep material puts it on a slide titled **"The Old Way of Doing Things 4/6/8"**, listing
+  *"Only a Best Practice"* and *"Origins are unclear"*. The standard's Foreword concedes prior
+  methods are *"not attributable to any particular source and appear to be based on precedent."*
+  It survives here only because it is numerically identical to the standards-backed part: 2/3/4 %EH
+  give exactly 4/6/8 screen heights. **The arithmetic is sound; the provenance is folklore.** Do not
+  call this model "not folklore" — an earlier version of this file did, and it was wrong.
+- 🔴 **The reference glyph is a LOWERCASE letter.** AVIXA CTS-Prep slide 27, *"With text: lowercase
+  letter"*. This harness originally measured cap height, which made every floor ~35% too low —
+  lenient, the dangerous direction. Default is now x-height; `--element cap` restores the old, more
+  permissive behaviour. Pass `--font` for that face's real ratio instead of the generic 0.52.
+- ⚠️ **All three tiers are Basic Decision Making at different %EH** (2 / 3 / 4). DISCAS *Analytical*
+  Decision Making is a different calculation entirely, `IH = (IR × FV) / 3438`, driven by vertical
+  pixel resolution. The `analytical` tier here means 2%EH, **not** DISCAS ADM.
+
+On a 7.5in slide this gives **31.2pt for basic viewing** in Arial. That is larger than most decks
+use, which is the finding rather than a bug.
+
+⚠️ **The floor is a property of SLIDE HEIGHT IN INCHES, not of aspect ratio.** 16:9 at 13.333×7.5
+gives 31.2pt; 16:9 at 10×5.625 gives 23.4pt. Same shape, same projected result, 25% weaker floor,
+because the second authors everything at 75% scale.
+
+⚠️ **`--room-depth` alone can never turn a pass into a fail.** With no measured screen, screen height
+is *defined* as distance ÷ ratio, so the distance cancels. It only changes an advisory line. Pass
+`--screen-height` with it to measure a real room.
+
+**Do not add a words-per-slide or redundancy check.** The only meta-analysis of the redundancy
+effect (Adesope & Nesbit, 57 studies) finds on-screen *key terms* alongside narration runs
+**positive** (g = 0.99), verbatim transcript also positive (g = 0.21), and the whole effect
+collapses to ~0 when a graphic is present. The obvious word-count proxy is empirically backwards.
 
 **3. A shape with no fill is not necessarily on the slide background.** Text laid over a
 coloured panel is one of the most common ways a real deck is built. Resolving the backdrop
@@ -89,7 +118,7 @@ the reader failed, and either way that is a failure, not a clean bill of health.
 ## Fixing what it finds
 
 For native charts, rebuild the visual from shapes — see the `deck-builder` skill, whose
-component library cannot express a native chart. For type below the floor, raise the size or
+component library never creates one. For type below the floor, raise the size or
 cut the words; shrinking to fit is how the problem got there. For contrast, change the
 colour pair, not the opacity.
 
@@ -99,6 +128,8 @@ colour pair, not the opacity.
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/test_deck_audit.py
 ```
 
-27 cases. Every one is a bug that was live in this harness and shipped green — including a
-version that reported "0 runs, all PASS, exit 0" on a deck built entirely from grouped
-shapes and tables, which is exactly the construction this plugin tells you to use.
+Every case is a bug that was live in this harness and shipped green — including a version that
+reported "0 runs, all PASS, exit 0" on a deck built entirely from grouped shapes and tables,
+which is exactly the construction this plugin tells you to use, and a version that read only
+`spPr` so the most common shape in any deck (filled by a `p:style` reference, with nothing in
+`spPr` at all) came back as "no fill" and fabricated both sides of the contrast pair.

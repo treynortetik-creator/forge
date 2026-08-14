@@ -52,7 +52,12 @@ def audit(prs, **kw):
 print("\nlegibility floor")
 
 f = D.legibility_floor_pt(7.5, "basic")
-check("basic viewing need lands near the 24pt folklore", 20 <= f <= 26, f"got {f}pt")
+# NOT "lands near 24pt". That test asserted a just-so story: nothing supports the claim
+# that this model is where the folk 24pt minimum came from, the number needs a 7.5in
+# slide AND cap height AND 3%EH simultaneously, and AAPT was printing "18 to 24 pt" for
+# overhead transparencies decades before DISCAS existed. Assert the standard instead.
+check("the floor satisfies %EH x slide_height, which is what the standard says",
+      abs(f - D.PERCENT_EH["basic"] * 7.5 * 72 / D.DEFAULT_X_RATIO) < 0.1, f"got {f}pt")
 check("the naive version's ~185pt is gone", f < 60, f"got {f}pt")
 check("analytical < basic < passive",
       D.legibility_floor_pt(7.5, "analytical") < f < D.legibility_floor_pt(7.5, "passive"))
@@ -237,6 +242,92 @@ rw.font.color.rgb = RGBColor(0x76, 0x76, 0x76)          # 4.54:1 on white
 check("20pt at 4.54:1 is not reported as a failure",
       len(audit(pw)["findings"]["low_contrast"]) == 0,
       "large-text threshold is wrong; 20pt is large and only needs 3:1")
+
+
+
+# ── 8. the adversarial-review findings ───────────────────────────────────────
+print("\nfindings from the adversarial review")
+
+import subprocess, json as _json
+from pptx.enum.shapes import MSO_SHAPE as _MS
+from lxml import etree as _et
+
+# D2 — a shape filled by p:style/fillRef, with NOTHING in spPr. This is what
+# python-pptx add_shape emits and what PowerPoint emits for a drawn shape.
+pf = blank(); sf = pf.slides.add_slide(pf.slide_layouts[6])
+shf = sf.shapes.add_shape(_MS.RECTANGLE, Inches(1), Inches(1), Inches(8), Inches(3))
+rf = shf.text_frame.paragraphs[0].add_run(); rf.text = "on a style-filled shape"
+rf.font.size = Pt(32); rf.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+thf = D.theme_colours(pf)
+check("a fillRef shape does not read as 'no fill'",
+      D.shape_fill_rgb(shf, thf, D.theme_fill_styles(pf)) is not None,
+      "spPr-only reading fabricates both sides of the contrast pair")
+resf = audit(pf)
+check("...and it is not a fabricated contrast FAILURE",
+      len(resf["findings"]["low_contrast"]) == 0, str(resf["findings"]["low_contrast"]))
+
+# D3 — colour transforms
+base = (0x4F, 0x81, 0xBD)
+dark, ok = D._apply_transforms(base, _et.fromstring(
+    '<a:schemeClr xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" '
+    'val="accent1"><a:lumMod val="20000"/></a:schemeClr>'))
+check("lumMod 20% actually darkens the colour", ok and sum(dark) < sum(base) / 2,
+      f"{base} -> {dark}")
+light, _ = D._apply_transforms(base, _et.fromstring(
+    '<a:schemeClr xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" '
+    'val="accent1"><a:lumMod val="50000"/><a:lumOff val="50000"/></a:schemeClr>'))
+check("lumMod+lumOff 50% lightens it", sum(light) > sum(base), f"{base} -> {light}")
+_, alpha_ok = D._apply_transforms(base, _et.fromstring(
+    '<a:schemeClr xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" '
+    'val="accent1"><a:alpha val="50000"/></a:schemeClr>'))
+check("alpha is reported unmodellable, not silently ignored", not alpha_ok)
+
+# D8 — --json and text must agree, always
+empty_f = TMPF = __import__("tempfile").mktemp(suffix=".pptx"); blank().save(TMPF)
+for mode in ("hard", "any"):
+    t = subprocess.run([sys.executable, "deck_audit.py", TMPF, "--fail-on", mode],
+                       capture_output=True).returncode
+    j = subprocess.run([sys.executable, "deck_audit.py", TMPF, "--fail-on", mode, "--json"],
+                       capture_output=True).returncode
+    check(f"--json agrees with text on --fail-on {mode}", t == j, f"text={t} json={j}")
+    check(f"a zero-run deck FAILS under --fail-on {mode}", t == 1, f"got {t}")
+
+# D5 — the master-placeholder link the docs promise must exist
+check("resolve_font_pt can return 'master placeholder'",
+      "master placeholder" in open("deck_audit.py").read(),
+      "documented in the header and SKILL.md but never implemented")
+
+# D6 — rotation
+pr = blank(); sr = pr.slides.add_slide(pr.slide_layouts[6])
+tall = sr.shapes.add_shape(_MS.RECTANGLE, Inches(6.0), Inches(-0.25), Inches(1), Inches(8))
+tall.rotation = 90        # renders 8x1in, centred, FULLY on-slide
+check("a rotated shape that lands on-slide is not a false off-slide",
+      len(audit(pr)["findings"]["offslide"]) == 0, "rotation ignored in bounds")
+pr2 = blank(); sr2 = pr2.slides.add_slide(pr2.slide_layouts[6])
+wide = sr2.shapes.add_shape(_MS.RECTANGLE, Inches(2.6), Inches(3.5), Inches(8), Inches(1))
+wide.rotation = 90        # renders 1x8in, y spans past a 7.5in slide
+check("a rotated shape that hangs off IS caught",
+      len(audit(pr2)["findings"]["offslide"]) == 1, "rotation ignored in bounds")
+
+# A2/A5/A7 — the legibility corrections
+check("the reference glyph defaults to x-height, not cap height",
+      D.glyph_ratio(None, "x")[0] < D.CAP_HEIGHT_RATIO)
+check("x-height gives a HIGHER (stricter) floor than cap height",
+      D.legibility_floor_pt(7.5, "basic") > D.legibility_floor_pt(7.5, "basic", element="cap"))
+check("a named font uses its real ratio",
+      D.glyph_ratio("Arial", "x")[0] == D.X_HEIGHT_RATIO["arial"])
+check("the floor tracks slide HEIGHT, not aspect ratio",
+      D.legibility_floor_pt(7.5, "basic") != D.legibility_floor_pt(5.625, "basic"),
+      "16:9 at 13.333x7.5 and at 10x5.625 are the same aspect")
+check("tiers map to 2/3/4 %EH",
+      (D.PERCENT_EH["analytical"], D.PERCENT_EH["basic"], D.PERCENT_EH["passive"])
+      == (0.02, 0.03, 0.04))
+
+# lxml truthiness
+_el = _et.fromstring('<root xmlns:p="p"><p:spPr/></root>')
+check("_find_any survives a childless element (which is falsy)",
+      D._find_any(_el, "{p}spPr") is not None,
+      "`a or b` on lxml elements silently skips an empty element")
 
 
 print(f"\n{RUN - len(FAILS)}/{RUN} passed")

@@ -28,6 +28,7 @@ Requires python-pptx.
 """
 import argparse
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -196,7 +197,26 @@ def resolve_font_pt(run, para, shape, slide, prs, master_styles):
                 if v:
                     return v, "layout placeholder"
 
-    # 5. master txStyles, keyed by placeholder role
+    # 5. the matching placeholder on the MASTER. Documented in this module's header
+    #    and in SKILL.md, but previously not implemented -- so a 6pt size set on a
+    #    master placeholder was skipped and master txStyles answered 32pt instead.
+    #    Corporate templates routinely size on master placeholders.
+    if idx is not None:
+        try:
+            mst_ph = _find_layout_ph(slide.slide_layout.slide_master, idx)
+            if mst_ph is not None and mst_ph.has_text_frame:
+                body = mst_ph.text_frame._txBody
+                v = _lvl_size_from_liststyle(body.find(f"{A}lstStyle"), lvl)
+                if v:
+                    return v, "master placeholder"
+                for p3 in body.findall(f"{A}p"):
+                    v = _size_from_rpr(p3.find(f"{A}pPr/{A}defRPr"))
+                    if v:
+                        return v, "master placeholder"
+        except Exception:
+            pass
+
+    # 6. master txStyles, keyed by placeholder role
     key = "body"
     t = (ph_type or "").lower()
     if "title" in t or "ctrtitle" in t:
@@ -264,9 +284,19 @@ def resolve_font_colour(run, para, shape, slide, prs, master_styles, theme):
     got = _lvl_colour_from_liststyle(master_styles.get(key), theme, lvl)
     if got:
         return got, f"master txStyles/{key}"
-    # Office's default body text is tx1/dk1. Use it, but SAY it was assumed.
-    if "dk1" in theme:
-        return hex_to_rgb(theme["dk1"]), "theme dk1 (assumed)"
+    try:
+        ref = shape._element.find(f".//{P}style/{A}fontRef")
+        if ref is not None:
+            rgb, ok = _colour_el_to_rgb(_first_colour_child(ref), theme)
+            if rgb is not None:
+                return (rgb, "p:style/fontRef") if ok else (None, "fontRef has an "
+                                                            "unmodellable transform")
+    except Exception:
+        pass
+    # 🔴 DO NOT fall back to dk1. Assuming black here is what stopped the
+    # unmeasured_contrast channel from EVER firing: the escape hatch existed, and
+    # every unresolved run took this branch instead and got a confident verdict
+    # against a colour nobody wrote. Unknown must stay unknown.
     return None, "unresolved"
 
 
@@ -289,17 +319,207 @@ UNKNOWN_FILL = "UNKNOWN"   # picture or gradient: refuse to guess, skip the chec
 SCHEME_ALIAS = {"tx1": "dk1", "bg1": "lt1", "tx2": "dk2", "bg2": "lt2"}
 
 
-def _solid_to_rgb(fill, theme):
-    """An <a:solidFill> element -> concrete RGB, resolving scheme colours."""
-    v = _srgb(fill)
-    if v:
-        return hex_to_rgb(v)
-    sc = fill.find(f"{A}schemeClr")
-    if sc is not None and sc.get("val"):
-        name = SCHEME_ALIAS.get(sc.get("val"), sc.get("val"))
-        if name in theme:
-            return hex_to_rgb(theme[name])
+def _find_any(el, *tags):
+    """First matching DIRECT child. Never use `a or b` on lxml elements: an element
+    with no children is FALSY, so a childless <p:spPr/> silently falls through to the
+    next lookup and reports None. Same trap as `if not element:`."""
+    for t in tags:
+        got = el.find(t)
+        if got is not None:
+            return got
     return None
+
+
+def _hsl(r, g, b):
+    r, g, b = r / 255, g / 255, b / 255
+    mx, mn = max(r, g, b), min(r, g, b)
+    l = (mx + mn) / 2
+    if mx == mn:
+        return 0.0, 0.0, l
+    d = mx - mn
+    sat = d / (2 - mx - mn) if l > 0.5 else d / (mx + mn)
+    if mx == r:
+        h = ((g - b) / d + (6 if g < b else 0)) / 6
+    elif mx == g:
+        h = ((b - r) / d + 2) / 6
+    else:
+        h = ((r - g) / d + 4) / 6
+    return h, sat, l
+
+
+def _rgb(h, sat, l):
+    def hue(p, q, t):
+        t %= 1
+        if t < 1 / 6: return p + (q - p) * 6 * t
+        if t < 1 / 2: return q
+        if t < 2 / 3: return p + (q - p) * (2 / 3 - t) * 6
+        return p
+    if sat == 0:
+        v = int(round(l * 255)); return (v, v, v)
+    q = l * (1 + sat) if l < 0.5 else l + sat - l * sat
+    pp = 2 * l - q
+    return tuple(int(round(max(0, min(1, hue(pp, q, h + o))) * 255))
+                 for o in (1 / 3, 0, -1 / 3))
+
+
+def _pct(el, tag):
+    n = el.find(f"{A}{tag}")
+    if n is None or not n.get("val"):
+        return None
+    return int(n.get("val")) / 100000.0
+
+
+def _apply_transforms(rgb, clr_el):
+    """Apply lumMod / lumOff / shade / tint to a resolved colour.
+
+    PowerPoint's colour picker emits lumMod+lumOff for EVERY "Lighter/Darker %"
+    swatch in the theme row, so a deck styled from the UI is full of them. Reading
+    only schemeClr@val returns the BASE colour, which for `accent1 lumMod 20000` is a
+    mid blue where the slide actually shows near-black -- reporting 4.31:1 on a pair
+    that renders at about 1.2:1, silently.
+
+    Returns (rgb, ok). ok=False means a transform is present that this cannot model,
+    in which case the caller must report the colour as indeterminate rather than
+    guess. Alpha is the main one: partial transparency needs compositing against
+    whatever is behind, which is not a colour question.
+    """
+    if clr_el is None:
+        return rgb, True
+    if clr_el.find(f"{A}alpha") is not None:
+        return rgb, False
+    known = {"lumMod", "lumOff", "shade", "tint", "satMod", "satOff",
+             "hueMod", "hueOff", "comp", "inv", "gray", "gamma", "invGamma"}
+    for child in clr_el:
+        tag = child.tag.split("}")[-1]
+        if tag in ("comp", "inv", "gray", "gamma", "invGamma"):
+            return rgb, False
+
+    h, sat, l = _hsl(*rgb)
+    v = _pct(clr_el, "lumMod")
+    if v is not None:
+        l *= v
+    v = _pct(clr_el, "lumOff")
+    if v is not None:
+        l += v
+    v = _pct(clr_el, "satMod")
+    if v is not None:
+        sat *= v
+    v = _pct(clr_el, "satOff")
+    if v is not None:
+        sat += v
+    v = _pct(clr_el, "hueMod")
+    if v is not None:
+        h *= v
+    l, sat = max(0.0, min(1.0, l)), max(0.0, min(1.0, sat))
+    out = _rgb(h, sat, l)
+
+    # shade/tint operate on the linear channels, not on HSL luminance.
+    v = _pct(clr_el, "shade")
+    if v is not None:
+        out = tuple(int(round(c * v)) for c in out)
+    v = _pct(clr_el, "tint")
+    if v is not None:
+        out = tuple(int(round(c * v + 255 * (1 - v))) for c in out)
+    return tuple(max(0, min(255, c)) for c in out), True
+
+
+def _colour_el_to_rgb(el, theme):
+    """Any DrawingML colour element (srgbClr / schemeClr / sysClr / prstClr) -> RGB.
+
+    Returns (rgb, ok); ok=False when a transform is present that cannot be modelled.
+    """
+    if el is None:
+        return None, True
+    tag = el.tag.split("}")[-1]
+    base = None
+    if tag == "srgbClr" and el.get("val"):
+        base = hex_to_rgb(el.get("val"))
+    elif tag == "schemeClr" and el.get("val"):
+        name = SCHEME_ALIAS.get(el.get("val"), el.get("val"))
+        if name in theme:
+            base = hex_to_rgb(theme[name])
+    elif tag == "sysClr" and el.get("lastClr"):
+        base = hex_to_rgb(el.get("lastClr"))
+    elif tag == "prstClr" and el.get("val"):
+        base = PRESET_COLOURS.get(el.get("val").lower())
+    if base is None:
+        return None, True
+    return _apply_transforms(base, el)
+
+
+COLOUR_TAGS = ("srgbClr", "schemeClr", "sysClr", "prstClr", "hslClr", "scrgbClr")
+
+PRESET_COLOURS = {"black": (0, 0, 0), "white": (255, 255, 255), "red": (255, 0, 0),
+                  "green": (0, 128, 0), "blue": (0, 0, 255), "yellow": (255, 255, 0),
+                  "gray": (128, 128, 128), "grey": (128, 128, 128),
+                  "darkGray".lower(): (169, 169, 169), "lightgray": (211, 211, 211)}
+
+
+def _first_colour_child(parent):
+    if parent is None:
+        return None
+    for child in parent:
+        if child.tag.split("}")[-1] in COLOUR_TAGS:
+            return child
+    return None
+
+
+def _solid_to_rgb(fill, theme):
+    """An <a:solidFill> element -> concrete RGB, or UNKNOWN_FILL if unmodellable."""
+    if fill is None:
+        return None
+    rgb, ok = _colour_el_to_rgb(_first_colour_child(fill), theme)
+    if rgb is None:
+        return None
+    return rgb if ok else UNKNOWN_FILL
+
+
+def theme_fill_styles(prs):
+    """The theme's fillStyleLst, which <a:fillRef idx="n"> points into (1-based)."""
+    try:
+        part = prs.slide_master.part.part_related_by(
+            "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme")
+        root = getattr(part, "_element", None)
+        if root is None:
+            from lxml import etree
+            root = etree.fromstring(part.blob)
+        lst = root.find(f".//{A}fmtScheme/{A}fillStyleLst")
+        return list(lst) if lst is not None else []
+    except Exception:
+        return []
+
+
+def _fill_from_style_ref(shape, theme, fill_styles):
+    """Resolve <p:style><a:fillRef>, which is how MOST real shapes are filled.
+
+    A shape drawn in PowerPoint, and every shape python-pptx's add_shape() emits,
+    carries NO fill in spPr at all -- the fill comes from this style reference into
+    the theme's fillStyleLst, with a colour override on the ref itself. Reading only
+    spPr therefore reports the single most common shape in any deck as "no fill",
+    falls through to the slide background, and fabricates BOTH sides of the contrast
+    pair. Verified: python-pptx add_shape writes fillRef idx=3 schemeClr accent1 and
+    nothing in spPr.
+    """
+    try:
+        ref = shape._element.find(f".//{P}style/{A}fillRef")
+        if ref is None:
+            return None
+        idx = int(ref.get("idx") or 0)
+        if idx == 0:
+            return None                      # idx 0 is explicitly no fill
+        rgb, ok = _colour_el_to_rgb(_first_colour_child(ref), theme)
+        if rgb is None:
+            return None
+        if not ok:
+            return UNKNOWN_FILL
+        # The referenced style may be a gradient or pattern, in which case the
+        # override colour is only one stop of it and a flat answer would be wrong.
+        style = fill_styles[idx - 1] if 0 < idx <= len(fill_styles) else None
+        if style is not None and style.tag.split("}")[-1] != "solidFill":
+            return UNKNOWN_FILL
+        return rgb
+    except Exception:
+        return None
 
 
 def _fill_of(props, theme):
@@ -325,38 +545,55 @@ def _fill_of(props, theme):
     return None                          # no fill specified -> inherit
 
 
-def shape_fill_rgb(shape, theme):
-    """Concrete RGB for a shape's own fill, or UNKNOWN_FILL, or None to inherit."""
+def shape_fill_rgb(shape, theme, fill_styles=()):
+    """Concrete RGB for a shape's backdrop, or UNKNOWN_FILL, or None to inherit.
+
+    Order matters: spPr wins, then the p:style fill reference. A picture or a
+    style-driven table is UNKNOWN, never a silent fall-through to the slide
+    background -- that fall-through is what let this harness report a fabricated
+    1.0:1 on white-over-photo and a fabricated PASS on black-over-black-photo.
+    """
     try:
-        sp = shape._element
-        for tag in (f"{P}spPr", f"{A}spPr", f"{P}grpSpPr", f"{A}grpSpPr"):
-            props = sp.find(tag)
+        el = shape._element
+        tag = el.tag.split("}")[-1]
+
+        # <p:pic> keeps its image in blipFill as a DIRECT CHILD, never inside spPr.
+        if tag == "pic" or el.find(f"{A}blipFill") is not None or el.find(f"{P}blipFill") is not None:
+            return UNKNOWN_FILL
+
+        for t in (f"{P}spPr", f"{A}spPr", f"{P}grpSpPr", f"{A}grpSpPr"):
+            props = el.find(t)
             if props is not None:
-                return _fill_of(props, theme)
+                got = _fill_of(props, theme)
+                if got is not None:
+                    return got
+                break
+
+        got = _fill_from_style_ref(shape, theme, fill_styles)
+        if got is not None:
+            return got
+
+        # A table's banding lives in tableStyles.xml, which is a whole style system
+        # this does not read. Guessing white here fabricated nine contrast failures
+        # on a default-styled table over a dark panel.
+        if getattr(shape, "has_table", False) and shape.has_table:
+            return UNKNOWN_FILL
     except Exception:
         pass
     return None
 
 
 def run_colour_rgb(run, theme):
-    try:
-        if run.font.color and run.font.color.rgb is not None:
-            return hex_to_rgb(str(run.font.color.rgb))
-    except Exception:
-        pass
+    """A run's OWN explicit colour, or None. Transforms are applied; an unmodellable
+    one returns None so the caller reports it unmeasured rather than guessing."""
     try:
         rpr = run._r.find(f"{A}rPr")
         if rpr is not None:
             fill = rpr.find(f"{A}solidFill")
-            v = _srgb(fill)
-            if v:
-                return hex_to_rgb(v)
-            sc = fill.find(f"{A}schemeClr") if fill is not None else None
-            if sc is not None and sc.get("val"):
-                alias = {"tx1": "dk1", "bg1": "lt1", "tx2": "dk2", "bg2": "lt2"}
-                nm = alias.get(sc.get("val"), sc.get("val"))
-                if nm in theme:
-                    return hex_to_rgb(theme[nm])
+            if fill is not None:
+                rgb, ok = _colour_el_to_rgb(_first_colour_child(fill), theme)
+                if rgb is not None:
+                    return rgb if ok else None
     except Exception:
         pass
     return None
@@ -402,7 +639,12 @@ def _group_transform(grp):
     grouped shapes at their raw child coordinates, which are meaningless on the slide.
     """
     try:
-        xfrm = grp._element.find(f".//{A}xfrm")
+        # DIRECT child of grpSpPr, never a descendant search. `.//xfrm` on a group
+        # with a bare <p:grpSpPr/> (legal, and several exporters emit it) returns the
+        # FIRST CHILD SHAPE's xfrm, translating every child by that child's own
+        # offset. Third instance of this exact bug class in this file.
+        props = _find_any(grp._element, f"{P}grpSpPr", f"{A}grpSpPr")
+        xfrm = props.find(f"{A}xfrm") if props is not None else None
         if xfrm is None:
             return (0, 0, 1.0, 1.0, 0, 0)
         off, ext = xfrm.find(f"{A}off"), xfrm.find(f"{A}ext")
@@ -470,14 +712,44 @@ def text_frames_of(shape):
     return out
 
 
+def _rot_deg(shape):
+    """@rot on the shape's xfrm, in degrees. OOXML stores 60000ths of a degree."""
+    try:
+        props = _find_any(shape._element, f"{P}spPr", f"{A}spPr")
+        xfrm = props.find(f"{A}xfrm") if props is not None else None
+        if xfrm is not None and xfrm.get("rot"):
+            return (int(xfrm.get("rot")) / 60000.0) % 360.0
+    except Exception:
+        pass
+    return 0.0
+
+
 def _bounds(shape, tf):
-    """Absolute slide-coordinate bounds in EMU, or None."""
+    """Absolute slide-coordinate bounds in EMU, or None.
+
+    Accounts for @rot, which PowerPoint applies ABOUT THE SHAPE CENTRE. Ignoring it
+    is wrong in both directions: an 8x1in bar rotated 90 degrees renders 1x8in and
+    hangs off a 7.5in slide while the raw box fits, and a 1x8in box rotated 90
+    renders 8x1in fully on-slide while the raw box reports off-slide. It also
+    corrupts _contains, so a rotated panel gets credited as a backdrop it is not.
+    """
     try:
         if shape.left is None or shape.top is None:
             return None
-        x0, y0 = _apply(tf, shape.left, shape.top)
-        x1, y1 = _apply(tf, shape.left + (shape.width or 0), shape.top + (shape.height or 0))
-        return (min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1))
+        w, h = (shape.width or 0), (shape.height or 0)
+        rot = _rot_deg(shape)
+        if rot:
+            cx, cy = shape.left + w / 2.0, shape.top + h / 2.0
+            rad = math.radians(rot)
+            ac, as_ = abs(math.cos(rad)), abs(math.sin(rad))
+            # Axis-aligned bounding box of the rotated rectangle.
+            bw, bh = w * ac + h * as_, w * as_ + h * ac
+            corners = [(cx - bw / 2.0, cy - bh / 2.0), (cx + bw / 2.0, cy + bh / 2.0)]
+        else:
+            corners = [(shape.left, shape.top), (shape.left + w, shape.top + h)]
+        pts = [_apply(tf, x, y) for x, y in corners]
+        xs, ys = [q[0] for q in pts], [q[1] for q in pts]
+        return (min(xs), min(ys), max(xs), max(ys))
     except Exception:
         return None
 
@@ -517,45 +789,108 @@ def backdrop_for(i, layers, slide_bg):
 
 # ── the checks ───────────────────────────────────────────────────────────────
 
-CAP_HEIGHT_RATIO = 0.70   # a capital letter is ~70% of the point size
-SUBTENSE_DIVISOR = 200.0  # element height >= viewing distance / 200 (angular subtense)
-# The AV "4/6/8 rule": the farthest viewer sits at most N x the screen height away.
-VIEWING_NEED = {"analytical": 4.0, "basic": 6.0, "passive": 8.0}
+# ── the legibility model, and exactly what it is drawn from ─────────────────
+#
+# ANSI/INFOCOMM V202.01:2016 §4.3.1:  IH = FV / (200 x %EH)
+#   "200 is the Acuity Factor for Basic Decision Making", derived in §6.1.2 from a
+#   minimum resolvable angle of 17.25 arcminutes. Rearranged for absolute element
+#   height EH = %EH x IH, that is FV = 200 x EH -- the "element height >= viewing
+#   distance / 200" form used here.
+#
+# 🔴 THE ELEMENT FOR TEXT IS A LOWERCASE LETTER, NOT A CAPITAL.
+#   AVIXA's own CTS-Prep material, slide 27 "What is Percent Element Height?":
+#       "With text: lowercase letter"
+#   (identical wording in the 2017 Italy and 2019 France decks). The published
+#   standard's §3.2.6 is ambiguous; AVIXA's teaching material is not. This harness
+#   originally measured CAP height, which made every floor about 35% too low --
+#   lenient, which is the dangerous direction for a legibility check.
+#
+# ⚠️ THE 4/6/8 RULE IS NOT PART OF THE STANDARD. It appears zero times in V202.01,
+#   and AVIXA's CTS-Prep deck puts it on a slide titled "The Old Way of Doing Things
+#   4/6/8", listing "Only a Best Practice" and "Origins are unclear". The standard's
+#   own Foreword says prior methods are "not attributable to any particular source
+#   and appear to be based on precedent". It survives here only because it is
+#   numerically identical to the standards-backed part: FV = 200 x %EH x IH makes
+#   2/3/4 %EH give exactly 4/6/8 screen heights. So the ARITHMETIC is sound and the
+#   PROVENANCE is folklore. Do not describe this model as "not folklore".
+#
+# ⚠️ The tiers below are all Basic Decision Making at different %EH. DISCAS
+#   Analytical Decision Making is a DIFFERENT calculation, IH = (IR x FV) / 3438,
+#   driven by vertical pixel resolution with no %EH term. "analytical" here means
+#   2%EH, not DISCAS ADM.
+#
+# AVIXA CTS-Prep slide 39: "Typically use something from 2% Element Height to 4%
+# Element Height ... A 3% Element Height is a good starting point."
+
+PERCENT_EH = {"analytical": 0.02, "basic": 0.03, "passive": 0.04}
+VIEWING_NEED = {"analytical": 4.0, "basic": 6.0, "passive": 8.0}   # screen heights
+
+# x-height / em, measured from OS/2.sxHeight / head.unitsPerEm on the real binaries.
+X_HEIGHT_RATIO = {
+    "arial": 0.5186, "helvetica": 0.5229, "helvetica neue": 0.5170,
+    "verdana": 0.5454, "tahoma": 0.5460, "calibri": 0.4775, "carlito": 0.4775,
+    "georgia": 0.4814, "times new roman": 0.4473, "times": 0.4473,
+    "garamond": 0.4400, "inter": 0.7275 * 0.72, "roboto": 0.5283,
+    "open sans": 0.5350, "lato": 0.5060, "segoe ui": 0.5000,
+}
+DEFAULT_X_RATIO = 0.52       # Arial/Helvetica class, the common deck faces
+CAP_HEIGHT_RATIO = 0.70      # kept for --element cap
+SUBTENSE_DIVISOR = 200.0     # the Basic Decision Making acuity factor
 
 
-def legibility_floor_pt(slide_h_in, need="basic", screen_h_in=None, room_depth_ft=None):
+def glyph_ratio(font_name=None, element="x"):
+    """Height of the reference glyph as a fraction of the point size."""
+    if element == "cap":
+        return CAP_HEIGHT_RATIO, "cap height"
+    if font_name:
+        r = X_HEIGHT_RATIO.get(str(font_name).strip().lower())
+        if r:
+            return r, f"x-height of {font_name}"
+    return DEFAULT_X_RATIO, "x-height (generic)"
+
+
+def legibility_floor_pt(slide_h_in, need="basic", screen_h_in=None, room_depth_ft=None,
+                        font_name=None, element="x"):
     """Minimum legible point size on a projected slide.
 
-    A point is a DOCUMENT unit, not a physical one. Its physical height on the wall
-    depends entirely on how large the slide is projected, so the chain is:
+    A point is a DOCUMENT unit, not a physical one. Its height on the wall depends
+    entirely on how large the slide is projected:
 
-        fraction_of_image = (pt / 72) * CAP_HEIGHT_RATIO / slide_h_in
-        physical_cap_in   = fraction_of_image * screen_h_in
-        require             physical_cap_in >= viewing_distance_in / 200
+        fraction_of_image = (pt / 72) * glyph_ratio / slide_h_in
+        physical_glyph_in = fraction_of_image * screen_h_in
+        require             physical_glyph_in >= viewing_distance_in / 200
 
-    Treating points as physical inches (the naive version of this function) reports a
-    ~185pt floor for a 30ft room, which is off by an order of magnitude.
+    Treating points as physical inches reports a ~185pt floor for a 30ft room.
 
-    If the screen size is unknown, derive it from the 4/6/8 rule -- and note that the
-    viewing distance then CANCELS, because screen size scales with room depth. The
-    floor becomes a property of the viewing need and the slide's aspect, not the room.
+    With no measured screen, screen height comes from the %EH tier, and the viewing
+    distance then CANCELS -- not a discovered invariant, just the substitution, since
+    screen height is defined as distance/ratio. Consequence: --room-depth alone can
+    never turn a pass into a fail. Pass --screen-height to measure a real room.
+
+    ⚠️ The result is a property of SLIDE HEIGHT IN INCHES, not of aspect ratio.
+    16:9 at 13.333x7.5 and 16:9 at 10x5.625 are the same shape and give 31.2pt vs
+    23.4pt, because the second authors everything at 75% scale.
     """
+    ratio, _ = glyph_ratio(font_name, element)
     if screen_h_in and room_depth_ft:
-        dist_in = room_depth_ft * 12.0
-        need_cap_in = dist_in / SUBTENSE_DIVISOR
-        return round(need_cap_in / screen_h_in * slide_h_in * 72.0 / CAP_HEIGHT_RATIO, 1)
-    ratio = VIEWING_NEED.get(need, VIEWING_NEED["basic"])
-    return round(ratio / SUBTENSE_DIVISOR * slide_h_in * 72.0 / CAP_HEIGHT_RATIO, 1)
+        need_in = (room_depth_ft * 12.0) / SUBTENSE_DIVISOR
+        return round(need_in / screen_h_in * slide_h_in * 72.0 / ratio, 1)
+    pct = PERCENT_EH.get(need, PERCENT_EH["basic"])
+    return round(pct * slide_h_in * 72.0 / ratio, 1)
 
 
-def audit(path, room_depth_ft=None, min_pt=None, need="basic", screen_h_in=None):
+def audit(path, room_depth_ft=None, min_pt=None, need="basic", screen_h_in=None,
+          element="x", font_name=None):
     prs = Presentation(str(path))
     theme = theme_colours(prs)
     mstyles = master_txstyles(prs)
+    fill_styles = theme_fill_styles(prs)
     slide_w_in = prs.slide_width / EMU_PER_IN
     slide_h_in = prs.slide_height / EMU_PER_IN
 
-    derived_pt = legibility_floor_pt(slide_h_in, need, screen_h_in, room_depth_ft)
+    derived_pt = legibility_floor_pt(slide_h_in, need, screen_h_in, room_depth_ft,
+                                     font_name, element)
+    _, glyph_desc = glyph_ratio(font_name, element)
     # What screen the stated room actually needs, which is the useful thing the
     # room depth tells you once the point-size floor stops depending on it.
     needed_screen_h_ft = (room_depth_ft / VIEWING_NEED.get(need, 6.0)) if room_depth_ft else None
@@ -571,7 +906,7 @@ def audit(path, room_depth_ft=None, min_pt=None, need="basic", screen_h_in=None)
         bg = slide_bg_rgb(slide, prs, theme)
         s_words, s_shapes = 0, 0
         ordered = list(walk_shapes(slide.shapes))
-        layers = [{"fill": shape_fill_rgb(sh, theme), "bounds": _bounds(sh, t),
+        layers = [{"fill": shape_fill_rgb(sh, theme, fill_styles), "bounds": _bounds(sh, t),
                    "name": sh.name} for sh, t, _ in ordered]
         for zi, (shape, tf, in_group) in enumerate(ordered):
             checked_shapes += 1
@@ -589,12 +924,10 @@ def audit(path, room_depth_ft=None, min_pt=None, need="basic", screen_h_in=None)
 
             # off-slide / bleeding geometry, in SLIDE coordinates
             try:
-                if shape.left is not None and shape.top is not None:
-                    x0, y0 = _apply(tf, shape.left, shape.top)
-                    x1, y1 = _apply(tf, shape.left + (shape.width or 0),
-                                    shape.top + (shape.height or 0))
-                    l, t = x0 / EMU_PER_IN, y0 / EMU_PER_IN
-                    r, b = x1 / EMU_PER_IN, y1 / EMU_PER_IN
+                bb = layers[zi]["bounds"]
+                if bb is not None:
+                    l, t = bb[0] / EMU_PER_IN, bb[1] / EMU_PER_IN
+                    r, b = bb[2] / EMU_PER_IN, bb[3] / EMU_PER_IN
                     if l < -0.05 or t < -0.05 or r > slide_w_in + 0.05 or b > slide_h_in + 0.05:
                         findings["offslide"].append({
                             "where": loc, "name": shape.name,
@@ -666,13 +999,34 @@ def audit(path, room_depth_ft=None, min_pt=None, need="basic", screen_h_in=None)
         "checked": {"shapes": checked_shapes, "runs": checked_runs},
         "type_sizes": sorted(sizes),
         "legibility_floor_pt": floor_pt,
-        "legibility_source": "explicit --min-pt" if min_pt else f"{need} viewing need",
+        "legibility_source": ("explicit --min-pt" if min_pt else
+                             f"{need} viewing need ({PERCENT_EH.get(need, 0.03) * 100:g}%EH), "
+                             f"{glyph_desc}"),
         "room_depth_ft": room_depth_ft,
         "needed_screen_height_ft": round(needed_screen_h_ft, 1) if needed_screen_h_ft else None,
         "findings": findings,
         "per_slide": per_slide,
         "theme_colours": theme,
     }
+
+
+def exit_code(r, fail_on):
+    """The ONE place a verdict is computed.
+
+    --json used to recompute this locally and skipped both the zero-run trap and
+    --fail-on any, so the mode every CI gate and agent actually uses reported 0 on a
+    deck with no measurable text -- precisely the state this module calls the most
+    dangerous it can be in.
+    """
+    n = {k: len(v) for k, v in r["findings"].items()}
+    hard = n["native_charts"] + n["tiny_text"] + n["low_contrast"] + n["offslide"]
+    total = sum(n.values())
+    if r["checked"]["runs"] == 0:
+        hard += 1
+        total += 1
+    if fail_on == "none":
+        return 0
+    return 1 if (total if fail_on == "any" else hard) else 0
 
 
 def report(r, fail_on):
@@ -719,16 +1073,7 @@ def report(r, fail_on):
                 print(f"      {detail}")
     print("\n  caveat: static file analysis. Says nothing about whether the deck is any good,")
     print("  whether the story works, or how it reads when projected in a lit room.\n")
-    total = sum(n.values())
-    hard = n["native_charts"] + n["tiny_text"] + n["low_contrast"]
-    # Measuring nothing is not passing. A reader that silently traverses no text is
-    # the single most dangerous state this tool can be in, because it reports green.
-    if r["checked"]["runs"] == 0:
-        hard += 1
-        total += 1
-    if fail_on == "none":
-        return 0
-    return 1 if (total if fail_on == "any" else hard) else 0
+    return exit_code(r, fail_on)
 
 
 def main():
@@ -742,6 +1087,12 @@ def main():
                          "real room instead of assuming the 4/6/8 rule")
     ap.add_argument("--viewing-need", choices=list(VIEWING_NEED), default="basic",
                     help="analytical (dense tables) / basic (default) / passive (back of a hall)")
+    ap.add_argument("--element", choices=["x", "cap"], default="x",
+                    help="reference glyph. AVIXA's own training says the element for "
+                         "text is a LOWERCASE letter, so x-height is the default; "
+                         "'cap' is ~35%% more lenient and not what the standard teaches")
+    ap.add_argument("--font", default=None,
+                    help="font name, for a real x-height ratio instead of the generic 0.52")
     ap.add_argument("--min-pt", type=float, default=None, help="override the point-size floor")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--fail-on", choices=["hard", "any", "none"], default="hard")
@@ -753,15 +1104,14 @@ def main():
         print("ERROR: --screen-height needs --room-depth to mean anything.", file=sys.stderr)
         return 2
     try:
-        r = audit(a.file, a.room_depth, a.min_pt, a.viewing_need, a.screen_height)
+        r = audit(a.file, a.room_depth, a.min_pt, a.viewing_need, a.screen_height,
+                  a.element, a.font)
     except Exception as e:
         print(f"ERROR: could not read {a.file}: {type(e).__name__}: {e}", file=sys.stderr)
         return 1
     if a.json:
         print(json.dumps(r, indent=2))
-        f = r["findings"]
-        hard = len(f["native_charts"]) + len(f["tiny_text"]) + len(f["low_contrast"])
-        return 0 if a.fail_on == "none" else (1 if hard else 0)
+        return exit_code(r, a.fail_on)
     return report(r, a.fail_on)
 
 

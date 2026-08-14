@@ -19,12 +19,24 @@ So the chart arrives as a dead picture: not editable, not restylable, not select
 data. The recipient cannot fix a typo in an axis label.
 
 **The response is not a style guide telling people to avoid charts. Style guides lose.**
-`scripts/deck_build.py` has no `add_chart` and no way to reach one. Every visual is built
-from rectangles, ovals, text boxes and tables — the primitives that survive editable.
-Compliance is structural.
+`scripts/deck_build.py` has no `add_chart`; every component builds from rectangles, ovals,
+text boxes and tables — the primitives that survive editable.
 
-Also breaks on import, for the same rebuild reason: fonts Google lacks (substituted, metrics
-shift, layout moves), slide transitions, and embedded video.
+⚠️ **This is a strong default, not a sealed box.** `Slide.s` and `Deck.prs` are public
+attributes holding the live python-pptx objects, so `s.s.shapes.add_chart(...)` reaches a
+native chart in one hop. An earlier version of this file claimed there was "no way to reach
+one" and that compliance was "structural"; that was false. What the round trip actually
+guarantees is narrower and still worth having: **the component library never creates a
+chart, and `deck-audit` catches one if you reach around it.**
+
+Also affected on import, for the same rebuild reason — and these follow **opposite** rules,
+so do not lump them together:
+
+- **Fonts Google lacks** are substituted; metrics shift and layout moves.
+- **Transitions:** supported ones carry over; unsupported ones are removed with **no substitute**.
+  Morph does not survive.
+- **Animations:** unsupported ones **are** substituted, usually with Fade.
+- **Embedded video:** unverified. Do not assert it either way without testing.
 
 ## Use it
 
@@ -58,8 +70,11 @@ Setting both explicitly is what makes the deck measurable by `deck-audit`.
 The first draft of the bundled theme had 18pt labels and **the builder rejected its own
 defaults on the first run**, which is the behaviour working.
 
-If you genuinely need smaller type you are designing a document to be read up close, not a
-slide to be projected. Set `viewing_need` to `analytical` in the theme and say so out loud.
+If you genuinely need smaller type you are authoring a document to be read up close, not a
+slide to be projected. Set `viewing_need` to `analytical` (2%EH) — but only if the screen
+really is that large relative to the room, because the tool cannot verify that and you are
+asserting it. ⚠️ Note this tier is **not** DISCAS Analytical Decision Making, which is a
+*more* demanding category, not a lighter one.
 
 ## Branding
 

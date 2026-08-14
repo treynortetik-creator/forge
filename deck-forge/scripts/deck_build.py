@@ -61,8 +61,8 @@ try:
     from deck_audit import legibility_floor_pt
 except ImportError:                                    # standalone use
     def legibility_floor_pt(slide_h_in, need="basic", *a, **k):
-        return round({"analytical": 4.0, "basic": 6.0, "passive": 8.0}[need]
-                     / 200.0 * slide_h_in * 72.0 / 0.70, 1)
+        return round({"analytical": .02, "basic": .03, "passive": .04}[need]
+                     * slide_h_in * 72.0 / 0.52, 1)
 
 
 DEFAULT_THEME = {
@@ -73,20 +73,40 @@ DEFAULT_THEME = {
         "accent": "1F4E79", "accent2": "C55A11", "rule": "D8D8D8",
         "on_accent": "FFFFFF",
     },
-    # Every size here clears the 'basic' floor (23.1pt on a 7.5in slide). 18pt labels
-    # are the habit this library will not let you keep: the first draft of this theme
-    # had them, and the builder rejected its own defaults on the first run. If you
-    # genuinely need smaller type you are designing a document to be read up close,
-    # not a slide to be projected — set viewing_need to "analytical" and say so.
-    "type": {"family": "Arial", "title_pt": 40, "subtitle_pt": 24,
-             "body_pt": 24, "label_pt": 24, "stat_pt": 60},
+    # Every size clears the 'basic' floor, which is 31.2pt on a 7.5in slide once the
+    # reference glyph is the LOWERCASE letter AVIXA's own training specifies rather
+    # than the capital this library first used. That correction moved the floor up by
+    # ~35%, and these sizes moved with it. They look large because most decks are in
+    # fact too small for the room they are shown in; that is the finding, not a bug.
+    # If you need denser type you are authoring a document to be read up close — set
+    # viewing_need to "analytical" (2%EH), and only if the screen really is that big
+    # relative to the room.
+    "type": {"family": "Arial", "title_pt": 44, "subtitle_pt": 32,
+             "body_pt": 32, "label_pt": 32, "stat_pt": 66},
     "layout": {"margin_in": 0.9, "gutter_in": 0.35, "title_top_in": 0.6},
     "viewing_need": "basic",
 }
 
 
+MIN_SHAPE_IN = 0.02          # below this a shape is a hairline or schema-invalid
+VIEWING_NEEDS = ("analytical", "basic", "passive")
+HEX = __import__("re").compile(r"^#?[0-9A-Fa-f]{6}$")
+
+
 class DeckError(Exception):
     """Raised when a deck would be built wrong. Loud on purpose."""
+
+
+def _lum(rgb):
+    def f(c):
+        c /= 255
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+    return 0.2126 * f(rgb[0]) + 0.7152 * f(rgb[1]) + 0.0722 * f(rgb[2])
+
+
+def contrast_ratio(a, b):
+    l1, l2 = sorted((_lum(a), _lum(b)), reverse=True)
+    return (l1 + 0.05) / (l2 + 0.05)
 
 
 class Theme:
@@ -98,13 +118,42 @@ class Theme:
                     self.d[k].update(v)
                 else:
                     self.d[k] = v
-        missing = [k for k in DEFAULT_THEME["colours"] if k not in self.d["colours"]]
-        if missing:
-            raise DeckError(f"theme is missing colours: {missing}")
+        # The deep copy above means every default key is always present, so the old
+        # "missing colours" guard could never fire for a dict. Validate the VALUES.
+        for k, v in self.d["colours"].items():
+            if not isinstance(v, str) or not HEX.match(v):
+                raise DeckError(
+                    f"theme colour {k!r} is {v!r}; expected a 6-digit hex like "
+                    f"'1F4E79' or '#1F4E79'. Named CSS colours and 3-digit hex are "
+                    f"not supported.")
+        for k, v in self.d["type"].items():
+            if k == "family":
+                if not isinstance(v, str) or not v.strip():
+                    raise DeckError(f"theme type.family is {v!r}; expected a font name")
+            elif not isinstance(v, (int, float)) or v <= 0:
+                raise DeckError(f"theme type.{k} is {v!r}; expected a positive number")
+        for k, v in self.d["layout"].items():
+            if not isinstance(v, (int, float)) or v < 0:
+                raise DeckError(f"theme layout.{k} is {v!r}; expected a number >= 0")
+        sl = self.d["slide"]
+        for k in ("width_in", "height_in"):
+            if not isinstance(sl.get(k), (int, float)) or sl[k] <= 0:
+                raise DeckError(f"theme slide.{k} is {sl.get(k)!r}; expected a positive number")
 
     @classmethod
     def load(cls, path):
-        return cls(json.loads(Path(path).read_text("utf-8")))
+        try:
+            data = json.loads(Path(path).read_text("utf-8"))
+        except FileNotFoundError:
+            raise DeckError(f"theme file not found: {path}")
+        except json.JSONDecodeError as e:
+            raise DeckError(f"theme file {path} is not valid JSON: {e}")
+        if not isinstance(data, dict):
+            raise DeckError(f"theme file {path} must contain a JSON object")
+        try:
+            return cls(data)
+        except DeckError as e:
+            raise DeckError(f"{path}: {e}")
 
     def rgb(self, name):
         v = self.d["colours"].get(name, name)
@@ -132,8 +181,9 @@ class Slide:
     # ── primitives ───────────────────────────────────────────────────────────
 
     def _text(self, x, y, w, h, text, pt, colour="ink", bold=False,
-              align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP, wrap=True):
+              align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP, wrap=True, on="bg"):
         self.deck._check_pt(pt, text)
+        self.deck._check_contrast(colour, on, pt, bold, text)
         box = self.s.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
         tf = box.text_frame
         tf.word_wrap = wrap
@@ -188,6 +238,7 @@ class Slide:
                        shape=MSO_SHAPE.OVAL)
             self._text(self.left + 0.35, self.y, w - 0.35, pt / 72 * 1.6, item, pt, "ink")
             self.y += pt / 72 * 1.75
+            self.deck._check_bounds(self.y, 'bullets')
         return self
 
     def bars(self, data, unit="", height_in=3.2, colour="accent"):
@@ -203,6 +254,16 @@ class Slide:
         gut = self.t.d["layout"]["gutter_in"]
         total_w = self.right - self.left
         bw = (total_w - gut * (n - 1)) / n
+        # a:ext/@cx is ST_PositiveCoordinate (minInclusive 0). Past ~30 bars this goes
+        # negative and emits schema-invalid OOXML that PowerPoint may refuse to open --
+        # and the audit certified 150 negative-width shapes as clean, exit 0.
+        if bw < MIN_SHAPE_IN:
+            raise DeckError(
+                f"{n} bars do not fit across {total_w:.2f}in: each would be "
+                f"{bw:.3f}in wide, and a shape cannot have negative or hairline width "
+                f"(a:ext/@cx must be >= 0).\nAt most "
+                f"{int((total_w + gut) // (MIN_SHAPE_IN + gut))} bars fit here. Split the "
+                f"data across slides, or use a table.")
         label_pt = self.t.pt("label_pt")
         base = self.y + height_in
         for i, (label, val) in enumerate(data):
@@ -214,6 +275,7 @@ class Slide:
             self._text(x, base + 0.1, bw, 0.5, label, label_pt, "muted", align=PP_ALIGN.CENTER)
         self._rect(self.left, base, total_w, 0.02, fill="rule")
         self.y = base + 0.75
+        self.deck._check_bounds(self.y, 'bars')
         return self
 
     def stats(self, items, colour="accent"):
@@ -229,6 +291,7 @@ class Slide:
             self._text(x, self.y, cw, 1.1, value, self.t.pt("stat_pt"), colour, bold=True)
             self._text(x, self.y + 1.15, cw, 0.9, caption, self.t.pt("label_pt"), "muted")
         self.y += 2.2
+        self.deck._check_bounds(self.y, 'stats')
         return self
 
     def callout(self, text, attribution=None, fill="accent", ink="on_accent"):
@@ -259,6 +322,7 @@ class Slide:
             run.font.name = self.t.family
             run.font.color.rgb = self.t.rgb(ink)
         self.y += h + 0.4
+        self.deck._check_bounds(self.y, 'block')
         return self
 
     def table(self, rows, col_widths=None, header=True):
@@ -294,6 +358,7 @@ class Slide:
                 cell.fill.fore_color.rgb = self.t.rgb("accent" if is_head else "bg")
         self.deck._check_pt(pt, "table text")
         self.y += h + 0.4
+        self.deck._check_bounds(self.y, 'block')
         return self
 
 
@@ -305,8 +370,44 @@ class Deck:
         self.prs = Presentation()
         self.prs.slide_width, self.prs.slide_height = Inches(self.w), Inches(self.h)
         self.need = self.theme.d.get("viewing_need", "basic")
+        # .get(need, default) swallowed typos: a theme meaning "passive" (floor 30.9pt)
+        # that misspelled it silently got 23.1pt, and text that should have been
+        # rejected built and audited clean.
+        if self.need not in VIEWING_NEEDS:
+            raise DeckError(
+                f"unknown viewing_need {self.need!r}. Use one of: "
+                f"{', '.join(sorted(VIEWING_NEEDS))}. Guessing here would quietly "
+                f"lower the legibility floor, which is the one thing this must not do.")
         self.floor_pt = legibility_floor_pt(self.h, self.need)
         self.slides = []
+
+    def _check_contrast(self, fg_name, bg_name, pt, bold, what=""):
+        """Contrast is half this plugin's headline; enforcing it only after the fact
+        let a theme with white ink on a white background build without complaint."""
+        try:
+            fg = tuple(self.theme.rgb(fg_name))
+            bg = tuple(self.theme.rgb(bg_name))
+        except Exception:
+            return
+        ratio = contrast_ratio(fg, bg)
+        # WCAG large text is 18pt, or 14pt bold. (24px/18.66px are those same sizes
+        # in CSS pixels — applying the pixel figures to points is a 1.333x error.)
+        need = 3.0 if (pt >= 18.0 or (bold and pt >= 14.0)) else 4.5
+        if ratio < need:
+            raise DeckError(
+                f"{fg_name} on {bg_name} is {ratio:.2f}:1, below the {need}:1 WCAG "
+                f"minimum for {pt}pt{' bold' if bold else ''} text"
+                + (f" (text: {str(what)[:40]!r})" if what else "")
+                + ".\nChange the colour pair in the theme. Do not ship text nobody "
+                  "can read.")
+
+    def _check_bounds(self, y, what=""):
+        if y > self.h + 0.01:
+            raise DeckError(
+                f"content reached {y:.2f}in on a {self.h}in slide — {y - self.h:.2f}in "
+                f"past the bottom edge" + (f" at {what}" if what else "") +
+                ".\nSplit across slides or cut content. Off-slide content is invisible "
+                "in the room and silently truncated in a PDF export.")
 
     def _check_pt(self, pt, what=""):
         if pt < self.floor_pt:
