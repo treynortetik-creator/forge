@@ -1,0 +1,28 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "forge",
+  "description": "Two Claude Code plugins for making things: design-forge for visual work, story-forge for long-form fiction. Both are built on the same idea — judgment stays with the model, and anything expressed as a number gets measured instead of eyeballed.",
+  "owner": { "name": "Treynor Tetik" },
+  "plugins": [
+    {
+      "name": "design-forge",
+      "displayName": "Design Forge",
+      "description": "Adversarial builder/critic loop, a measurement harness that computes what a screenshot cannot show (type ladder, worst-case accent count, WCAG contrast, target size), a licence-cleared asset library, a scroll-film site builder, and a three-pass prose de-slopper.",
+      "source": "./design-forge",
+      "category": "design",
+      "license": "MIT",
+      "author": { "name": "Treynor Tetik" },
+      "keywords": ["design", "critique", "accessibility", "wcag", "typography", "visual-qa", "css", "anti-slop"]
+    },
+    {
+      "name": "story-forge",
+      "displayName": "Story Forge",
+      "description": "A long-form fiction pipeline: braindump to dossier, outlining, story-hacking, drafting, a three-pass line edit that strips AI prose patterns, a continuity and chronology audit, and a final export that removes invisible provenance characters.",
+      "source": "./story-forge",
+      "category": "writing",
+      "license": "MIT",
+      "author": { "name": "Treynor Tetik" },
+      "keywords": ["writing", "fiction", "novel", "outlining", "editing", "anti-slop", "continuity"]
+    }
+  ]
+}

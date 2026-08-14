@@ -1,0 +1,138 @@
+# Forge
+
+Two Claude Code plugins for making things.
+
+<p align="center">
+  <img src="media/forge-writes.gif" width="230" alt="Forge writing a novel by hand">
+  &nbsp;&nbsp;
+  <img src="media/forge-designs.gif" width="230" alt="Forge designing a landing page">
+</p>
+
+<p align="center"><sub><b>Same guy.</b> He writes the book and he designs the site.</sub></p>
+
+| | |
+|---|---|
+| **[design-forge](design-forge/)** | Visual work — an adversarial builder/critic loop, a measurement harness, a licence-cleared asset library, a scroll-film site builder |
+| **[story-forge](story-forge/)** | Long-form fiction — braindump to dossier, outlining, drafting, a three-pass line edit, a continuity audit |
+
+They share one idea: **judgment stays with the model, and anything expressed as a number gets measured
+instead of eyeballed.**
+
+That is not a style preference. Vision models score **58.57%** on trivial geometric tasks and
+**56.84% on counting line intersections** in an image. Open-ended AI design audit runs an **80.1%
+false-positive rate**, with 8.9% of it actively harmful advice. Ask a model whether a page is any good
+and you get something useful. Ask it to count accents or verify a hex and you get confident noise.
+
+So the work is split. A harness computes what is computable. The model is spent on taste, structure,
+and whether the thing is actually any good.
+
+<sub>Sources and verification tiers for every figure: [design-forge/references/mechanisms.md](design-forge/references/mechanisms.md)</sub>
+
+---
+
+## Install
+
+```bash
+claude plugin marketplace add treynortetik-creator/forge
+claude plugin install design-forge@forge     # or…
+claude plugin install story-forge@forge      # …or both
+```
+
+Or clone and install locally:
+
+```bash
+git clone https://github.com/treynortetik-creator/forge && cd forge
+claude plugin marketplace add .
+claude plugin install design-forge@forge
+```
+
+Restart the session or `/clear` afterwards so the skills load.
+
+**design-forge has an optional toolchain** (ImageMagick, Inkscape, Graphviz, ffmpeg, DuckDB) — see
+`design-forge/scripts/install.sh --tools` and `design-forge/scripts/doctor.sh`, which reports what is
+missing *and what each gap actually costs you*. Neither plugin requires it; both run on `python3` and
+a browser.
+
+---
+
+## design-forge
+
+<img src="media/forge-designs.gif" width="180" align="right" alt="">
+
+Seven skills. The one that earns its keep is **`design-audit`** — a read-only browser harness that
+computes what a screenshot cannot show.
+
+Three pages once went through **four rounds** of the critic loop and were declared finished. The
+harness then found **23 real defects in under two minutes**: a colour that was simply the wrong hex,
+seventeen WCAG failures, a type-ladder violation, tap targets under the legal minimum. Then a red team
+found bugs *in the harness*, and the fixed version found more still on the same "clean" pages.
+
+Four things a screenshot structurally cannot do:
+
+1. **Verify an exact value.** Two lavenders forty units apart look identical.
+2. **Falsify a per-viewport rule.** A screenshot *is* one viewport, and you chose which one.
+3. **Compare two numbers far apart in the page.** A 655px hero and a 688px story column never share a frame.
+4. **Compute a ratio.** Nobody eyeballs 4.21 against 4.50.
+
+**What it does not see, stated plainly:** one page, one state, one width. No hover or focus states (SC
+2.4.7 Focus Visible is Level AA and is unchecked), no dark mode, no error or empty states, no mobile,
+no RTL, no print, nothing about the accessibility tree. Two AA criteria implemented out of roughly
+fifty-five. A green report means *conformant on the axes measured* — not *accessible*, and not *good*.
+
+---
+
+## story-forge
+
+<img src="media/forge-writes.gif" width="180" align="right" alt="">
+
+Fifteen skills and four chaining commands, from a braindump through to a manuscript that has been
+line-edited, continuity-audited, and stripped of invisible provenance characters.
+
+The editing half is shared with design-forge: **`de-sloppifier`** (a three-pass line edit),
+**`voice`** (extract a style fingerprint from real samples so the prose is anchored to a person
+instead of the model's defaults), and **`clean-export`**.
+
+`de-sloppifier` leads with **present participial clauses**, not a word list — PNAS measured
+instruction-tuned models using them at **5.3× the human rate**. The durable machine signature is
+grammatical, not lexical; word lists date fast and survive light editing.
+
+It also deliberately does **not** use the word *burstiness*. That term has three incompatible
+meanings, the popular one is a mutation of a vendor coinage, and the only peer-reviewed test of it
+found it unreliable. What replaced it is honest and still useful: sentence-length **CV**, where human
+non-fiction runs ~78% against ~50% for machine prose **at nearly identical mean sentence length**. The
+signal was never length. It was dispersion.
+
+---
+
+## Attribution
+
+Both plugins stand on other people's work and say so.
+
+- **design-loop** is adapted from *The Design Loop*, itself a variation on the **Gauntlet Loop
+  originated by Matt Shumer**. The method is his.
+- **story-forge's craft notes** summarise publicly posted material, largely **Jason Hamilton / The
+  Nerdy Novelist**, plus **Wulf Moon**'s framework and **Browne & King's *Self-Editing for Fiction
+  Writers***. Each note names its source in frontmatter. Full detail: **[story-forge/NOTICES.md](story-forge/NOTICES.md)**.
+- 🔴 **The de-sloppifier's AI-vocabulary lists overlap Wikipedia's *Signs of AI writing*, which is
+  CC BY-SA** — attribution and share-alike required. Credited in both plugins' notices. If you reuse
+  those lists, carry the attribution.
+- **Two notes were deliberately removed before this went public** because they are third-party
+  creative assets rather than summaries of a method — a verbatim prompt and a curated vocabulary list.
+  Nothing is broken by their absence; see
+  [story-forge/references/writing/README.md](story-forge/references/writing/README.md).
+- **Anthropic's `frontend-design` skill** is quoted in design-forge's house-style notes, marked inline.
+- The **asset library** ships 61 files under MIT, ISC, OFL-1.1, CC0 and public-domain terms, each with
+  its licence *and where that licence was verified* recorded per file. See
+  [design-forge/THIRD-PARTY-NOTICES.md](design-forge/THIRD-PARTY-NOTICES.md).
+
+If you are one of the creators above and want something changed or removed, open an issue and it goes
+the same day.
+
+---
+
+## Licence
+
+MIT for the original work in this repository. The bundled assets under
+`design-forge/skills/art-department/library/` remain under their own licences, which carry
+redistribution obligations of their own — those are enumerated in
+[design-forge/THIRD-PARTY-NOTICES.md](design-forge/THIRD-PARTY-NOTICES.md).

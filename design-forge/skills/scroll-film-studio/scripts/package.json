@@ -1,0 +1,12 @@
+{
+  "name": "scroll-film-studio-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Verification helpers for the Scroll-Film Studio skill. Run `npm install` once before using shot.js or verify.js.",
+  "scripts": {
+    "postinstall": "node -e \"console.log('scroll-film-studio: ready. Chrome/Chromium must be installed, or set CHROME_PATH.')\""
+  },
+  "dependencies": {
+    "puppeteer-core": "^23.0.0"
+  }
+}
