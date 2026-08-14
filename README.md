@@ -1,6 +1,6 @@
 # Forge
 
-Two Claude Code plugins for making things.
+Three Claude Code plugins for making things.
 
 <p align="center">
   <img src="media/forge-writes.gif" width="230" alt="Forge writing a novel by hand">
@@ -8,12 +8,13 @@ Two Claude Code plugins for making things.
   <img src="media/forge-designs.gif" width="230" alt="Forge designing a landing page">
 </p>
 
-<p align="center"><sub><b>Same guy.</b> He writes the book and he designs the site.</sub></p>
+<p align="center"><sub><b>Same guy.</b> He writes the book, he designs the site, and he builds the deck.</sub></p>
 
 | | |
 |---|---|
 | **[design-forge](design-forge/)** | Visual work — an adversarial builder/critic loop, a measurement harness, a licence-cleared asset library, a scroll-film site builder |
 | **[story-forge](story-forge/)** | Long-form fiction — braindump to dossier, outlining, drafting, a three-pass line edit, a continuity audit |
+| **[deck-forge](deck-forge/)** | Presentations — a component library that cannot build a native chart, and a harness that measures legibility at distance and contrast against the real backdrop |
 
 They share one idea: **judgment stays with the model, and anything expressed as a number gets measured
 instead of eyeballed.**
@@ -40,8 +41,9 @@ harness decides which one wins.*
 
 ```bash
 claude plugin marketplace add treynortetik-creator/forge
-claude plugin install design-forge@forge     # or…
-claude plugin install story-forge@forge      # …or both
+claude plugin install design-forge@forge     # any of them,
+claude plugin install story-forge@forge      # or
+claude plugin install deck-forge@forge       # all three
 ```
 
 Or clone and install locally:
@@ -107,6 +109,40 @@ meanings, the popular one is a mutation of a vendor coinage, and the only peer-r
 found it unreliable. What replaced it is honest and still useful: sentence-length **CV**, where human
 non-fiction runs ~78% against ~50% for machine prose **at nearly identical mean sentence length**. The
 signal was never length. It was dispersion.
+
+---
+
+## deck-forge
+
+A native PowerPoint chart **flattens into a static image** on Google Slides import, and there is no
+workaround inside an uploaded `.pptx` — Slides only keeps a chart live when it is linked to a Sheet,
+and that link cannot exist in a file you upload. The recipient cannot fix a typo in an axis label.
+
+The usual response is a style guide telling people to avoid charts. Style guides lose. So
+`deck_build.py` **has no `add_chart` and no way to reach one**. Every visual is built from rectangles,
+ovals, text boxes and tables — the primitives that survive the import editable. Compliance is
+structural, not advisory. The builder also enforces the legibility floor with an exception rather than
+a warning, on the theory that a warning you can scroll past is how 8pt footnotes ship.
+
+`deck_audit.py` measures what a person looking at a slide cannot:
+
+| | |
+|---|---|
+| **legibility** | minimum point size from angular subtense and the AV 4/6/8 rule, not folklore |
+| **contrast** | WCAG 1.4.3 against the **actual** backdrop, resolved by z-order |
+| **native charts** | the thing that will silently become a picture |
+| **off-slide geometry** | including shapes nested inside groups |
+
+Two results worth stating plainly. **Points are not a physical size** — a point is a document unit, and
+treating it as an inch gives a 185pt floor for a 30ft room. Run the real chain and, under the 4/6/8
+rule, the viewing distance *cancels*, because screen size scales with room depth. The floor lands at
+**23.1pt** on a 7.5in slide, which is a decent explanation for where the folk "minimum 24pt" rule came
+from. And **WCAG large text is 18pt or 14pt bold** — the familiar 24px/18.66px figures are those same
+sizes in CSS pixels, so applying them to points invents failures between 18 and 24pt.
+
+The harness shipped four times reporting green on the defect it exists to catch, including a version
+that returned "0 runs, all PASS, exit 0" on a deck built exactly the way the plugin says to build one.
+Each of those is now a regression test; there are 33.
 
 ---
 
