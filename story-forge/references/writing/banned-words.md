@@ -10,6 +10,17 @@ status: living
 
 # Banned Words List (AI-slop filter)
 
+🔴 **This list is calibrated for FICTION PROSE. Do not apply it verbatim to other copy.**
+It bans `Live`, which is correct when a model reaches for "lively" as decoration and wrong
+when you are writing an invitation to an evening of **live jazz**. It bans `Register` for a
+documented fiction-specific reason (clinical sensor-verbs standing in for felt sensation,
+see the note further down) and that reasoning does not transfer to an event page where
+guests **register** to attend.
+
+Applying a fiction slop-filter to event, product or business copy strips load-bearing
+domain nouns and reads as damage. Treat entries as candidates in fiction and as
+suggestions everywhere else, and keep any word that is doing literal work.
+
 Part of the **story hacker prompts** writing system — feed this to the model so the prose doesn't read as AI-generated.
 
 > Forbidden list of words, phrases, and names. Do not use any of the following in the text.
