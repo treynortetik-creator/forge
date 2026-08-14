@@ -27,6 +27,39 @@ System posture for all passes: *You are an expert line editor. This is a difficu
 > a chunk boundary**. The word stream is never affected. If your manuscript marks scene breaks with
 > blank lines only, use a visible marker (`***`, `#`) instead — those round-trip exactly.
 
+## 🔴 After every pass: prove you did not destroy anything
+
+A line edit that quietly deletes a citation is indistinguishable, in a 90,000-word diff, from a line
+edit that tightened a sentence. **August et al., *PLOS ONE*, February 2026**: an LLM made 83
+corrections to global-health papers — **14% made the text worse**, and it silently removed **ten
+pieces of key information, including in-text citations and a reference to a table.** A human editor
+made 21 corrections, 90% improvements, and **flagged seven unclear passages instead of rewriting
+them**. Neither AI tool flagged anything.
+
+So run this after each pass, before accepting the output:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/de-sloppifier/scripts/edit_diff.py before.md after.md
+```
+
+It classifies every change and escalates only the two classes that can destroy meaning:
+
+| Severity | What it catches |
+|---|---|
+| 🔴 **DELETION** | a citation, quote, cross-reference (`See Table 3`) or number that existed before and does not exist after |
+| ⚠️ **MEANING** | a negation flipped, a hedge removed, a quantifier widened (*most → all*), or a whole sentence deleted rather than rewritten |
+
+**It deliberately reports nothing for style, typo, punctuation or whitespace changes.** The job is to
+make the dangerous 2% findable, not to re-review the safe 98% — a report that flags everything gets
+skimmed, which is the failure mode this exists to avoid.
+
+Exit code is 1 when a deletion is found, so it can gate a chain (`--fail-on meaning|any|none` to
+change the threshold, `--json` for machine output).
+
+**Judgement still required.** A deleted number is sometimes correct — the edit may have removed a
+redundant restatement. The tool's claim is *"this changed and it is the kind of change that matters"*,
+never *"this is wrong."*
+
 ## The change-log contract — every analyze step outputs this shape
 
 The artifact between the two halves of every pass is specified, not freeform:

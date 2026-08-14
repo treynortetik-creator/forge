@@ -77,6 +77,19 @@ Follow the logic-check skill's own dependency check at the top of that skill. If
 
 ---
 
+## Step 4.4: Semantic-Damage Check
+
+Before the repeat scan, prove the wave did not delete anything load-bearing:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}"/skills/de-sloppifier/scripts/edit_diff.py <original> <deslopped>
+```
+
+🔴 **Any DELETION finding stops the chain.** A missing citation, quote, cross-reference or number is
+not a style outcome — restore it and re-run. MEANING findings (flipped negation, dropped hedge,
+widened quantifier) need a human decision each; they are often legitimate tightening, and sometimes a
+reversal of what the author actually claimed.
+
 ## Step 4.5: Post-Wave Repeat Scan
 
 Edit waves introduce repeats, especially when chunks or chapters were edited in parallel: independent editors converge on the same replacement phrasing. After all edits are applied:

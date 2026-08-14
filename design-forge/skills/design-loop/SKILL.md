@@ -112,6 +112,20 @@ Rules:
 - **Binary verdicts, not scores.** Scores drift upward every round.
 - **All three must pass.** Any fail goes back to the builder with the single biggest gap named.
 - **No fixed round count.** The exit is winning, or the user stopping the run.
+- 🔴 **Blind the critic to authorship, cap its findings, and demand a line citation.**
+  Measured: 14 trained instructors highlight **42.8%** of an essay; four frontier models highlight
+  **over 80%**. Comments average **87.1 words vs 37.9**. And agreement with instructors on *which
+  problem is most urgent* is **38.5%** — barely better than chance. **The model has no concept of
+  significance.** It will find something wrong with everything, at length, in no useful order.
+  Three cheap corrections, all of which change the output:
+  - **Blind it.** Never tell a critic whose work it is, that it is "our" build, or which round this
+    is. A model told the author is nervous will praise 300 lines of nonsense — that has been
+    demonstrated on a prompt that explicitly promised honest feedback.
+  - **Cap the findings.** "Return at most 3" forces a ranking decision the model will otherwise
+    refuse to make. An uncapped critic returns a list, not a judgement.
+  - **Require a citation for every claim** — a selector, a line number, a measured value. A finding
+    that cannot point at something is not falsifiable, and unfalsifiable findings are exactly what
+    fill the other 40% of the highlighting.
 - 🔴 **One mechanism, one call.** A batched checklist in a single context quietly reintroduces the
   holistic judgment you were trying to avoid. Per-item binary questions lift exact agreement with
   human preference (46.4% → 52.2%) and cut variance. Randomise the order — position bias is worth
