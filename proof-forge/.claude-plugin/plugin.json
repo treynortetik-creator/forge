@@ -1,6 +1,6 @@
 {
   "name": "proof-forge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Verify what came out of the render. Compare two exports and mark exactly where they differ, on video, stills or audio, with a threshold derived from the pair rather than guessed at.",
   "author": {
     "name": "treynortetik-creator"
