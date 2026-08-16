@@ -1,7 +1,7 @@
 {
   "name": "story-forge",
   "description": "A long-form fiction pipeline as Claude Code skills: braindump to dossier, outlining, story-hacking, drafting, and a three-pass line edit that strips AI prose patterns. Claude orchestrates; python handles the deterministic glue. Includes clean-export, a final pass that removes invisible provenance characters without altering a word.",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": {
     "name": "Treynor Tetik"
   },

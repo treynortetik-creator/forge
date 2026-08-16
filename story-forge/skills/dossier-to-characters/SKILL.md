@@ -37,6 +37,17 @@ dialogue samples in four registers (relaxed, stressed, thoughtful, excited) · *
 scored against the anchored rubric in
 `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md` · a five-part character arc.
 
+🔴 **If the book will be ILLUSTRATED, the physical description carries a hard extra rule: every
+garment gets an explicit colour and form, and so does every recurring object the character owns.**
+"A sweater" drifts to a different colour in every generated image. "A rust-orange knit sweater" does
+not. "A parked pickup truck" comes out malformed; "a 1980s American full-size pickup, faded
+forest-green with a white roof, single cab, light dust on the lower panels" does not. **A character
+sheet controls only what it enumerates — everything unstated is re-rolled on every image call.**
+This was diagnosed on a real book where 0 of 11 spreads specified a garment colour and the mother's
+entry gave her hair, skin and a smile but no clothing at all. Full method, including why the whole
+cast must be generated in ONE image and why each costume state needs its own sheet:
+`${CLAUDE_PLUGIN_ROOT}/references/art/character-anchors.md`.
+
 Two standing constraints from the source, both load-bearing:
 
 > **"Your job is not to produce a happily ever after for each character, it is to be a brutal
