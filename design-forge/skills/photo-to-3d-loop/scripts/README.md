@@ -20,6 +20,13 @@ execute `bpy` inside it, which is what makes scene state persist between iterati
 🔴 Port **9877 is the OFFICIAL addon and has no `execute_code`** — it will connect and then
 fail to do anything. Verified against Blender 5.2.0 LTS.
 
+⚠️ **One bridge, one scene, one worker.** `driver.py iterate` resets that shared scene every
+round, so two of these running at once overwrite each other and produce plausible wrong
+numbers rather than an error. Both ends of the socket are pinned to 9876 (`driver.py:40`, and
+the addon's own default), so a second bridged instance is not a supported path. `../SKILL.md`
+documents the headless alternative — `blender --background`, 1.45 s and 370 MB per render —
+which removes the shared state entirely.
+
 **2. `magick` (ImageMagick 7) and `ffmpeg` on PATH.**
 All measurement is ImageMagick shelling out; `ffmpeg` encodes the turntable only. Note
 ImageMagick 7 has no bare `convert`. Verified against ImageMagick 7.1.2 and ffmpeg 8.1.

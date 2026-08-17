@@ -110,6 +110,47 @@ harness defects on day one — every view clipping to featureless white, and the
 frame at every angle — either of which would have burned critic rounds on lighting notes instead of
 geometry. **After the smoke test, a bad render can only be the model's fault.**
 
+### 🔴 One bridge, one scene — and the headless way out
+
+The persistent bridge is the documented default and should stay it: twenty rounds ran on it. But it
+means **one Blender, one bridge, one mutable scene**, and `driver.py iterate` opens every round by
+**resetting that scene** and rebuilding it from the model script.
+
+**Two concurrent workers therefore destroy each other's work, and the failure does not look like a
+crash. It looks like plausible, wrong numbers**, because each worker measures renders of whichever
+model happened to be in the scene when its render fired. That is the single most dangerous failure
+mode in this whole method — every guard rail in this file exists to catch exactly that class of
+silent-plausible error, and a shared scene manufactures it wholesale.
+
+⚠️ **Do not solve it with a second bridged instance.** Both ends of the socket are pinned to 9876:
+`driver.py:40` holds `PORT = 9876` as a module constant with no override, and the community addon
+auto-starts on the same number (`blender_mcp_community.py:2834`, `port = 9876`; its `blendermcp_port`
+scene property defaults to 9876 too, and the `BlenderMCPServer.__init__` at line 47 takes a `port`
+argument nobody varies). A second bridge means editing the addon *and* the harness before you have
+modelled anything.
+
+**The way out is no bridge at all.** `blender --background --factory-startup --python <script>` —
+full process launch, scene build, 512 px EEVEE render, exit — measured on this machine at
+**1.45 s wall clock and 370 MB peak RSS.** No bridge, no persistent scene, **no shared mutable
+state**: each worker is its own OS process and they physically cannot corrupt one another. This is
+also what VIGA itself did, a fresh `--background` subprocess per iteration. The persistent bridge
+here was a convenience, never a requirement.
+
+**The ceiling is RAM, not cores.** At ~370 MB per instance, 6-8 concurrent is realistic on a 16 GB
+machine and fewer with anything else running. **Check free memory before fanning out**; thrashing is
+slower than running serially.
+
+🔴 **Do not half-migrate.** The harness talks to the bridge over a socket. Headless is a *different
+execution path* — a script handed to `blender --background --python`, not a socket call. **A worker
+that believes it is headless while still calling the socket will silently operate on the shared GUI
+scene**, which is precisely the bug headless exists to remove. Migrate fully or not at all.
+
+⭐ **And know what you are buying, because it is less than it looks: Blender is not the bottleneck.**
+A render is 1.45 s. The loop is slow because the model and the critic reason slowly. Parallel
+headless Blender removes a *collision risk* and buys some wall clock; the real throughput win is
+parallelising the reasoning. **Do not re-plumb infrastructure to speed up the fastest part of the
+pipeline.**
+
 ### The contact sheet is the feedback signal
 
 Each render sits **directly above the photograph taken from the same angle**. That column alignment
