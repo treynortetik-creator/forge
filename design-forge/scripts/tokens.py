@@ -228,7 +228,19 @@ def main():
                   f"longer matches this source's format", file=sys.stderr)
             continue
         if a.category:
+            before_n = len(merged)
             merged = {kk: vv for kk, vv in merged.items() if a.category.lower() in kk.lower()}
+            if not merged:
+                # A silent zero here is a lie: the file parsed fine and is often ENTIRELY the
+                # thing you filtered for. --category is a substring match on the token NAME, so
+                # `--category color` hits tailwind's `--color-red-500` and misses open-props'
+                # `--gray-0` and radix's `--blue-1`, which are nothing but colours.
+                print(f"\n{SOURCES[k]['name']}  —  filter '--category {a.category}' matched 0 of "
+                      f"{before_n} tokens.\n  This is a NAME substring match, not a semantic "
+                      f"category. This source's tokens are not named with '{a.category}' in them.\n"
+                      f"  Drop --category to see all {before_n}.", file=sys.stderr)
+                failures += 1
+                continue
         if a.json:
             results.append({"source": k, **SOURCES[k], "tokens": merged})
         else:
