@@ -78,7 +78,7 @@ a browser.
 
 <img src="media/forge-designs.gif" width="180" align="right" alt="">
 
-Seven skills. The one that earns its keep is **`design-audit`** — a read-only browser harness that
+Eight skills. The one that earns its keep is **`design-audit`** — a read-only browser harness that
 computes what a screenshot cannot show.
 
 Three pages once went through **four rounds** of the critic loop and were declared finished. The
@@ -97,6 +97,15 @@ Four things a screenshot structurally cannot do:
 2.4.7 Focus Visible is Level AA and is unchecked), no dark mode, no error or empty states, no mobile,
 no RTL, no print, nothing about the accessibility tree. Two AA criteria implemented out of roughly
 fifty-five. A green report means *conformant on the axes measured* — not *accessible*, and not *good*.
+
+**`photo-to-3d-loop`** applies the same thesis to geometry: model a real object in Blender from
+reference photographs, render fixed views, measure the silhouettes, and send a **fresh** critic that
+never saw the build. Twenty rounds reached 91.9% mean IoU, and about half of them went into finding
+out that an instrument was lying rather than that the model was wrong. Its hardest-won rule is that
+**a person who has physically handled the object outranks every critic and every metric** — the
+defect that closed the project was flat flanks on a part that curves, invisible to four rounds of
+critics *and* to the metric, because a flat flank and a convex one cast the identical silhouette from
+every view the rig could render.
 
 ---
 

@@ -68,6 +68,7 @@ Only go to `references/asset-sources.md` when the library does not already have 
 | A chart in a report | **Hand-authored inline SVG** (`viewBox`, `<rect rx=6>`, one bar in accent) | Chart.js, a CDN, a generated image |
 | A system/architecture diagram | **Graphviz** `dot -Tsvg` (big graphs) or **hand SVG** (<12 nodes) | Mermaid on anything branded — it reads "Windows 95" |
 | Depth, a hero object, a texture with real light | **Blender** → render → optionally **Inkscape** `object-trace` → vector | A CSS `box-shadow` approximation |
+| A 3D model of a **real object**, built from photographs of it | 🔴 **`photo-to-3d-loop`** — load it first. This is a multi-round build/render/measure/critic loop, not a modelling session, and it carries ~20 traps that each cost an hour | Modelling by eye against the photos and calling it done |
 | A photographic background / material / HDRI | **Poly Haven** or **ambientCG** (CC0, keyless) | Generating one |
 | An icon | **Iconify** (326k, per-set SPDX; `healthicons` = 2,709 MIT) | Generating one, or SVG Repo |
 | Ornament, pattern, botanical, editorial texture | **Cleveland / AIC / Smithsonian / Wikimedia** (CC0 or PD) | A generated "vintage-style" image |
@@ -175,6 +176,11 @@ the same as a screenshot that proves the thing is good.
 **For a Blender render:** the `blender` MCP (port 9877) takes viewport screenshots. Look before you
 commit to a 96-sample Cycles run.
 
+⚠️ **Looking is not enough when the subject is a real object you have photographs of.** A flat flank
+and a convex one cast the *identical* silhouette from the front, the rear and both profiles — four
+rounds of critics missed exactly that, and so did the metric. If you are reproducing something real,
+use **`photo-to-3d-loop`**, which measures instead.
+
 ---
 
 ## Cost discipline
@@ -194,3 +200,5 @@ commit to a 96-sample Cycles run.
 - `references/asset-sources.md` — the verified command reference and every gotcha
 - `memory/reference/artifacts/2026-08-07-free-asset-libraries-crawlable.md` — the source research
 - `skills/scroll-film-studio/` — the scroll-film build path
+- `skills/photo-to-3d-loop/` — modelling a real object in Blender from reference photographs: the
+  build/render/measure/fresh-critic loop, the acceptance gate, and the Blender 5.x bridge traps
