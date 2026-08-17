@@ -51,16 +51,23 @@ three. **Revisit this only if your metric can still see your edits.**
 
 ## The loop, one round
 
+The harness ships with this skill, in `scripts/`. 🔴 **Run it from YOUR project root** — the
+directory holding `refs/` and `renders/` — because that is what the scripts anchor their
+paths to. `cd` there first, or set `P23D_ROOT`.
+
 ```bash
-python3 driver.py check                      # bridge alive? which Blender?
+P23D=${CLAUDE_PLUGIN_ROOT}/skills/photo-to-3d-loop/scripts
+
+cd /path/to/your/project                     # refs/ and renders/ live here
+python3 $P23D/driver.py check                # bridge alive? which Blender? which project?
 cp model_v20.py model_v21.py                 # ALWAYS fork; never edit a shipped version
 #   ... ONE coherent set of changes to ONE named component ...
-python3 driver.py iterate v21 model_v21.py   # reset, run, render all views, contact sheet, snapshot
-python3 -c "import driver; driver.render_masks('v21')"
-python3 loop.py score v21                    # per-view IoU + W:H error
-python3 loop.py judge v21 v20                # ACCEPT or REJECT, with reasons
-python3 overlay.py v21                       # red/blue silhouette difference map
-python3 loop.py trend                        # per-view history + oscillation flags
+python3 $P23D/driver.py iterate v21 model_v21.py   # reset, run, render all views, sheet, snapshot
+python3 $P23D/driver.py masks v21            # alpha-matte pass — what gets scored
+python3 $P23D/loop.py score v21              # per-view IoU + W:H error
+python3 $P23D/loop.py judge v21 v20          # ACCEPT or REJECT, with reasons
+python3 $P23D/overlay.py v21                 # red/blue silhouette difference map
+python3 $P23D/loop.py trend                  # per-view history + oscillation flags
 ```
 
 Then **dispatch a fresh critic sub-agent**, read its report, verify every number in it, and write the
@@ -73,6 +80,10 @@ not re-derive anything.
 
 ### The harness, seven files
 
+They ship with this skill in **`${CLAUDE_PLUGIN_ROOT}/skills/photo-to-3d-loop/scripts/`**, and
+that folder's `README.md` carries the run order, the environment variables, and the full list
+of what a new project has to change.
+
 | file | what it does |
 |---|---|
 | `driver.py` | bridge, reset, studio, the fixed-view rig (az/el/**roll**/ref), render, alpha masks, contact sheet, snapshot |
@@ -82,6 +93,17 @@ not re-derive anything.
 | `analyze_refs.py` | photogrammetry on the references: section extraction, in-plane roll, corner fits |
 | `fit_camera.py` | freeze the mesh, move only the camera — the mesh-or-rig diagnostic |
 | `turntable.py` | seamless orbit, EEVEE or Cycles, with a motion check |
+
+⚠️ **`driver.py`'s `VIEWS` rig is a WORKED EXAMPLE, not a template** — seven views fitted to
+one specific device. Keep it as the reference for what a fitted rig looks like, replace the
+tuples for your object, and note the mapping is declared in **three** places (`driver.VIEWS`,
+`measure.VIEWS`, `overlay.PAIRS`) with nothing keeping them in sync. A mapping that disagrees
+between files judges a render against the wrong photograph and the numbers stay plausible.
+
+**Prerequisites, both hard:** Blender running with the **community** MCP bridge on
+`127.0.0.1:9876` (port 9877 is the official addon and has no `execute_code`), and `magick` +
+`ffmpeg` on PATH. Host side is pure Python stdlib. `python3 $P23D/driver.py check` tests all
+of it in one call.
 
 **Smoke-test the whole path on a plain box before modelling anything.** Doing that found two real
 harness defects on day one — every view clipping to featureless white, and the object overflowing the
