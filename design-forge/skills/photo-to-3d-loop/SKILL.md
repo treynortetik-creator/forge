@@ -399,6 +399,29 @@ evidence about the *lens*, because their poses were never free parameters. If a 
 place with the mesh frozen, the mesh was never the problem. **Its error is then not evidence about
 the mesh and must not be spent on the mesh.**
 
+⭐ **REFINEMENT, 2026-08-18 — the ban is on the EVIDENCE, not on the parameter.** A naive reading of
+this rule would have blocked a correct fix, so state it precisely:
+
+> **Banned:** nudging azimuth/elevation until a SCORE improves.
+> **Required, where it is available:** RECOVERING azimuth/elevation from measurable image geometry.
+
+On the crib build a worker fitted the two front corner-post edges against the carpet to **rms 0.12 px**,
+put the vertical vanishing point at (419.5, 2388) and derived a camera pitch of **23.1°** where the rig
+had 10°. It also showed the horizontal VP was effectively at infinity — three lines that must be
+parallel in 3D intersected at x = −52000, −18200 and **+275000**, not even agreeing in sign — so
+azimuth was ~2°, not 12°. That is photogrammetry, not score-chasing, and it was confirmed by rendering
+10 / 20 / 23 beside the photograph before adoption: at 10° you look ACROSS the guard rail at the back
+panel; at 23° you look OVER it onto the mattress, which is what the photo shows.
+
+**The distinguishing test: could this adjustment hide a geometry error?** Score-fitting can, which is
+why it is banned. A pose recovered from vanishing points cannot — it is constrained by the image
+independently of the model, and it is falsifiable *before* you look at any score. **Recover the pose
+first, then never touch it again.**
+
+⚠️ And give the rig a **roll** term. Hand-held reference photos are rarely level (2.6° here), and
+without a roll parameter that tilt gets silently absorbed into az/el, corrupting the two parameters
+you most need to keep honest.
+
 ### 9. A reject path is mandatory, and a rejection must be traced to a CAUSE.
 
 A loop that commits every round cannot converge: it trades a solved view for an unsolved one, then
