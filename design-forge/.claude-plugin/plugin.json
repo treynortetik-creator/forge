@@ -1,8 +1,8 @@
 {
   "name": "design-forge",
   "displayName": "Design Forge",
-  "description": "A design toolkit for Claude Code: an adversarial builder/critic loop, a measurement harness that computes what a screenshot cannot show (type ladder, worst-case accent count, WCAG contrast, target size), a licence-cleared asset library, a scroll-film site builder, and a three-pass prose de-slopper. Judgment stays with the model; arithmetic goes to the harness.",
-  "version": "0.3.3",
+  "description": "A design toolkit for Claude Code: an adversarial builder/critic loop, a measurement harness that computes what a screenshot cannot show (type ladder, worst-case accent count, WCAG contrast, target size), a licence-cleared asset library, a photo-to-3D Blender modelling loop, a scroll-film site builder, and a three-pass prose de-slopper. Judgment stays with the model; arithmetic goes to the harness.",
+  "version": "0.4.0",
   "author": {
     "name": "Treynor Tetik"
   },
@@ -17,6 +17,9 @@
     "visual-qa",
     "html",
     "css",
+    "blender",
+    "3d",
+    "photogrammetry",
     "generative-art",
     "copywriting",
     "anti-slop"

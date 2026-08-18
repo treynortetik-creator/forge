@@ -1,7 +1,7 @@
 # Design Forge
 
-A design plugin for Claude Code. Seven skills covering critique, measurement, asset generation,
-site building, and copy editing.
+A design plugin for Claude Code. Eight skills covering critique, measurement, asset generation,
+3D reconstruction, site building, and copy editing.
 
 **The thesis, in one line:** *judgment stays with the model, arithmetic goes to a harness.*
 
@@ -86,6 +86,20 @@ Four things a screenshot structurally cannot do:
 |---|---|
 | **`art-department`** | The visual-deliverable playbook: which tool for which job, the licence gate, house style, and a **61-asset library where every file's licence is recorded along with where it was verified** — 10,775 icons (MIT/ISC), CC0 textures, OFL fonts, public-domain ornament. |
 | **`scroll-film-studio`** | Scroll-scrubbed cinematic sites, one continuous shot driven by scroll position. Pure-code GSAP/Lenis lane (free) or a generated film lane. |
+| **`photo-to-3d-loop`** | Model a real object in Blender from reference photographs, by iteration: write, render fixed views, measure silhouettes against the photos, send a **fresh** critic that never saw the build, revise. Carries the acceptance gate and about twenty traps that each cost an hour. |
+
+**Why `photo-to-3d-loop` exists.** Twenty rounds against seven photographs took a block-out to
+**91.9% mean silhouette IoU**. Roughly half of those rounds went not into the model but into
+discovering that an instrument was lying — a threshold that ate a white product off a white
+background and understated it 40% for four versions, a reference mislabelled as a top view that
+generated a phantom −56% error every round, a stale camera datablock that quietly scored every mask
+at 0.356× scale while the numbers stayed plausible.
+
+And the defect that closed the project was found by **a person who had physically held the object**,
+after four rounds of critics and the metric had all missed it: the flanks were flat where the real
+part curves. They missed it because **from the front, the rear and both profiles a flat flank and a
+convex one cast the identical silhouette.** The metric was structurally blind. That is rule 10, and
+it is why this skill is not just "use Blender."
 
 ### Copy
 
