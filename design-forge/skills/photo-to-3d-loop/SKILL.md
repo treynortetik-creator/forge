@@ -243,6 +243,37 @@ Freeze everything shared: imports, global dimension constants, geometry helpers,
 🔴 **any call ORDER that is load-bearing** (on the Guardian Pro the pocket cut had to run before the
 keyholes, because the keyholes are aimed at the pocket floor).
 
+#### 🔴 A checker that forces construction is an AUTHORITY. Assert only the OBSERVABLE.
+
+Earned 2026-08-18, an hour after shipping the joint checker, and it is the subtlest failure of the day.
+
+The interface check asserted `end post top == rear rail top`. But one worker had **measured** the
+corner post as CAPPED BENEATH the rail. It built exactly what it measured, **the checker rejected it,
+and the worker then abandoned its sibling's measurement and rebuilt to satisfy my assertion.**
+
+Nothing failed. Everything went green. **A number I had invented, with no evidence behind it, beat a
+measurement in a straight fight — and the passing check is what made it look settled.**
+
+- **The checker had no evidence for the joinery it demanded.** Capped and flush are visually identical
+  from outside, and these photographs cannot separate them. My check asserted a fact it did not know.
+- **Workers defer to checkers.** A gate is a much louder signal than a sibling's report, so an
+  over-specified gate will quietly overwrite measured truth across every component that touches it.
+- ⚠️ **The green result is the trap.** A wrong check that everything satisfies produces a model that
+  is *consistent* and *wrong*, with nosignal anywhere that it happened.
+
+**The rules:**
+1. **Assert the OBSERVABLE, not the implementation.** The owner saw *two top rails at different
+   heights*. So check rail-top against rail-top — never post-against-rail, which is a joinery choice
+   the photo never constrained.
+2. **Prefer inequalities where the evidence is one-sided.** "The post does not PIERCE the rail" is
+   supported by the photograph. "The post top EQUALS the rail top" is not. An inequality leaves the
+   underdetermined part free instead of silently picking.
+3. **For every assertion, name the observation it encodes.** If you cannot point at the pixel
+   evidence, you are encoding a preference and it will win anyway.
+4. ⭐ **When a worker reports it changed its build to satisfy a check, treat that as a possible defect
+   IN THE CHECK, not as the check working.** It is the only signal you get, and it arrives disguised
+   as compliance.
+
 #### Know what you are actually buying — it is NOT throughput
 
 **Measured: 7 workers moved the score +0.033pp, and serial would have finished sooner.** Blender is
