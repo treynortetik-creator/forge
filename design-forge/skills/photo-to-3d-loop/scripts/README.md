@@ -179,3 +179,22 @@ script and a rendering Blender session. The rendering, scoring, camera-fitting a
 paths are carried over from a project where they ran for twenty rounds, but they have not
 been re-run since being moved, and the acceptance-gate thresholds (`GOOD = 0.90`,
 `TOL = 0.010` in `loop.py`) were tuned for that object and are a starting point, not a law.
+
+## `joints.py` — assembled-model interface checks
+
+Run: `blender --background --factory-startup --python joints.py` · exit 0 = all interfaces agree.
+
+**The gap it closes.** Component decomposition gives every worker a check that its own part is right
+*in isolation*. No such check can catch two workers holding different numbers for the **same shared
+edge**, because each part is individually correct — the defect exists only in the assembly. On the
+2026-08-18 crib build the thing that caught it was the owner looking at a render and saying it
+"looks all janky," twice. That is not a test strategy.
+
+**Calibrate it before you trust it.** Run it against the known-bad model FIRST and confirm it fails
+on the defects you already know about, and passes the joints you know are fine. On the crib it
+reported `end-panel back post top: got 0.6400, want 0.6730` — reproducing, to a number, the 3.3%-of-
+length step a human had spotted by eye. A check that has never failed is a decoration, not evidence.
+
+**Query both sides off the assembled mesh**, never off the constants — reading the constants back
+just proves the constants equal themselves, which is the tautological-test failure this skill warns
+about elsewhere. Remember `bpy.context.view_layer.update()` before reading `matrix_world`.
