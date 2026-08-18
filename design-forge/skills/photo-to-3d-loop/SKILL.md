@@ -151,6 +151,86 @@ headless Blender removes a *collision risk* and buys some wall clock; the real t
 parallelising the reasoning. **Do not re-plumb infrastructure to speed up the fastest part of the
 pipeline.**
 
+### 🔴 Parallel component decomposition — the multi-agent pattern
+
+Proven 2026-08-17 on the Guardian Pro (7 workers) and the reason this section exists. **Splitting an
+object into components and giving each to its own agent with its own headless Blender is a real
+technique, but almost everything intuitive about *why* it helps is wrong.** Read all four parts
+before running it.
+
+#### Pick the decomposition mode from the object, not from habit
+
+| Object shape | Mode | Ownership unit | Conflict risk |
+|---|---|---|---|
+| **Genuinely separate parts** (furniture, assemblies, scenes: a crib's rails / base / legs / mattress) | **One module per part**, each exporting `build(ctx) -> objects`; an `assemble.py` imports and calls them | a whole FILE | **Structurally impossible** — no two workers touch one file |
+| **One continuous body** (a moulded device shell) | Marker-block splicing inside a single script | named BLOCKS, `mark.py` inserts boundaries, `assemble.py` splices | real, must be enforced |
+
+⭐ **Prefer whole-file ownership whenever the part boundaries are physically real.** The Guardian Pro
+needed block-splicing only because it is one moulded shell — seven workers editing one 1018-line
+script, where the bezel's constant sat four lines from the fins'. If your object is an *assembly*,
+the file boundary does the safety work for free and you can skip that machinery entirely.
+
+#### 🔴 The acceptance rule MUST change, or the whole run returns a guaranteed null
+
+This is the finding that matters most and it is deeply counter-intuitive.
+
+**Six consecutive verified, obviously-correct changes moved the mean IoU by 0.0pp** — a ×2.3 bezel
+radius fix, four tabs becoming real apertures, a restored spine, measured apertures, a corner radius,
+a proud lens barrel. Every one is right beside the photograph. Every one is **interior to every
+silhouette**.
+
+Six of seven components were interior in four to seven of the seven views. **A gate of the form
+"commit only if the global score improves" would have refused nearly every correct edit those workers
+could make.** That is not discipline, it is a pre-guaranteed null result.
+
+So split the gate and require **both**:
+
+1. **GLOBAL GUARD (mechanical, do-no-harm).** The mean may not fall more than 0.05pp, and no view
+   already at or above 90% may fall more than 1.0pp. **Necessary, never sufficient — print that in
+   the tool's own output**, because "the number didn't move" is not evidence of being right.
+2. **COMPONENT EVIDENCE (the actual proof), with its method named.** Either a **ruler** — a value off
+   the PHOTOGRAPH against the same value queried off the **MESH**, never off a render — or a **fresh
+   critic** judging a crop of that component beside the same crop of the photo.
+
+#### Enforce ownership; do not merely instruct it
+
+A read-only instruction is not an enforcement mechanism. **Plant a deliberate trespasser and confirm
+it is blocked** before trusting the assembly: on the Guardian Pro a fake `bezel` worker that edited
+`FINS_PER_GROUP` was correctly named, diffed and refused. Also verify both safety properties
+mechanically, not by inspection:
+
+- **Structural** — stripping the markers back out reproduces the pre-split file **byte for byte**.
+- **Behavioural** — the marked file renders and scores **identically** to the pre-split file.
+
+Freeze everything shared: imports, global dimension constants, geometry helpers, materials, and
+🔴 **any call ORDER that is load-bearing** (on the Guardian Pro the pocket cut had to run before the
+keyholes, because the keyholes are aimed at the pocket floor).
+
+#### Know what you are actually buying — it is NOT throughput
+
+**Measured: 7 workers moved the score +0.033pp, and serial would have finished sooner.** Blender is
+not the bottleneck; a 512 px render is 1.45 s. The loop is slow because agents and critics *reason*
+slowly.
+
+⭐ **What parallelism genuinely bought was orthogonal questions.** Every defect it surfaced had sat in
+plain sight for nine to twenty rounds, and each was found by the one worker whose narrow remit
+pointed straight at it — a materials worker nearly cut as out-of-scope discovered that
+`paint(body, WHITE)` was a **no-op**. **Decompose to get many narrow questions asked at once, not to
+go faster.** Scope the workers so their questions genuinely differ; seven agents asking the same
+broad question is seven times the cost for one answer.
+
+#### Capacity: RAM is the constraint, and check it at run time
+
+Each headless instance is **~370 MB peak RSS** (megabytes — a 16 GB machine holds a few, not
+hundreds). **6-8 concurrent is the ceiling on an idle 16 GB box, and far fewer in practice**: measured
+on 2026-08-18 with 3.3 GB free, the honest cap was **4**. Query free memory immediately before
+fanning out and size the pool from the answer — thrashing is slower than running serially.
+
+```bash
+vm_stat | awk '/page size/{ps=$8} /Pages free/{f=$3} /Pages inactive/{i=$3} \
+  END{printf "free+inactive: %.1f GB -> cap %d blenders\n", (f+i)*ps/1073741824, int((f+i)*ps/1073741824/0.6)}'
+```
+
 ### The contact sheet is the feedback signal
 
 Each render sits **directly above the photograph taken from the same angle**. That column alignment
@@ -395,6 +475,40 @@ window before it.
 
 🔴 **No plateau means the measurement is not measuring the object.** Report the plateau flag beside
 every number so a suspect reading announces itself.
+
+### 🔴 No plateau means no silhouette. Measure INTERNAL features instead.
+
+The sweep above is not just a way to choose a threshold — **it is a go/no-go test on whether the
+photograph can support silhouette work at all.** A plateau means there is a real boundary. A smooth
+monotonic climb means the threshold is slicing a continuous tonal gradient and **there is no
+silhouette to recover**, at any threshold.
+
+Verified on a white crib against a white wall, 2026-08-18. Sampled tones: wall `210,209,205` · back
+rail `195,195,185` · slats `179,175,166`. **The object is DARKER than its background and separated by
+~15 levels**, the same shape of trap as the white-device-on-white-sweep failure that cost six rounds.
+The sweep confirmed it in about two minutes:
+
+```
+thresh   60%    64%    68%    72%    76%    80%    84%
+fg %    33.7   41.8   48.4   56.6   66.6   82.5   97.7      <- no plateau anywhere
+```
+
+⭐ **The pivot, and it rescues the project rather than ending it: the outer boundary is unavailable
+but INTERNAL features usually are not.** On the same photograph, a scanline across the slats showed a
+local contrast range of **83-115 levels** — five to seven times the object-vs-background separation —
+because each slat is bounded by a shadowed gap. Slat pitch, rail heights, post widths and panel
+divisions are all recoverable to a few pixels.
+
+**So when the sweep shows no plateau, change instrument rather than pushing harder:**
+
+- ❌ Do NOT build a silhouette IoU loop. It will return confident, meaningless numbers, and every
+  guard rail in this file exists to catch exactly that.
+- ✅ Measure **feature-to-feature pixel distances** at high-contrast interior edges and drive the
+  model from RATIOS (slat pitch ÷ panel width, rail height ÷ total height).
+- ✅ Judge form with a **fresh visual critic** comparing render and photo at a matched viewpoint —
+  see the critic rules below.
+- ✅ Say plainly, in the deliverable, that the model is proportioned rather than measured. **Never
+  state a real-world dimension the photographs cannot support.**
 
 ### Write the mask out as an image and LOOK at it.
 
