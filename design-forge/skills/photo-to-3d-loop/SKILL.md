@@ -890,6 +890,42 @@ render wants it there.
 
 ---
 
+## Lifting a texture off the photograph itself
+
+Earned 2026-08-18 putting a real fitted sheet onto a modelled crib mattress. Cheap, high-impact, and
+every step below is one that went wrong first.
+
+**1. Crop a patch with no structure in it.** The first two crops caught crib rails at the edge and
+tiled them into the pattern. Sample from the middle of the material, and *look at the crop* before
+using it.
+
+**2. Flatten the lighting gently, or not at all.** The textbook divide-by-heavy-blur normalises the
+shading gradient and **blew the patch to a mean of 248/255** — nearly white. Over a small patch the
+gradient is mild; a plain `-contrast-stretch 0.6%x0.6%` plus a little saturation landed at 184 and
+kept the print. Check the mean after, not just the look.
+
+**3. 🔴 Make it tileable by OFFSET-AND-FEATHER, never by mirroring.** A 2×2 mirror tile is one command
+and looks seamless in isolation, but at low repeat counts it reads as an obvious **kaleidoscope grid**
+— butterfly-symmetric rosettes the eye locks onto instantly. Roll the patch by half its width and
+height, then feather the cross seam. If you inherit a mirrored tile, a rotation plus a low-frequency
+vector warp in the shader hides it substantially but never fully.
+
+**4. Bind with OBJECT coordinates and `projection='BOX'`, not Generated.** Generated normalises to the
+bounding box per axis, so on a thin wide slab (0.93 × 0.47 × 0.06) the print stretches ~2:1 on the top
+face and smears into 1D stripes on the sides. Object coordinates are local space in world units and
+therefore isotropic. ⭐ **Both need no UV layer**, which matters because primitives built through
+`from_pydata` have none and the worker that owns the material usually does not own the mesh.
+
+**5. 🔴 Judge the print SCALE only against the photograph at matched scale.** A render viewed on its
+own said "2× too big"; the correction was then judged too small; the original estimate was right all
+along. **A render alone was wrong by ~2× in both directions.** Stack a crop of the render beside the
+same region of the photo at the same scale — the same reason the contact sheet exists.
+
+**6. Assert the bind, because it fails silently.** `ctx.paint()`-style material asserts do NOT catch a
+texture that failed to connect — the material is present, the image just never reaches Base Color and
+you get flat colour. Assert explicitly: image size is what you expect, the image node's **Vector input
+is linked**, and Base Color is linked. Then still look at the render.
+
 ## Deliverable discipline — the turntable
 
 - 🔴 **Frame *i* sits at azimuth `360*i/N`, never `i/(N-1)`.** The second form makes frame N a
