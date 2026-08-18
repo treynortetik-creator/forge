@@ -477,6 +477,38 @@ it.
 
 ---
 
+### 12. 🔴 Disqualify the instrument on physics before you read its output as data
+
+Earned 2026-08-18, and it cost a correct finding two rejections.
+
+A worker reported the model stood ~45% too tall and correctly noted that its finding **contradicted a
+frozen constant the head had changed minutes earlier**. The head checked twice and twice concluded
+"the model is fine." Both checks were broken, in the same way — **neither validated its own output
+for physical plausibility**:
+
+- a peak-finding detector returned slat pitches of **3, 10, 14 and 23 px for one panel**. One panel
+  has ONE pitch. That output disqualifies the detector; it is not data to be averaged or reasoned
+  from.
+- a contiguity-free `max - min` over "dark rows" silently spanned **two separate dark regions** with
+  a bright mattress between them, turning a 111 px gap into 335 px. It failed silently and in the
+  confident direction.
+
+The right answer took twenty seconds: **crop the photograph and look at it.**
+
+**The rules:**
+- **State the physical invariant your instrument must satisfy, and check it first.** One panel, one
+  pitch. One object, one silhouette. Monotonic where the geometry is monotonic. An instrument that
+  violates its own invariant has failed a self-test and its answer is void — not weak evidence, void.
+- **Assert contiguity before treating `min`/`max` as an extent.** Gaps are invisible to a range and
+  always inflate it.
+- 🔴 **When a finding contradicts something YOU just changed, that is the moment of maximum bias, not
+  a licence for extra scepticism toward the finding.** Weight it UP. The instinct runs the other way,
+  which is exactly why it needs writing down.
+- **Re-running a check is not verification when both runs share a defect class.** Two checks that
+  fail the same way agree with each other and tell you nothing.
+- ⭐ **When two instruments disagree, stop computing and LOOK.** Same lesson as the contact sheet, and
+  the same lesson as a human who has handled the object outranking the metric.
+
 ## 🔴 Measurement — where most of the pain was
 
 ### Renders: measure the ALPHA matte. Never brightness.
