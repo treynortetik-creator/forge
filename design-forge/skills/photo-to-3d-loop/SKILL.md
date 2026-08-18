@@ -192,6 +192,43 @@ So split the gate and require **both**:
    the PHOTOGRAPH against the same value queried off the **MESH**, never off a render — or a **fresh
    critic** judging a crop of that component beside the same crop of the photo.
 
+#### 🔴 Whole-file ownership stops merge conflicts. It does NOT stop INTERFACE DRIFT.
+
+The most important limitation of this whole pattern, earned 2026-08-18 within an hour of adopting it.
+
+File ownership makes it impossible for two workers to clobber each other's *code*. It does nothing
+about two workers holding **independent numbers for the same physical edge**. The crib's back corner
+came out visibly stepped because `back_panel.py` put its top rail at `H_BACK = 0.673` while
+`end_panels.py` carried its own private `H_END_B = 0.640` for the **same shared rail**. Neither file
+was internally wrong. Both passed their own checks. The owner's reaction on seeing it:
+
+> *"the joints don't match with the other pieces. They should all be level… they're uneven, and so it
+> looks all janky and fucked up."*
+
+⭐ **The defect lived in the gap between the files, which is the one place no worker was looking and
+no per-component check can reach.** Decomposition does not remove integration risk, it *relocates* it
+— out of the merge and into the interfaces, where it is quieter and looks like a modelling mistake
+rather than a coordination one.
+
+**The rule: any dimension where two components physically MEET is a CONTRACT and lives in frozen
+shared scope. A worker may measure it and propose a change; it may never hold a private copy.**
+
+```python
+# ctx.py — frozen, shared, the single source for every shared edge
+JOINT_TOP_BACK = H_BACK    # top rail height where the END panels meet the BACK panel
+```
+
+Before fanning workers out, **enumerate the joints first** and write each one into shared scope —
+every edge, seam, mating face and datum where two owners' parts touch. That list is the real
+interface of the decomposition, and it is worth more thought than the component split itself. A good
+smell test: if two briefs both contain a number for the same millimetre of the object, you have
+already lost.
+
+⚠️ **And a per-component gate cannot catch this.** Component evidence proves a part is right *in
+isolation*; interface drift only shows up in assembly. **Add an explicit joint check to the assembled
+model** — query the mating coordinates off the mesh and assert they agree — or the first person to
+notice will be whoever looks at the render, which on this project was the owner, twice.
+
 #### Enforce ownership; do not merely instruct it
 
 A read-only instruction is not an enforcement mechanism. **Plant a deliberate trespasser and confirm
@@ -498,6 +535,15 @@ but INTERNAL features usually are not.** On the same photograph, a scanline acro
 local contrast range of **83-115 levels** — five to seven times the object-vs-background separation —
 because each slat is bounded by a shadowed gap. Slat pitch, rail heights, post widths and panel
 divisions are all recoverable to a few pixels.
+
+⭐ **REFINEMENT, 2026-08-18: run the sweep REGIONALLY, not just globally.** A whole-image sweep
+answers "can I segment the object," which on this photograph was no. But a sweep over the *foot
+region alone* — where the crib meets CARPET rather than wall — produced a textbook plateau:
+foreground moved only 40.0% -> 34.9% across t=110-150, then fell off a cliff to 1.9% by t=165, with
+a genuinely bimodal histogram either side (carpet mode 80-89, object mode 150-159, a 40:1 trough
+between). **So parts of an unusable photograph can still be measurable.** Test each region against
+its own background before writing the whole image off; the answer is usually "the half sitting on the
+floor is fine, the half against the wall is not."
 
 **So when the sweep shows no plateau, change instrument rather than pushing harder:**
 
