@@ -698,6 +698,48 @@ Every one of these produced a plausible result while being wrong.
 
 ---
 
+### 🔴 Frame the SUBJECT, not the set
+
+Earned 2026-08-18, and the visible symptom was the least of it.
+
+An auto-framing camera that bounds *every mesh in the scene* breaks the moment the scene gains
+anything that is not the subject. Adding an 8×8 floor plane made the camera frame a 16-unit box and
+the model rendered **about 30 px wide** — a speck on a grey plane. The same happens with scene
+dressing, a backdrop, a light gizmo with geometry, or a measurement proxy left in the file.
+
+⭐ **The ugly picture is the cheap failure. The expensive one is silent:** if framing depends on scene
+CONTENT, then two rounds' renders are **not comparable**, because the camera moved for a reason that
+has nothing to do with the model. Every before/after judgement the loop runs on is quietly corrupted,
+and nothing crashes. A round that "looks closer" may only be framed tighter.
+
+**The rule: framing must be a function of the subject alone, never of the scene.** Tag subject
+geometry at creation and frame only tagged objects:
+
+```python
+def box(...):
+    ...
+    ob["subject"] = 1          # every subject primitive is tagged where it is BUILT
+    return ob
+
+# in aim():
+DRESSING = ("floor", "toy", "backdrop", "proxy")
+pts = [ob.matrix_world @ Vector(c)
+       for ob in scene.objects if ob.type == 'MESH'
+       and ob.get("subject", 0) and not ob.name.lower().startswith(DRESSING)
+       for c in ob.bound_box]
+if not pts: raise RuntimeError("aim(): no SUBJECT geometry (is anything tagged?)")
+```
+
+Tag at construction rather than filtering by name at render time — a name list is a guess about the
+future, a tag is a fact recorded by whoever built the object. Keep the name prefixes only as a
+fallback for geometry that arrives through some other path. **And raise rather than silently framing
+an empty set**: a camera that quietly frames nothing renders a blank image, which reads as a broken
+model rather than a broken camera.
+
+⚠️ **Give scene dressing an off switch** (`CRIB_NO_TOYS=1`-style env flag). The reference photographs
+almost never contain your dressing, so every comparison render wants it gone while every beauty
+render wants it there.
+
 ## Environment traps
 
 - **ImageMagick `montage` exits 1 with no font config.** Build tiles with `-resize` / `-extent` /
