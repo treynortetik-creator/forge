@@ -231,7 +231,7 @@ that matters.**
 
 ---
 
-## Prose mechanisms (for `de-sloppifier`)
+## Prose mechanisms (evidence behind story-forge's `de-sloppifier`)
 
 **The durable machine signature is grammatical, not lexical.** Word lists date fast, get trained out,
 and survive light editing. Sentence structure does not. Order your passes accordingly.

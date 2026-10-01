@@ -29,8 +29,8 @@ echo
 echo "${BOLD}design-forge doctor${RST}"
 echo "${DIM}$(date '+%Y-%m-%d %H:%M')${RST}"
 echo
-echo "${BOLD}Core${RST} ${DIM}(design-loop, design-audit, de-sloppifier, clean-export, voice)${RST}"
-check python3 "python3"      required "serving pages, chunking prose, clean-export"
+echo "${BOLD}Core${RST} ${DIM}(design-loop, design-audit)${RST}"
+check python3 "python3"      required "serving pages for the audit harness"
 check node    "node"         optional "syntax-checking the audit harness; scroll-film scripts"
 check git     "git"          optional "versioning your design work"
 

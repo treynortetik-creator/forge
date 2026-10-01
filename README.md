@@ -116,7 +116,7 @@ every view the rig could render.
 Seventeen skills and four chaining commands, from a braindump through to a manuscript that has been
 line-edited, continuity-audited, and stripped of invisible provenance characters.
 
-The editing half is shared with design-forge: **`de-sloppifier`** (a three-pass line edit),
+The editing half lives here only (design-forge no longer ships copies, as of 2026-10-01): **`de-sloppifier`** (a three-pass line edit),
 **`voice`** (extract a style fingerprint from real samples so the prose is anchored to a person
 instead of the model's defaults), and **`clean-export`**.
 

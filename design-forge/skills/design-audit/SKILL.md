@@ -205,4 +205,4 @@ but never colour *legibility* will pass a page with seventeen WCAG failures. Tha
 
 - `design-loop` — the builder/critic loop this feeds
 - `art-department` — the visual-deliverable playbook and asset library
-- `de-sloppifier` — the copy equivalent: mechanisms for prose instead of pixels
+- `de-sloppifier` (in **story-forge**; install story-forge for prose editing) — the copy equivalent: mechanisms for prose instead of pixels

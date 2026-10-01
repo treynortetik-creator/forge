@@ -89,23 +89,13 @@ object URL — each one is recorded.
 - **`skills/design-loop/`** is adapted from *The Design Loop*, itself a variation on the **Gauntlet
   Loop originated by Matt Shumer**. The method is his; the implementation, the critic briefs, and the
   additions documented in that file are this repository's.
-- **`skills/de-sloppifier/`, `skills/voice/`, `skills/clean-export/`** are adapted from **story-forge**,
-  by the same author.
-- 🔴 **Wikipedia, [Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing)
-  — CC BY-SA.** The AI-vocabulary and puffery categories in `de-sloppifier` Pass 1 and Pass 3 overlap
-  substantially with this community-maintained essay, including its groupings. **CC BY-SA requires
-  attribution and share-alike, which an unattributed MIT redistribution does not satisfy.** If you
-  reuse those word lists, carry this attribution with them. The rest of the skill — the three-pass
-  structure, the 13 edit moves, the census/judge/apply discipline, and the participial-clause and
-  sentence-length-CV work — is original to this repository.
-- **Wulf Moon**, **Jason Hamilton / The Nerdy Novelist**, **Browne & King** — the craft behind the
-  shared writing skills. Full detail in `../story-forge/NOTICES.md`.
+- The prose-editing skills (`de-sloppifier`, `voice`, `clean-export`) and their craft sources (Wikipedia's
+  *Signs of AI writing*, Wulf Moon, Jason Hamilton / The Nerdy Novelist, Browne & King) moved to
+  **story-forge** on 2026-10-01. Their attributions live in `../story-forge/NOTICES.md`.
 - **Anthropic's `frontend-design` skill.** `skills/art-department/references/house-style.md` quotes it
   directly (marked inline as verbatim) and builds on its two-pass process. Anthropic's bundled skills
   are **not published under an open licence**; the quotation is short, attributed, and used for
   commentary. The surrounding rules are this repository's own.
-- **`references/writing/`** — five notes bundled so `voice` and `de-sloppifier` actually run.
-  `voice-matching.md` derives from a public YouTube tutorial, credited in its own frontmatter.
 - **`references/mechanisms.md`** cites published research and standards. Every entry is tagged with how
   it was verified — normative, practitioner, convention, or folklore — and quotations are short and
   attributed. WCAG text is quoted from W3C Understanding documents, which are published under the

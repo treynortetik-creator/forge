@@ -30,7 +30,7 @@ reference is a photograph instead of a bar.
 
 ## Provenance
 
-Adapted from **VIGA** (arXiv 2601.11109, MIT; repo `Fugtemypt123/VIGA`). Three of its ideas carry
+Adapted from **VIGA** (arXiv 2601.11109; repo `Fugtemypt123/VIGA`). 🔴 **Attribution corrected 2026-08-19: it is NOT MIT.** VIGA is **UC Berkeley + CMU + Max Planck + Impossible Inc.** The "MIT" in this line was wrong from the day it was written and would be an embarrassing thing to repeat in front of an applied scientist. Three of its ideas carry
 their weight and are non-negotiable:
 
 1. **Pin the reference images OUTSIDE the sliding memory window.** They are the ground truth; they
@@ -355,6 +355,44 @@ all") · a port standing out of the top of the device · the missing port cluste
 direction · plate W:H · rear fin-field width · spine width · fin pitch (five readings on record
 spanning 29%) · heatsink pocket rim height · lens protrusion.
 
+#### 🔴 MEASURED 2026-08-19 — this rule was right in kind and wrong in WEIGHT
+
+A controlled three-arm trial (11-part workbench, one model, identical 3-round budget, fresh critic
+per round, ground truth authored before any render and never shown to a builder):
+
+| arm | feedback channel | mean per-part dim error | parts within 5% |
+|---|---|---|---|
+| A | visual critique only | **10.95%** | **0 / 11** |
+| B | per-part NUMERIC only | **2.48%** | 7 / 11 |
+| C | both | **2.73%** | 7 / 11 |
+
+**Arm B's round-1 model already matched arm A's round-3 model.** Numeric-bearing arms beat
+visual-only by ~4×.
+
+🔴 **The correction this forces is a REWEIGHTING, not a rebuild — and the distinction is exact.**
+This skill already carries a numeric instrument, and this very rule already says *ruler for ratios*.
+But its ruler is a **GLOBAL SILHOUETTE SCALAR**. What actually won was **PER-PART DIMENSIONAL
+QUERIES** — every part's extents, checked individually against the reference. Promote that to a
+first-class channel; a single whole-model number is not the same instrument and never was.
+
+⚠️ **Do NOT read this as "drop the critic."** Three results forbid it:
+1. **Visual feedback DID improve performance** — monotone across all three rounds, no plateau. A flat
+   reading of *"visual feedback does not improve performance"* (CADTests) is not what this measured.
+2. **Numeric alone has its own failure mode, and it is a nasty one.** Arm B built a shelf as an
+   **82 mm beam instead of a 23 mm board**, because at 6° elevation the visible top boundary of a
+   horizontal member is its **BACK edge**. That is a projection-reading error: the ruler faithfully
+   measured the wrong thing. **A critic catches it instantly.**
+3. **Arm C posted the best part-POSITION accuracy of any arm by 5×** (0.04% of height). Pictures buy
+   **assembly** correctness even where they do not buy **dimensional** correctness.
+
+**So the end state is arm C's design — both channels, reweighted toward per-part numeric — not arm B's.**
+⚠️ **n = 1 complete trial.** B vs C (2.48 vs 2.73) is a tie inside unmeasured variance; the defensible
+claim is *numeric-bearing beats visual-only*, not *numeric-only wins*.
+
+**The sharpest single symptom: the visual arm cannot locate its own error.** It reported the legs
+"15% under" when they were **22% over**, and called depth the weakest axis when height was 2× worse.
+A critic tells you *that* something is wrong far more reliably than *which way* or *by how much*.
+
 ### 4. Make the critic state its METHOD, and cap its findings.
 
 Every report on the project whose numbers survived re-measurement **said how it measured** (circle
@@ -460,6 +498,34 @@ trades back, and the next critic argues about the damage. **Verified acceptance*
 the global score improves **AND** no view already at or above a "solved" threshold degrades by more
 than a tolerance. Rule two is the important half.
 
+#### 🔴 MEASURED 2026-08-19 — this gate is doing more work than anyone realised. Name its winner.
+
+**The loop is a SAMPLER, not a monotonic improver, and that is now measured on this harness:** two
+independent 6-round loops, 12 round-transitions, every round applied mechanically from a fresh
+critic's JSON. **3 of 12 rounds (25%) made the model WORSE, and BOTH loops ended off their peak** —
+by 2.85pp and 2.49pp. Trajectories oscillated hard: one parameter went +38.5% → −3.5% → +27.2% →
++1.7% → −16.6% as three consecutive fresh critics measured the same tube off renders and disagreed
+by 44 points.
+
+⭐ **The good news: replaying this gate over those candidates captured 100% of the available
+best-of-N benefit in both loops** — it correctly rejected every worse round and landed on the peak.
+Keeping best scored +25.46pp mean gain vs +22.79pp for keeping final; **best-of-N is worth ~+11.7%**,
+which is real but far smaller than the published +10.8-vs-+6.1 (a 77% edge).
+
+**So the change is ten lines of insurance, not a redesign: TAG THE CHAMPION.** The gate already
+refuses bad rounds, but nothing in the harness ever *names* the best iterate, and this rule documents
+three human overrides — every one a chance to lose the peak by hand. Add a `best` tag, and **render
+the deliverable from that tag, never from HEAD.**
+
+⚠️ **Do NOT switch the critic to absolute scoring to support this.** Measured on the same data:
+pairwise Copeland ranking scored **ρ = 1.000** with zero cycles; absolute 1-10 scoring scored
+**ρ = 0.90**, gave 3 of 5 candidates a different integer from two fresh critics, and handed two
+candidates 10.2pp apart the same 8. This skill already avoids absolute scoring (rule 4) — keep it.
+**Add pairwise only as a tiebreak inside ~1pp, and flip presentation order only there:** position
+bias was **0% when the real gap was ≥2.46pp** and **33% when it was ≤0.27pp**. Order-flipping earns
+its doubled cost at near-ties and nowhere else.
+
+
 **But a gate that fires without a diagnosis is a coin toss with a number attached.** Three overrides
 are on the record across twenty rounds and every one carries a falsifiable test:
 
@@ -519,6 +585,22 @@ objective cannot arbitrate an interior feature.
 
 **A loop that listens only to that number will refuse correct work.**
 
+#### 🔴 MEASURED 2026-08-19 — the compression is now quantified, twice, independently
+
+Two separate controlled trials put numbers on how badly IoU flattens real error:
+
+- **A 4.4× accuracy difference shows up as 6.8 IoU points.** (Arm A 10.95% error → 0.9239 IoU;
+  arm B 2.48% → 0.9915.) The metric moves, but nowhere near proportionally.
+- **IoU is ~15× less sensitive to a small feature than to a large one.** On a mug, the handle versus
+  body height. One round posted **the best IoU to that point while carrying a +27% dimensional
+  error**, and in a second loop **the IoU winner was not the dimensional winner.**
+
+⚠️ Note one trial reproduced *compression* but **did NOT** reproduce a rank *inversion*; the other did.
+So treat inversion as demonstrated-possible, not guaranteed. Either way the operational rule is the
+same: **IoU is a trend tracker, never an accept/reject gate on its own** — pair it with per-part
+dimensional checks (see rule 3), which is the channel that actually resolves the error IoU is hiding.
+
+
 So the documented stop condition — three consecutive rounds without the mean improving — has to be
 read with a diagnosis attached. Twice on this project the honest reading was not *"the model stopped
 improving"* but **"the instrument stopped being able to measure it."** When the remaining error is
@@ -562,6 +644,45 @@ The right answer took twenty seconds: **crop the photograph and look at it.**
   fail the same way agree with each other and tell you nothing.
 - ⭐ **When two instruments disagree, stop computing and LOOK.** Same lesson as the contact sheet, and
   the same lesson as a human who has handled the object outranking the metric.
+
+### 13. 🔴 Assert the STRUCTURE mechanically. A render cannot show you a part that is inside another part.
+
+Added 2026-08-19, after a checker built for exactly this found a real defect in a model this project
+had already **shipped**.
+
+**The defect class:** floating parts, sunk parts, parts jammed through each other, orphans touching
+nothing, and duplicated members. 3DCodeBench names it the #1 measured failure of LLM-generated 3D —
+*"successful renders still suffer from disconnected or floating 3D geometric components"* — and this
+loop had **nothing** that caught any of it. A leg 2 mm off the floor renders perfectly.
+
+**What it found on the shipped crib:** `deck_left` sits **87% inside** `endL_botrail` — the same
+physical member modelled **twice, in two different files** (`base_legs.py` and `end_panels.py`),
+mirrored on both sides. 🔴 **And `joints.py` passed it**, because the joint contract asserts Z LEVELS
+and never asserts CO-OCCUPANCY. Two parts can agree perfectly on their shared edge and still be the
+same board built twice. **This is the parallel-component-decomposition failure mode** (see that
+section above) landing in production, undetected, because every instrument pointed at surfaces.
+
+**Run a structural mesh checker every round (one is not bundled in this plugin; the author's lives in a private repo, so write your own against the five checks below).** Five checks: loose-part count,
+ground contact, interpenetration, orphans, symmetry residual. Returns JSON with named offenders and
+propagates an exit code, so it gates without parsing.
+
+**Measured cost and reliability:** **8/8 injected defects caught** · **0/30 false positives** on
+randomised clean assemblies · **37.8 ms for 78 parts** (67.6 ms under load) against **1,342 ms** for
+a single 512² render. **The whole suite costs 3-5% of one render.** There is no budget argument
+against running it.
+
+⚠️ **Three honest costs, so it does not get switched off in frustration:**
+- The real crib needed **5 `ignore_pairs`** to go from 35 findings to 3. Legitimate joinery, an
+  organic toy, and an un-notched sheet all trip it. **Tune the spec once, per model.**
+- **Whole-model symmetry is the check that produces useless noise** — asserting it on the crib gave
+  9 false positives because the guard rail deliberately covers only one half. Assert symmetry on
+  PARTS, not on models.
+- `interpenetration` is the check that breaks first if the loop starts producing rotated parts: at
+  45°, 41 slat pairs post phantom AABB overlaps peaking at 0.2045 against a 0.25 gate. **20% headroom.**
+
+🔴 **A checker that has never caught anything is not a checker.** Before trusting it on a new model,
+inject a defect you know about and confirm it fires. The module's own tests caught three bugs in
+itself this way, including one that gave a 100% false-positive rate on legitimate tenons.
 
 ## 🔴 Measurement — where most of the pain was
 

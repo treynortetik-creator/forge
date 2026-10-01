@@ -67,7 +67,7 @@ decoration pretending to be structure.
 
 ## Visual slop — the seven tells
 
-Same idea as the prose desloppifier, aimed at pixels. Each one is the statistically obvious choice.
+Same idea as story-forge's prose `de-sloppifier` (install story-forge for prose editing), aimed at pixels. Each one is the statistically obvious choice.
 
 | Tell | The fix |
 |---|---|

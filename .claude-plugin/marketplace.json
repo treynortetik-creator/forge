@@ -9,7 +9,7 @@
     {
       "name": "design-forge",
       "displayName": "Design Forge",
-      "description": "Adversarial builder/critic loop, a measurement harness that computes what a screenshot cannot show (type ladder, worst-case accent count, WCAG contrast, target size), a licence-cleared asset library, a photo-to-3D Blender modelling loop, a scroll-film site builder, and a three-pass prose de-slopper.",
+      "description": "Adversarial builder/critic loop, a measurement harness that computes what a screenshot cannot show (type ladder, worst-case accent count, WCAG contrast, target size), a licence-cleared asset library, a photo-to-3D Blender modelling loop, a scroll-film site builder. Prose editing lives in story-forge.",
       "source": "./design-forge",
       "category": "design",
       "license": "MIT",
@@ -25,8 +25,7 @@
         "visual-qa",
         "css",
         "blender",
-        "3d",
-        "anti-slop"
+        "3d"
       ]
     },
     {

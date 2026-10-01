@@ -1,7 +1,8 @@
 # Design Forge
 
-A design plugin for Claude Code. Eight skills covering critique, measurement, asset generation,
-3D reconstruction, site building, and copy editing.
+A design plugin for Claude Code. Five skills covering critique, measurement, asset generation,
+3D reconstruction, and site building. Prose editing (`de-sloppifier`, `voice`, `clean-export`) lives in
+**story-forge**; install it alongside this plugin if you want it.
 
 **The thesis, in one line:** *judgment stays with the model, arithmetic goes to a harness.*
 
@@ -103,11 +104,8 @@ it is why this skill is not just "use Blender."
 
 ### Copy
 
-| Skill | What it does |
-|---|---|
-| **`de-sloppifier`** | Three-pass line edit: pacing and paragraph shape, then line editing, then AI-pattern removal (negative parallelism, rule-of-three padding, em-dashes, inflated vocabulary, abstraction without grounding). |
-| **`voice`** | Extracts a voice fingerprint from writing samples so generated copy is anchored to a real person's prose instead of the model's defaults. |
-| **`clean-export`** | Strips invisible provenance characters (zero-width, bidi, Unicode TAG payloads, exotic spaces) without altering a word. Run before anything leaves the machine. |
+Prose editing moved to **story-forge** (2026-10-01), so the two plugins no longer ship colliding skills.
+Install story-forge for `de-sloppifier`, `voice` and `clean-export`: `claude plugin install story-forge@forge`.
 
 ---
 
@@ -241,7 +239,7 @@ Each of these cost real time on the run that produced this plugin.
 ```
 design-forge/
 ├── .claude-plugin/plugin.json
-├── skills/            7 skills
+├── skills/            5 skills
 ├── scripts/
 │   ├── install.sh     validate → register → install (+ optional toolchain)
 │   ├── doctor.sh      dependency report, exits 0 always
@@ -264,5 +262,4 @@ Obligations, and the two caveats worth reading before you reuse the museum image
 commercially: **`THIRD-PARTY-NOTICES.md`**.
 
 `design-loop` is adapted from *The Design Loop*, itself a variation on the **Gauntlet Loop originated
-by Matt Shumer** — the method is his. `de-sloppifier`, `voice` and `clean-export` come from
-**story-forge**.
+by Matt Shumer** — the method is his. 
