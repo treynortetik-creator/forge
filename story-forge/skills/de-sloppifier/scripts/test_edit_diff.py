@@ -151,8 +151,8 @@ def _ents(b, a):
             if x["severity"] == "DELETION" and x["kind"] == "named entity"]
 
 check("a deleted co-host company is caught",
-      _ents("Co-hosted by SafelyYou, August Health and PalCare.",
-            "Co-hosted by SafelyYou and PalCare.") == ["August Health"])
+      _ents("Co-hosted by BrightPath, Summit Labs and NovaWorks.",
+            "Co-hosted by BrightPath and NovaWorks.") == ["Summit Labs"])
 check("a deleted venue name is caught",
       _ents("Drinks at Winter's Jazz Club on the 20th.",
             "Drinks at the club on the 20th.") == ["Winter's Jazz Club"])
@@ -160,7 +160,7 @@ check("a multi-word name is reported ONCE, not once per word",
       len(_ents("Meeting at Winter's Jazz Club tonight.",
                 "Meeting at the venue tonight.")) == 1)
 check("a deleted CamelCase brand is caught",
-      _ents("The vendor is PalCare and it works.", "The vendor works.") == ["PalCare"])
+      _ents("The vendor is NovaWorks and it works.", "The vendor works.") == ["NovaWorks"])
 
 check("FP: repeated name replaced by a pronoun is NOT a deletion",
       _ents("Mara flicked ash. Mara did not look up. Mara said it anyway.",

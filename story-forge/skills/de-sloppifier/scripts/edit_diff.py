@@ -78,10 +78,10 @@ XREF = re.compile(r"\b(?:see|per|in|from)\s+(?:Table|Figure|Fig\.|Chapter|Sectio
 # expensive edit this tool exists to catch, and it was the one class it was blind to.
 #
 # Two shapes, both chosen to keep false positives near zero:
-#   1. TWO OR MORE consecutive capitalised words -- "August Health", "Winter's Jazz Club",
+#   1. TWO OR MORE consecutive capitalised words -- "Summit Labs", "Winter's Jazz Club",
 #      "Chelsea Kelly", "McClurg Court". A single leading capital cannot trigger this,
 #      which is what keeps ordinary sentence-initial words out.
-#   2. A single token carrying an internal capital or all-caps -- "SafelyYou", "PalCare",
+#   2. A single token carrying an internal capital or all-caps -- "BrightPath", "NovaWorks",
 #      "NIC", "iPhone". These are unambiguous even standing alone.
 # A bare capitalised word with neither property is NOT an entity here. "Join" and "The"
 # would drown the signal, and a lone surname that vanishes usually takes its first name
@@ -90,7 +90,7 @@ _CAPWORD = r"[A-Z][a-z'’\-]+"
 ENTITY = re.compile(
     r"\b(?:" + _CAPWORD + r"(?:\s+(?:of|and|the|for|de|von|van))?\s+" + _CAPWORD +
     r"(?:\s+" + _CAPWORD + r")*"                       # 2+ capitalised words
-    r"|[A-Za-z]+[A-Z][A-Za-z]*"                        # SafelyYou, PalCare, McClurg
+    r"|[A-Za-z]+[A-Z][A-Za-z]*"                        # BrightPath, NovaWorks, McClurg
     r"|[A-Z]{2,}"                                      # NIC, PPTX
     r")\b")
 # Sentence-initial words are capitalised by grammar, not by being names. If a match
@@ -98,7 +98,7 @@ ENTITY = re.compile(
 # "Join Chelsea Kelly" to "Meet Chelsea Kelly" reads as a deleted entity.
 _SENT_START = re.compile(r"(?:^|[.!?\"“'’)\]]\s+)$")
 # Connectors and calendar words carry no identity on their own. "August" is exempt only
-# as a bare token; "August Health" still registers through its second word.
+# as a bare token; "Summit Labs" still registers through its second word.
 _ENTITY_STOP = {"the", "and", "for", "of", "de", "von", "van",
                 "january", "february", "march", "april", "may", "june", "july",
                 "august", "september", "october", "november", "december",
@@ -249,7 +249,7 @@ def classify(before, after):
     # five "Mara"s is the de-sloppifier doing its job -- Pass 2 explicitly tells it to
     # swap a repeated character name for a pronoun -- and fiction is this plugin's home
     # turf, so a per-occurrence rule would make the DEFAULT gate unusable exactly where
-    # it is used most. Losing the LAST "August Health" from a three-co-host announcement
+    # it is used most. Losing the LAST "Summit Labs" from a three-co-host announcement
     # is the catastrophe. Numbers keep the per-occurrence rule because a repeated figure
     # is a restated fact, not a restated name.
     cand, still_there = entity_candidates(before), capitalised_tokens(after)
