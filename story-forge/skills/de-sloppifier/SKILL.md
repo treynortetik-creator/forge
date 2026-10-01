@@ -51,7 +51,7 @@ It classifies every change and escalates only the two classes that can destroy m
 
 **Named entities use a harder bar than the rest: only a drop to zero counts.** Losing one of five
 `Mara`s is Pass 2 doing its job, since it explicitly tells you to swap a repeated character name for
-a pronoun. Losing the *last* `August Health` from a three-co-host announcement is the catastrophe.
+a pronoun. Losing the *last* `Summit Labs` from a three-co-host announcement is the catastrophe.
 Numbers keep the per-occurrence rule, because a repeated figure is a restated fact rather than a
 restated name.
 
