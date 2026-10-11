@@ -1,0 +1,63 @@
+{
+  "genre": "emo-pop-punk",
+  "guide": "skills/lyric-writer/references/genres/emo-pop-punk.md",
+  "note": "Norms, not laws. Every check is PASS or WARN, never FAIL. [M-29] = measured from the 29 songs in the guide; [J] = guide author's judgment.",
+  "checks": {
+    "total_words": {
+      "target": [280, 380], "warn_outside": [218, 487],
+      "why": "[M-29] median 353 words, range 218-487; checker rule [J] 280-380 with repeats written out"
+    },
+    "repeated_line_share": {
+      "typical": [0.45, 0.75],
+      "why": "[M-29] median 58% of lines are repeats, typically 45-75%"
+    },
+    "chorus_lines": {
+      "range": [4, 8],
+      "why": "[M-29] 4 lines in 15 of 28 measurable choruses, range 2-11; checker rule [J] 4-8"
+    },
+    "chorus_occurrences": {
+      "min": 3,
+      "why": "[M-29] choruses occur 3-4 times, usually doubled at the end"
+    },
+    "chorus_perfect_rhyme_share": {
+      "max": 0.5,
+      "why": "[J] no more than 50% perfect rhymes in the chorus; [M-29] only 4 of 29 choruses are perfect-led"
+    },
+    "verse_lines_over": {
+      "syllables": 16, "max_count": 2,
+      "why": "[J] no more than two verse lines over 16 syllables; [M-29] peaks around 18"
+    },
+    "you_count": {
+      "min": 10, "median": 21,
+      "why": "[M-29] 26 of 29 songs say you/your 10+ times, median 21"
+    },
+    "title_in_chorus": {
+      "why": "[M-29] 10 of 29 put the title in the chorus (7 of those in line 1 or 2); never-sung titles are a legit move (guide move 9)"
+    },
+    "receipts_proxy": {
+      "min": 1,
+      "why": "[J] 1+ number, time or place per song; [M-29] 8 of 29 have a number, 7 of 29 name a place or person"
+    },
+    "line_length_swing": {
+      "min_stdev": 1.5,
+      "why": "[M-29] real songs swing from 4 to 18 syllables; uniform line lengths is a red flag (guide section 4)"
+    }
+  },
+  "word_lists": {
+    "file": "emo-pop-punk-flags.txt",
+    "sections": {
+      "therapy-speak": {
+        "max_hits": 0,
+        "why": "[J] 2020s register, wrong for 2005 (guide section 4)"
+      },
+      "anachronism": {
+        "max_hits": 0,
+        "why": "[J] smartphones, streaming, social apps; use the era's props instead (guide section 4)"
+      },
+      "generic-angst": {
+        "max_hits": 1,
+        "why": "[J] generic angst: allow one, and only if an object pins it (guide section 4)"
+      }
+    }
+  }
+}

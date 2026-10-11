@@ -1,0 +1,62 @@
+# emo / pop-punk genre flag lists (guide: emo-pop-punk.md, section 4).
+# [section] headers; one entry per line; '#' comments; case-insensitive.
+# Single words also catch -s/-es/-ed/-ing/-d endings; multi-word entries match as phrases.
+# Thresholds (how many hits warn) live in emo-pop-punk.json, not here.
+
+[therapy-speak]
+# 2020s register, wrong for a 2005 narrator.
+boundary
+boundaries
+healing
+toxic
+gaslight
+gaslighting
+trauma
+traumatized
+triggered
+closure
+my truth
+valid
+validate
+processing
+
+[anachronism]
+# Judgment calls, decided on purpose:
+#  - "text"/"texted"/"texting" are NOT flagged: T9 texting on flip phones is 2005.
+#  - "facebook"/"twitter"/"myspace" are NOT flagged: all existed in the era.
+#  - "iphone" IS flagged: 2007 at the earliest, after most of the core era.
+# Era props to use instead: AIM away messages, voicemail, payphones, burned CDs,
+# flip phones, MySpace Top 8, the mall, curfew.
+smartphone
+iphone
+android
+streaming
+spotify
+instagram
+tiktok
+snapchat
+facetime
+airpods
+uber
+selfie
+hashtag
+emoji
+dm
+dms
+ghosted
+left on read
+wifi
+influencer
+doorbell camera
+group chat
+
+[generic-angst]
+# Flag only when 2+ appear (allow one, if an object pins it).
+pain
+broken
+darkness
+demon
+scar
+falling apart
+fall apart
+the void

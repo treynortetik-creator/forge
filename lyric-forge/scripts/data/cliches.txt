@@ -1,0 +1,155 @@
+# lyric-forge cliche / AI-tell wordlist.
+# One entry per line. '#' starts a comment. Case-insensitive.
+# Single words match on a word boundary and also catch -s / -es / -ed / -ing / -d
+# endings (so "echo" catches echoes, echoed, echoing). Multi-word entries match as a phrase.
+# Edit freely: this is a starting list, not a verdict. A flagged word is a prompt to ask
+# "did I earn this?", not an automatic cut.
+
+# --- single-word AI tells (overrepresented in model-written lyrics) ---
+neon
+echo
+shatter
+shattered
+tapestry
+whisper
+ember
+ashes
+phoenix
+symphony
+kaleidoscope
+labyrinth
+crimson
+velvet
+silhouette
+cascade
+tempest
+ethereal
+luminous
+celestial
+serenade
+masquerade
+wildfire
+inferno
+abyss
+oblivion
+haunt
+fragile
+tether
+unravel
+shimmer
+glimmer
+flicker
+twilight
+horizon
+mirage
+reverie
+solace
+sanctuary
+cathedral
+paper-thin
+stardust
+moonlight
+starlight
+heartbeat
+heartbeats
+
+# --- stock phrases ---
+fire in my soul
+fire in my veins
+fire in my heart
+heart of gold
+heart of stone
+set me free
+break the chains
+break these chains
+broken heart
+broken wings
+broken dreams
+shattered dreams
+shattered glass
+shattered heart
+cold as ice
+burning bright
+burn so bright
+learning to fly
+spread my wings
+against the odds
+against all odds
+stand the test of time
+rise above
+rise from the ashes
+rising from the ashes
+rise like a phoenix
+tear me apart
+falling apart
+fall apart
+falling down
+lost in the dark
+lost in the night
+lost in your eyes
+into the night
+into the void
+into the fire
+dancing in the moonlight
+dance with the devil
+dance in the rain
+paint the sky
+painted sky
+night sky
+sea of stars
+sea of faces
+ocean of tears
+echoes of
+ghosts of
+ghost of you
+whispers in the wind
+whispers in the dark
+whispers of
+shadows dance
+shadows of the past
+dancing shadows
+the weight of the world
+weight of the world
+eyes like
+pieces of me
+pick up the pieces
+pick up the pieces of
+sands of time
+tides of time
+tale as old as time
+as old as time
+chasing dreams
+chasing shadows
+chasing the sun
+chasing the light
+write my own story
+my own story
+turn the page
+light in the darkness
+light in the dark
+darkness inside
+the darkness within
+demons inside
+inner demons
+fight my demons
+battle scars
+scars on my heart
+scars of the past
+wild and free
+young and free
+forever and always
+now and forever
+until the end of time
+end of time
+
+# --- added from the emo/pop-punk guide section 4 (AI-lyric tells) ---
+fading light
+endless night
+fire in my soul
+weather the storm
+drowning in pain
+lost in time
+memories fade
+rise again
+hidden scars
+stories untold
