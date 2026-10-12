@@ -1,0 +1,26 @@
+{
+  "title": "Lamp Room (example)",
+  "audio": "lamp-room.m4a",
+  "audio_duration_seconds": 36.0,
+  "fps": 30,
+  "aspect": "16:9",
+  "style": "Fictional characters in a dreamy 1980s synth-pop music video, cinematic, soft film grain.",
+  "identities": {
+    "Maren": "a weathered lighthouse keeper with a grey beard and a yellow oilskin coat",
+    "Bolt": "a small boxy robot drummer with a dented copper body and two round lamp eyes"
+  },
+  "shots": [
+    {"id": "01", "time": "00:00.00-00:06.00", "slug": "storm-over-tower", "frame": "01-storm-over-tower", "face": "none",
+     "description": "A tall striped lighthouse on a rocky headland at dusk, waves crashing, the beam sweeping the clouds. Slow push-in.", "sing": false},
+    {"id": "02", "time": "00:06.00-00:12.50", "slug": "keeper-climbs", "frame": "02-keeper-climbs", "face": "human",
+     "description": "Maren climbs the spiral stairs inside the tower holding a lantern, his shadow stretching up the curved wall.", "sing": false},
+    {"id": "03", "time": "00:12.50-00:20.00", "slug": "keeper-sings", "frame": "03-keeper-sings", "face": "human",
+     "description": "Close-up of Maren singing the verse into a brass speaking tube beside the great lamp, locked camera.", "sing": true},
+    {"id": "04", "time": "00:20.00-00:28.00", "slug": "robot-drum-solo", "frame": "04-robot-drum-solo", "face": "creature",
+     "description": "Bolt plays a drum kit made of buoys and oil drums in the lamp room, sticks blurring, sparks of light on the glass. Locked camera, exactly one robot.", "sing": false},
+    {"id": "05", "time": "00:28.00-00:33.00", "slug": "duet-chorus", "frame": "05-duet-chorus", "face": "human",
+     "description": "Maren sings the chorus beside Bolt at the drums, the lamp beam rotating behind them. Exactly two characters.", "sing": true, "model": "minimax/hailuo-3"},
+    {"id": "06", "time": "00:33.00-00:36.00", "slug": "dawn-beam-off", "frame": "06-dawn-beam-off", "face": "none",
+     "description": "Dawn light on the sea; the great lamp clicks off and the tower falls quiet. Slow pull-back.", "sing": false}
+  ]
+}

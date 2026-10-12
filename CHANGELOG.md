@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-12
+
+### music-forge 0.2.0
+
+- music-forge 0.2.0: lyric-forge renamed and folded in; new music-video and track-check skills.
+- `music-video`: shot plan, `plan_check.py`, still prompts, `build_clips.py` (OpenRouter video models, routing table in
+  `data/model-routing.json`, resumable, `--dry-run`, `--max-usd`, opt-in `--audio-refs`), frame-exact `cut.py`, `review_frames.py`,
+  `teasers.py`. `track-check`: `song_scan.py` and `voice_match.py`. `lyric-writer` and `sung-vs-written` are unchanged.
+- Install name changes from `lyric-forge@forge` to `music-forge@forge`; uninstall the old one.
+
 ## 2026-10-11
 
 ### lyric-forge 0.1.0 (new)
@@ -12,7 +22,7 @@
   cliche scan), `rhymes.py` (Datamuse, cliche-filtered), `sung_check.py`, plus tests and a fictional fixture.
 - Genre guides load from `references/genres/`; `emo-pop-punk.md` is a full guide (29 songs studied), and `lyric_meter.py --genre emo-pop-punk` runs its measurable norms as a PASS/WARN GENRE CHECK.
 - Credits: adapted from bitwize-music-studio/claude-ai-music-skills (CC0); ideas from NuNaught (Apache-2.0)
-  and Hermes (MIT). See `lyric-forge/NOTICE.md`.
+  and Hermes (MIT). See `music-forge/NOTICE.md`.
 - Root README and marketplace updated: four plugins became five.
 
 ## 2026-10-01

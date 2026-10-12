@@ -1,0 +1,24 @@
+{
+  "name": "music-forge",
+  "displayName": "Music Forge",
+  "version": "0.2.0",
+  "description": "Make a song and then a video for it, measured instead of eyeballed: write lyrics for AI music generators with scripts that count syllables and rhymes, check what was actually sung, turn a finished song plus a shot plan into a frame-exact music video through OpenRouter video models and ffmpeg, and scan tracks for tempo, key and singer consistency.",
+  "author": {
+    "name": "Treynor Tetik"
+  },
+  "homepage": "https://github.com/treynortetik-creator/forge",
+  "repository": "https://github.com/treynortetik-creator/forge",
+  "license": "MIT",
+  "keywords": [
+    "lyrics",
+    "songwriting",
+    "suno",
+    "music",
+    "music-video",
+    "video",
+    "openrouter",
+    "ffmpeg",
+    "whisper",
+    "demucs"
+  ]
+}

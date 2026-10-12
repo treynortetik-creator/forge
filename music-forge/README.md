@@ -1,6 +1,8 @@
-# lyric-forge
+# music-forge
 
-Write lyrics for AI music generators (Suno and similar), then check what the generator actually sang.
+Write lyrics for AI music generators (Suno and similar), check what the generator actually sang, turn the finished song into a cut music video, and scan tracks for tempo, key and singer consistency.
+
+*Formerly lyric-forge. Renamed and folded in at 0.2.0; the two lyric skills are unchanged.*
 
 It follows the Forge rule: **judgment stays with the model, and anything expressed as a number gets measured instead of eyeballed.** Models miscount syllables and misjudge rhymes with total confidence, so scripts count them. The model spends its effort on what no script can see: whether a line is true, specific, and singable.
 
@@ -8,21 +10,23 @@ It follows the Forge rule: **judgment stays with the model, and anything express
 
 ```bash
 claude plugin marketplace add treynortetik-creator/forge
-claude plugin install lyric-forge@forge
+claude plugin install music-forge@forge
 ```
 
-Restart the session or `/clear` so the skills load. You need `uv` (https://docs.astral.sh/uv/) for the scripts; there is nothing to `pip install`.
+Restart the session or `/clear` so the skills load. You need `uv` (https://docs.astral.sh/uv/) for the scripts; there is nothing to `pip install`. The video skill also needs `ffmpeg`/`ffprobe` and, for PNG captions and end cards, ImageMagick (`magick`), plus an `OPENROUTER_API_KEY` in your environment to animate shots.
 
-## Two skills
+## Four skills
 
 | Skill | Use it when |
 |---|---|
 | **lyric-writer** | writing, revising or reviewing lyrics. Brief, draft, **measure**, critic pass against a 13-point checklist, up to three revision passes, then a Suno-ready block: Title, Style (about 1000 characters or fewer), Exclude Styles, tagged Lyrics, Performance notes, and the measured numbers |
 | **sung-vs-written** | a song has been generated. Splits out the vocals, transcribes them, aligns the transcript to your written lyrics, and flags lines worth a listen |
+| **music-video** | you have a finished song and want a video. Shot plan, still prompts, animation through OpenRouter video models (routed, resumable, cost-capped), a frame-exact cut with the original song and burned captions, a look-at-the-frames review loop, and 16:9 plus vertical teasers |
+| **track-check** | you want to read a track: tempo, key, loudness curve, sections and a spectrogram; or compare a singer's isolated vocals across tracks. Carries the rule that the voice score is a speech model's guess, never a verdict |
 
 ## The scripts
 
-All live in `scripts/`. Skills call them through `${CLAUDE_PLUGIN_ROOT}`.
+Lyric scripts live in `scripts/`, video scripts in `scripts/video/`, audio scripts in `scripts/audio/`. Skills call them through `${CLAUDE_PLUGIN_ROOT}`.
 
 ### `lyric_meter.py`: measure the lyric sheet
 
@@ -90,6 +94,36 @@ Requires `uv` and `ffmpeg`. First run downloads the Demucs weights.
 uv run --with pronouncing python scripts/test_lyric_meter.py
 ```
 
+## The video scripts (`scripts/video/`)
+
+All take the shot plan (`shot-plan.json`: title, audio, style line, character looks, shots with id / `MM:SS.ss-MM:SS.ss` / slug / description / sing / frame) and default to `frames/`, `clips/`, `cuts/` beside it. Stdlib Python 3.11+ plus ffmpeg.
+
+| Script | Does |
+|---|---|
+| `plan_check.py` | gaps, overlaps, total vs audio length, missing frames, shots longer than their model's clip limit |
+| `still_prompts.py` | character-sheet template and one still prompt per shot, looks not names |
+| `build_clips.py` | keyframe (+ song slice with `--audio-refs`) to a clip per shot via OpenRouter `/api/v1/videos`; `--dry-run` prices the plan with no key, `--max-usd` is a hard ceiling, resumable, 5 workers, per-clip sidecar JSON |
+| `cut.py` | frame-exact slots from the plan's times, original song on top, SRT captions (ffmpeg subtitles filter if present, else ImageMagick PNG overlays), plus a `-small.mp4` under a size target |
+| `review_frames.py` | a frame per shot for you to look at, and audio of each singing clip for a whisper check |
+| `teasers.py` | N windows, each 16:9 and 9:16 blurred-fill, with fades and an optional end card |
+| `data/model-routing.json` | which model for which kind of shot, with prices. Every rule is dated and marked as drifting |
+
+```bash
+python3 scripts/video/plan_check.py shot-plan.json
+python3 scripts/video/build_clips.py shot-plan.json --dry-run
+python3 scripts/video/build_clips.py shot-plan.json --max-usd 15
+python3 scripts/video/cut.py shot-plan.json --out cuts/video.mp4 --captions lyrics.srt
+```
+
+**`--audio-refs` uploads song slices to a public temporary file host** (uguu.se, fallback litterbox.catbox.moe, 1 hour). It is off by default. Keyframes go inline and are never uploaded.
+
+Tests: `uv run python scripts/video/test_plan_check.py` and `uv run python scripts/video/test_cut.py` (synthetic sine song, colour clips, a local mock of the video API; no network, no key). `build_clips.py` has not been run against live OpenRouter in this form; do one cheap live shot before a big run.
+
+## The audio scripts (`scripts/audio/`)
+
+- `song_scan.py`: tempo (with half/double alternatives), key (with fit), loudness and brightness, sections, spectrogram. `uv run --with librosa --with matplotlib --with numpy python scripts/audio/song_scan.py song.m4a`
+- `voice_match.py`: median sung pitch and a speaker-embedding similarity between isolated vocal stems, always with a same-track control. The embedding model is trained on speech: use it for pitch register and gross singer swaps, never as proof two takes match. Model path via `--model` or `$TITANET_MODEL`; fetch instructions are in the script docstring and the `track-check` skill.
+
 ## Genre guides
 
 `skills/lyric-writer/references/genres/` holds per-genre craft guides; the skill loads the one matching the brief. `emo-pop-punk.md` is a full guide built from a close reading of 29 songs (25 core 2001-2008 tracks plus 4 modern contrast tracks; list in `emo-pop-punk-songs-studied.md`), and its measurable norms are encoded in `scripts/data/genres/emo-pop-punk.json` for `--genre emo-pop-punk`. Without a matching guide the skill falls back to the generic tables in `references/craft.md` and says so.
@@ -97,23 +131,26 @@ uv run --with pronouncing python scripts/test_lyric_meter.py
 ## Layout
 
 ```
-lyric-forge/
+music-forge/
   .claude-plugin/plugin.json
   skills/
-    lyric-writer/
-      SKILL.md
-      references/{craft.md, suno-notes.md, genres/emo-pop-punk*.md}
-    sung-vs-written/SKILL.md
+    lyric-writer/       SKILL.md  references/{craft.md, suno-notes.md, genres/emo-pop-punk*.md}
+    sung-vs-written/    SKILL.md
+    music-video/        SKILL.md
+    track-check/        SKILL.md
   scripts/
     lyric_meter.py  rhymes.py  sung_check.py  test_lyric_meter.py
     data/cliches.txt  data/genres/emo-pop-punk{.json,-flags.txt}  fixtures/sample.txt
+    video/  plan_lib.py plan_check.py still_prompts.py build_clips.py cut.py review_frames.py teasers.py
+            test_plan_check.py test_cut.py  data/{model-routing.json,shot-plan.schema.json}  fixtures/
+    audio/  song_scan.py voice_match.py
 ```
 
 ## Credits
 
 The checklist, refinement schedule, and section/length/density tables are adapted from **bitwize-music-studio/claude-ai-music-skills** (CC0), restructured and tied to measured thresholds. The Title/Lyrics/Style/Analysis output idea comes from NuNaught's suno-songwriting-skill (Apache-2.0) and the phonetic-respelling idea from the Hermes songwriting skill (MIT); ideas only, no text copied. Full detail: **[NOTICE.md](NOTICE.md)**.
 
-Every example lyric here is fictional. No existing song lyrics are included.
+Every example lyric, character and shot plan here is fictional. No existing song lyrics are included.
 
 ## Licence
 

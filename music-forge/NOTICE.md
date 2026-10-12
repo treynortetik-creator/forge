@@ -1,6 +1,6 @@
 # Credits and notices
 
-lyric-forge is MIT for the original work (see `LICENSE`). It adapts or is inspired by the following.
+music-forge is MIT for the original work (see `LICENSE`). It adapts or is inspired by the following.
 
 ## Adapted, with thanks
 
@@ -17,6 +17,15 @@ lyric-forge is MIT for the original work (see `LICENSE`). It adapts or is inspir
 - **Datamuse API** (https://www.datamuse.com/api/) is called by `scripts/rhymes.py` at run time. No key required; its usage terms apply to your use.
 - **CMU Pronouncing Dictionary** via the `pronouncing` package supplies syllable and rhyme data to `scripts/lyric_meter.py`. Fetched at run time by `uv`; not bundled.
 - **Demucs** (Meta / Kyutai, MIT) separates the vocals in `scripts/sung_check.py`. **whisper.cpp** (MIT) or **faster-whisper** (MIT), both built on OpenAI Whisper (MIT), transcribe them. All are fetched or installed by the user at run time; none is bundled.
+
+## Services and tools used at run time (none bundled)
+
+- **OpenRouter** (https://openrouter.ai) `/api/v1/videos`, called by `scripts/video/build_clips.py` with your own `OPENROUTER_API_KEY`. The video models behind it have their own terms and content filters.
+- **uguu.se** and **litterbox.catbox.moe** are third-party temporary file hosts, used only when you pass `--audio-refs`. Slices are publicly fetchable until they expire.
+- **ffmpeg** (LGPL/GPL, depending on build) and **ImageMagick** do the cutting and caption rendering.
+- **librosa** (ISC) and **matplotlib** (PSF-style) power `scripts/audio/song_scan.py`. **sherpa-onnx** (Apache-2.0) runs the NVIDIA NeMo **TitaNet** speaker model in `scripts/audio/voice_match.py`; you download the model yourself and its own licence applies.
+
+The video pipeline, routing table and audio scripts were written for this plugin from the author's own notes; no third-party repository text was copied.
 
 ## Examples
 

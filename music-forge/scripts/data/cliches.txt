@@ -1,4 +1,4 @@
-# lyric-forge cliche / AI-tell wordlist.
+# music-forge cliche / AI-tell wordlist.
 # One entry per line. '#' starts a comment. Case-insensitive.
 # Single words match on a word boundary and also catch -s / -es / -ed / -ing / -d
 # endings (so "echo" catches echoes, echoed, echoing). Multi-word entries match as a phrase.

@@ -170,7 +170,7 @@ These come from community and vendor guides, not Suno documentation. Test on sho
 - **Spoken lines:** A `[Spoken Word]` tag plus the phrase in parentheses `[S: search summaries]`. Good for move 6.
 - **Pronunciation:** Write numbers as words. Spell names phonetically and consistently. Hyphenate letters to be sung individually ("A-I-M") `[S: search summaries]`.
 - **Line length:** Guides say 4-8 words per line `[S: HookGenius]`. That conflicts with move 5, so allow one run-on line per verse and expect Suno to rush it.
-- **Seed the substance:** Thin prompts yield filler. A real story fed in first fixed most of the genericness `[S: AI Central]`. lyric-forge should build a dossier before drafting: who "you" is, what happened, 5 props, a place, a date.
+- **Seed the substance:** Thin prompts yield filler. A real story fed in first fixed most of the genericness `[S: AI Central]`. music-forge should build a dossier before drafting: who "you" is, what happened, 5 props, a place, a date.
 
 ---
 

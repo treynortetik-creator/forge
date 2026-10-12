@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "music-video shot plan",
+  "description": "Structural schema for editors. plan_check.py enforces the rest (tiling, gaps, overlaps, audio length, files on disk).",
+  "type": "object",
+  "required": ["title", "audio", "style", "shots"],
+  "properties": {
+    "title": {"type": "string"},
+    "audio": {"type": "string", "description": "Path to the finished song, relative to the plan file."},
+    "audio_duration_seconds": {"type": "number", "description": "Fallback when the audio file is not on disk."},
+    "fps": {"type": "integer", "minimum": 12, "maximum": 60, "default": 30},
+    "aspect": {"enum": ["16:9", "9:16"], "default": "16:9"},
+    "style": {"type": "string", "description": "One line prepended to every shot prompt."},
+    "identities": {
+      "type": "object",
+      "description": "Character name -> look string. Names in shot descriptions are replaced by the look; video models do not know your names.",
+      "additionalProperties": {"type": "string"}
+    },
+    "shots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "time", "slug", "description", "frame"],
+        "properties": {
+          "id": {"type": "string"},
+          "time": {"type": "string", "pattern": "^\\d+:\\d{2}(\\.\\d+)?-\\d+:\\d{2}(\\.\\d+)?$"},
+          "slug": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+          "description": {"type": "string"},
+          "sing": {"type": "boolean", "default": false},
+          "frame": {"type": "string", "description": "Keyframe filename in the frames directory (extension optional)."},
+          "face": {"enum": ["human", "creature", "none"], "description": "Used by model routing. Leave out when unsure."},
+          "model": {"type": "string", "description": "Optional per-shot model override."}
+        }
+      }
+    }
+  }
+}

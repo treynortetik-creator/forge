@@ -49,7 +49,7 @@ def load_cliche_regex(path):
 
 def query(rel, word, limit):
     qs = urllib.parse.urlencode({rel: word, "md": "s", "max": limit})
-    req = urllib.request.Request(f"{API}?{qs}", headers={"User-Agent": "lyric-forge/0.1"})
+    req = urllib.request.Request(f"{API}?{qs}", headers={"User-Agent": "music-forge/0.2"})
     try:
         with urllib.request.urlopen(req, timeout=15) as r:
             return json.load(r)

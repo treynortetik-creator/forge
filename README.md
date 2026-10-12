@@ -25,7 +25,7 @@ Five Claude Code plugins for making things, and checking them.
 | **[story-forge](story-forge/)** | Long-form fiction — braindump to dossier, outlining, drafting, a three-pass line edit, a continuity audit |
 | **[deck-forge](deck-forge/)** | Presentations — a component library that never builds a native chart, and a harness that measures legibility at distance and contrast against the real backdrop |
 | **[proof-forge](proof-forge/)** | Exports — compare two renders and mark exactly where they differ, on video, stills or audio |
-| **[lyric-forge](lyric-forge/)** | Song lyrics for AI music generators — a script counts syllables, classifies rhymes and scans for cliches while the model judges taste, then a vocal-stem transcript flags where the sung words differ from the written ones |
+| **[music-forge](music-forge/)** | Songs and their videos — scripts count syllables and rhymes while the model judges taste, a vocal-stem transcript flags where the sung words differ from the written ones, then a finished song plus a shot plan becomes a frame-exact music video (cost-capped OpenRouter animation, original-song cut, teasers), and tracks can be scanned for tempo, key and singer consistency |
 
 They share one idea: **judgment stays with the model, and anything expressed as a number gets measured
 instead of eyeballed.**
@@ -56,7 +56,7 @@ claude plugin install design-forge@forge     # any of them,
 claude plugin install story-forge@forge      # or
 claude plugin install deck-forge@forge       # or
 claude plugin install proof-forge@forge      # or
-claude plugin install lyric-forge@forge      # all five
+claude plugin install music-forge@forge      # all five
 ```
 
 Or clone and install locally:
@@ -229,7 +229,7 @@ Both plugins stand on other people's work and say so.
   creative assets rather than summaries of a method — a verbatim prompt and a curated vocabulary list.
   Nothing is broken by their absence; see
   [story-forge/references/writing/README.md](story-forge/references/writing/README.md).
-- **lyric-forge's checklist and length/density tables** are adapted from **bitwize-music-studio/claude-ai-music-skills** (CC0), with ideas from NuNaught's suno-songwriting-skill (Apache-2.0) and the Hermes songwriting skill (MIT). Full detail: **[lyric-forge/NOTICE.md](lyric-forge/NOTICE.md)**.
+- **music-forge's lyric checklist and length/density tables** are adapted from **bitwize-music-studio/claude-ai-music-skills** (CC0), with ideas from NuNaught's suno-songwriting-skill (Apache-2.0) and the Hermes songwriting skill (MIT). Full detail: **[music-forge/NOTICE.md](music-forge/NOTICE.md)**.
 - **Anthropic's `frontend-design` skill** is quoted in design-forge's house-style notes, marked inline.
 - The **asset library** ships 61 files under MIT, ISC, OFL-1.1, CC0 and public-domain terms, each with
   its licence *and where that licence was verified* recorded per file. See
