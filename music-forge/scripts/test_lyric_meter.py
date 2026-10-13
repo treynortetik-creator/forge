@@ -59,6 +59,45 @@ class Meter(unittest.TestCase):
     def test_oov_marked(self):
         self.assertEqual(lm.word_info("zxqvblorp")["oov"], True)
 
+    def test_flexible_word_range(self):
+        w = lm.word_info("fire")
+        self.assertEqual((w["syl_min"], w["syl_max"]), (1, 2))
+
+    def test_stress_match(self):
+        self.assertEqual(lm.stress_match("0101", "0101"), 1.0)
+        self.assertEqual(lm.stress_match("0101", "1010"), 0.0)
+        self.assertEqual(lm.stress_match("0121", "0101"), 1.0)   # secondary matches either
+        self.assertIsNone(lm.stress_match("", "01"))
+
+
+# Fictional. Same syllable count, beats in different places in verse 2 line 1; the
+# flexible word "fire" puts verse 2 line 2 in range of its partner.
+BEATS_SONG = """[Verse 1]
+Running faster, running harder
+Sit beside me by the evening tide
+
+[Verse 2]
+Again, again, again, again
+Sit beside the fire with me tonight
+"""
+
+
+class Beats(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.res = lm.analyse(BEATS_SONG, args(title=None))
+        cls.pairs = cls.res["repeat_comparisons"][0]["pairs"]
+
+    def test_same_count_different_beats_flagged(self):
+        p = self.pairs[0]
+        self.assertEqual(p["syl"], p["ref_syl"])
+        self.assertTrue(p["stress_flag"], p)
+
+    def test_range_reported(self):
+        p = self.pairs[1]
+        self.assertLess(p["range"][0], p["range"][1])
+        self.assertFalse(p["flag"])
+
 
 # Fictional. Deliberate violations: perfect-rhyme-only chorus, a therapy-speak word,
 # one "you" in the whole song, uniform line lengths, no numbers or names, a short file.

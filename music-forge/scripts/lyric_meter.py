@@ -13,8 +13,13 @@ WHAT IT MEASURES (per file)
   * per line: syllable count + stress pattern (CMU dict via `pronouncing`; words the dict
     does not know fall back to a vowel-group heuristic and are marked `~`)
   * per section: line count, word count
+  * syllable RANGES: words with more than one CMU pronunciation (fire 1-2, every 2-3,
+    hour 1-2) make the line a range ("13-14") and are listed after the line with `≈`
   * repeated sections (verse 1 vs verse 2, chorus vs chorus...): line-by-line syllable
-    difference, flagging pairs off by more than --tolerance (default 2)
+    difference, flagging pairs that miss by more than --tolerance (default 2) even at the
+    closest pronunciation; plus a BEAT MATCH: the share of stressed/unstressed slots that
+    agree (best of start- or end-aligned), flagged under --stress-min (default 0.6) when
+    the syllable counts already fit. Same count, different beats = fights the melody.
   * end-rhyme scheme per section, each link classed perfect / slant / repeat
       perfect = identical CMU rhyming part     (night / white)
       slant   = same final stressed vowel only (night / mind)
@@ -100,7 +105,11 @@ def heuristic_syllables(word):
 
 
 def word_info(word):
-    """-> dict(word, syl, stress[str of 0/1/2], oov, phones)"""
+    """-> dict(word, syl, syl_min, syl_max, stress[str of 0/1/2], oov, phones)
+
+    syl is the count of CMU's first pronunciation. syl_min/syl_max span every pronunciation
+    CMU lists (fire 1-2, every 2-3, hour 1-2), so a line can report a range instead of
+    silently picking one. A singer can land either way; the range is the honest answer."""
     lw = word.lower()
     phones_list = pronouncing.phones_for_word(lw)
     if not phones_list and "'" in lw:
@@ -110,12 +119,34 @@ def word_info(word):
         st = pronouncing.stresses(ph)
         if len(st) == 1 and lw in FUNCTION_WORDS:
             st = "0"
-        return {"word": lw, "syl": len(st), "stress": st, "oov": False, "phones": ph}
+        counts = [len(pronouncing.stresses(p)) for p in phones_list]
+        return {"word": lw, "syl": len(st), "syl_min": min(counts), "syl_max": max(counts),
+                "stress": st, "oov": False, "phones": ph}
     n = heuristic_syllables(lw)
     st = ("1" + "0" * (n - 1)) if n > 1 else "1"
     if n == 1 and lw in FUNCTION_WORDS:
         st = "0"
-    return {"word": lw, "syl": n, "stress": st, "oov": True, "phones": None}
+    return {"word": lw, "syl": n, "syl_min": n, "syl_max": n, "stress": st, "oov": True,
+            "phones": None}
+
+
+def stress_match(a, b):
+    """Share of beats that agree between two stress strings (0/1/2), or None if either is empty.
+
+    Matching lines of repeated sections are sung to one melody, so their stressed syllables
+    should land in the same slots. Equal syllable counts do not guarantee that: 12 and 12 can
+    put the beats in different places. Compared twice, aligned from the start and from the
+    end (lines are sung to the rhyme, so end alignment often matters more); the better
+    alignment wins. Secondary stress (2) counts as a match either way. Single-syllable
+    function words are already reduced to unstressed by word_info."""
+    if not a or not b:
+        return None
+
+    def score(x, y):
+        agree = sum(1 for p, q in zip(x, y) if p == q or "2" in (p, q))
+        return agree / min(len(x), len(y))
+
+    return round(max(score(a, b), score(a[::-1], b[::-1])), 2)
 
 
 def stress_glyphs(stress):
@@ -495,12 +526,15 @@ def analyse(text, args):
             infos = [word_info(w) for w in line_words(ln["text"])]
             syl = sum(i["syl"] for i in infos)
             oov = [i["word"] for i in infos if i["oov"]]
+            flex = [i["word"] for i in infos if i["syl_min"] != i["syl_max"]]
             stress = "".join(i["stress"] for i in infos)
             ew = infos[-1]["word"] if infos else None
             rows.append({
                 "n": ln["n"], "text": ln["text"], "syllables": syl,
+                "syl_min": sum(i["syl_min"] for i in infos),
+                "syl_max": sum(i["syl_max"] for i in infos), "flex": flex,
                 "approx": bool(oov), "oov": oov, "stress": stress_glyphs(stress),
-                "end_word": ew, "words": len(infos),
+                "stress_raw": stress, "end_word": ew, "words": len(infos),
             })
         sec["rows"] = rows
 
@@ -542,6 +576,7 @@ def analyse(text, args):
     # --- repeated-section line-by-line syllable variance
     first_of = {}
     comps = []
+    stress_min = getattr(args, "stress_min", 0.6)
     for sec in sections:
         b = sec["base"]
         if b not in first_of:
@@ -552,9 +587,18 @@ def analyse(text, args):
         for k in range(min(len(ref["rows"]), len(sec["rows"]))):
             ra, rb = ref["rows"][k], sec["rows"][k]
             d = rb["syllables"] - ra["syllables"]
+            # closest the two lines can get if a singer picks either pronunciation of the
+            # flexible words (fire, every...): flag only when even the best case misses
+            gap = max(0, rb["syl_min"] - ra["syl_max"], ra["syl_min"] - rb["syl_max"])
+            sm = stress_match(ra["stress_raw"], rb["stress_raw"])
             pairs.append({"line": k + 1, "ref_n": ra["n"], "n": rb["n"],
                           "ref_syl": ra["syllables"], "syl": rb["syllables"], "diff": d,
-                          "flag": abs(d) > args.tolerance,
+                          "ref_range": [ra["syl_min"], ra["syl_max"]],
+                          "range": [rb["syl_min"], rb["syl_max"]], "gap": gap,
+                          "flag": gap > args.tolerance,
+                          "stress_match": sm, "ref_stress": ra["stress"], "stress": rb["stress"],
+                          "stress_flag": (sm is not None and sm < stress_min
+                                          and gap <= args.tolerance),
                           "approx": ra["approx"] or rb["approx"]})
         comp = {"ref": ref["label"], "section": sec["label"], "pairs": pairs,
                 "line_count_ref": len(ref["rows"]), "line_count": len(sec["rows"])}
@@ -565,9 +609,16 @@ def analyse(text, args):
         for p in pairs:
             if p["flag"]:
                 flags.append(f"[{sec['label']}] line {p['line']} (file line {p['n']}): "
-                             f"{p['syl']} syl vs {p['ref_syl']} in [{ref['label']}] "
-                             f"(off by {abs(p['diff'])}, tolerance {args.tolerance})"
+                             f"{fmt_range(p['range'])} syl vs {fmt_range(p['ref_range'])} "
+                             f"in [{ref['label']}] "
+                             f"(off by {p['gap']} at best, tolerance {args.tolerance})"
                              + (" ~approx" if p["approx"] else ""))
+            elif p["stress_flag"]:
+                flags.append(f"[{sec['label']}] line {p['line']} (file line {p['n']}): "
+                             f"syllables fit but only {round(p['stress_match'] * 100)}% of "
+                             f"the beats line up with [{ref['label']}] line {p['line']} "
+                             f"(min {round(stress_min * 100)}%): "
+                             f"{p['stress']} vs {p['ref_stress']}")
     result["repeat_comparisons"] = comps
 
     # --- title check
@@ -679,9 +730,11 @@ def render(res, args):
         P(f"[{s['label']}]  {s['line_count']} lines, {s['word_count']} words, "
           f"syl {s['syl_min']}-{s['syl_max']} (mean {s['syl_mean']}), scheme {s['scheme'] or '-'}")
         for r in s["lines"]:
-            syl = f"{r['syllables']}{'~' if r['approx'] else ''}"
+            syl = f"{fmt_range([r['syl_min'], r['syl_max']])}{'~' if r['approx'] else ''}"
             tail = f"   ~ {','.join(r['oov'])}" if r["oov"] else ""
-            P(f"  {r['n']:>3} | {syl:>4} | {r['stress']:<26} | {r['text']}{tail}")
+            if r["flex"]:
+                tail += f"   ≈ {','.join(r['flex'])}"
+            P(f"  {r['n']:>3} | {syl:>5} | {r['stress']:<26} | {r['text']}{tail}")
         if s["links"]:
             P("      rhymes: " + ", ".join(
                 f"{l['words'][0]}/{l['words'][1]}={l['class']}" for l in s["links"]))
@@ -689,14 +742,20 @@ def render(res, args):
             P("      end-words not in CMU (rhyme unmeasured): " + ", ".join(s["unknown_end_words"]))
     P("")
     P("legend: / stressed  \\ secondary  . unstressed  ~ heuristic count (word not in CMU)")
+    P("        13-14 = a range: ≈ words have more than one pronunciation (fire, every, hour)")
     P("scheme: letters = rhyme groups, * slant link, = same end word, x unrhymed")
     P("")
     P(f"TOTAL {res['total_lines']} lines, {res['total_words']} words")
     if res["repeat_comparisons"]:
         P("")
-        P("REPEATED-SECTION SYLLABLE COMPARISON (line by line vs first occurrence)")
+        P("REPEATED-SECTION COMPARISON (line by line vs first occurrence)")
+        P("  syllables ref>new (! = off past tolerance) · beat match % (? = below --stress-min)")
         for c in res["repeat_comparisons"]:
-            row = " ".join(f"{p['ref_syl']}>{p['syl']}{'!' if p['flag'] else ''}" for p in c["pairs"])
+            row = " ".join(
+                f"{fmt_range(p['ref_range'])}>{fmt_range(p['range'])}{'!' if p['flag'] else ''}"
+                + (f" {round(p['stress_match'] * 100)}%{'?' if p['stress_flag'] else ''}"
+                   if p["stress_match"] is not None else "")
+                for p in c["pairs"])
             P(f"  [{c['section']}] vs [{c['ref']}]: {row}")
     if "title_check" in res:
         t = res["title_check"]
@@ -724,6 +783,10 @@ def render(res, args):
     return "\n".join(out)
 
 
+def fmt_range(r):
+    return str(r[0]) if r[0] == r[1] else f"{r[0]}-{r[1]}"
+
+
 def parse_range(s):
     a, b = s.split("-")
     return int(a), int(b)
@@ -742,6 +805,7 @@ def main():
     ap.add_argument("lyrics", help="text file with [Section] tags")
     ap.add_argument("--title", help="song title, for the title-in-chorus check")
     ap.add_argument("--tolerance", type=int, default=2, help="max syllable difference between matching lines of repeated sections (default 2)")
+    ap.add_argument("--stress-min", type=float, default=0.6, help="flag matching lines whose beats agree less than this share, when syllables already fit (default 0.6)")
     ap.add_argument("--spread", type=int, default=6, help="flag a section whose line syllables span more than this (default 6)")
     ap.add_argument("--reuse", type=int, default=3, help="song-wide: flag an end-word closing this many different lines (default 3)")
     ap.add_argument("--max-lines", type=parse_maxlines, default={}, help="e.g. verse=6,chorus=4,bridge=4")

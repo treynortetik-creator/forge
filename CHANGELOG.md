@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-13
+
+### music-forge 0.2.1
+
+- `lyric_meter.py`: syllable counts are now ranges when a word has more than one dictionary pronunciation (fire 1-2,
+  every 2-3, hour 1-2); the flexible words are listed after the line with `≈`. Repeated-section parity flags only when even
+  the closest pronunciation misses.
+- New beat match: each repeated-section line pair reports the share of stressed/unstressed slots that agree (best of start-
+  or end-aligned). Under `--stress-min` (default 0.6) it is flagged when the syllable counts already fit, because equal counts
+  can still put the beats in different places.
+
 ## 2026-10-12
 
 ### music-forge 0.2.0

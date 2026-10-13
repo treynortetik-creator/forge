@@ -67,7 +67,9 @@ uv run --with pronouncing python ${CLAUDE_PLUGIN_ROOT}/scripts/lyric_meter.py dr
 
 Write repeats out (the chorus every time it is sung) or the word-count, repeat-share and chorus-occurrence checks will undercount. The receipts check is a proxy (digits and capitalised names); judge the real props yourself. Read:
 
-- **Syllable column and `!` marks** in the repeated-section comparison. Anything off by more than 2 is a flag.
+- **Syllable column and `!` marks** in the repeated-section comparison. Anything off by more than 2 (even at the closest pronunciation) is a flag.
+- **Ranges and `≈` words.** A count like `13-14` means a word on that line has two dictionary pronunciations (fire, every, hour, toward). Quote ranges as ranges; never collapse one to a single number. If parity depends on the long reading, say which way the singer has to go.
+- **Beat match %** beside each repeated-section pair: the share of stressed/unstressed slots that agree with the matching line. Equal syllable counts are not enough; two 12-syllable lines with their beats in different places fight one melody. Under 60% (`?`) is flagged when the counts already fit. Fix it by moving the stresses (word order, a different word), or defend it in one line (for example, a deliberately rushed run-on line). It is a dictionary view of speech: treat it as a heads-up, not a verdict on the melody.
 - **Scheme letters.** Does the shape match what the genre guide asks for? `x` is an unrhymed line; `*` is a slant link; `=` is the same word again.
 - **GENRE CHECK WARNs** (when `--genre` is used). Every WARN gets an answer, same as flags.
 - **Flags list.** Every flag gets an answer: fix it, or say in one line why it stays (a chorus hook word repeating is allowed; a filler rhyme repeating is not).
