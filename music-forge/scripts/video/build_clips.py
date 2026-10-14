@@ -2,13 +2,22 @@
 """Animate each shot's keyframe into a video clip through OpenRouter's /api/v1/videos endpoint.
 
 Per shot: pick a model from data/model-routing.json (shot override > rules > default), send the keyframe
-(and, only with --audio-refs, that shot's slice of the song), poll, download, and write a sidecar JSON next to
-the clip with job id, model, prompt and cost. Resumable (existing clips are skipped), parallel (5 workers),
+(and, only with --audio-refs, an audio reference: the shot's slice of the song, of a stem, or a whole file such as a
+TTS line; see the shot's `audio_ref`), poll, download, and write a sidecar JSON next to the clip with job id, model,
+prompt, cost and the audio window it was given (sync_offset.py reads that). Resumable (existing clips are skipped), parallel (5 workers),
 with a cost ceiling and a --dry-run that makes no API call and needs no key.
 
 Run (stdlib + ffmpeg on PATH; needs OPENROUTER_API_KEY in the environment for live runs, never printed):
     uv run python build_clips.py shot-plan.json --dry-run
     uv run python build_clips.py shot-plan.json --max-usd 15 [--audio-refs] [--only 03 07] [--model ID] [--force]
+
+Audio reference per shot (`audio_ref`, only sent with --audio-refs and only to models that take audio):
+    "mix" (default)      the song itself, sliced at the shot start. Use for sung wides: hands and drums move to it.
+    "vocals", "instrumental", any key of the plan's "stems" map
+                         that stem, sliced at the shot start. Vocals for sung close-ups; an instruments-only mix for
+                         band shots in an instrumental (with "nobody sings, mouths closed" in the description).
+    a file path          used from its own start (padded), e.g. a TTS clip of a spoken line to drive the mouth.
+A shot with `sing: true` or any `audio_ref` gets audio; everything else is generated silent.
 
 PRIVACY: --audio-refs uploads each singing shot's audio slice (a few seconds of your song) to a PUBLIC
 temporary file host (uguu.se, falling back to litterbox.catbox.moe with a 1 hour expiry) so the video
@@ -62,12 +71,16 @@ def build_job(plan: dict, shot: dict, routing: dict, forced_model: str | None, r
     info = pl.model_info(routing, model)
     dur = pl.clip_duration_for(shot, info)
     res = resolution if resolution is not None else info.get("resolution")
-    with_audio = bool(shot.get("sing")) and audio_refs and info.get("audio_reference", False)
+    wants_audio = bool(shot.get("sing")) or bool(shot.get("audio_ref"))
+    with_audio = wants_audio and audio_refs and info.get("audio_reference", False)
+    src, src_start = audio_source(plan, shot)
     notes = []
-    if shot.get("sing") and not audio_refs:
-        notes.append("sing shot, no --audio-refs: generated silent, mouth will not match the song")
-    elif shot.get("sing") and not info.get("audio_reference", False):
-        notes.append(f"sing shot but {model} takes no audio reference: generated silent")
+    if wants_audio and not audio_refs:
+        notes.append("wants audio, no --audio-refs: generated silent, the mouth will not match")
+    elif wants_audio and not info.get("audio_reference", False):
+        notes.append(f"wants audio but {model} takes no audio reference: generated silent")
+    if with_audio and not src:
+        notes.append(f"audio_ref {shot.get('audio_ref')!r} not found (plan 'stems' or a file path)")
     if not info:
         notes.append(f"{model} is not in model-routing.json: cost unknown, request fields guessed")
     if shot["end"] - shot["start"] > info.get("duration", [0, 999])[1] + 0.5:
@@ -77,19 +90,34 @@ def build_job(plan: dict, shot: dict, routing: dict, forced_model: str | None, r
         notes.append("keyframe missing")
     est = pl.estimate_cost(shot, info, res, dur, 1)
     prompt = (plan.get("style", "").strip() + " " + pl.apply_identities(shot["description"], plan.get("identities"))).strip()
-    if with_audio:
+    if with_audio and shot.get("sing"):
         prompt += SING_SUFFIX
     return {"id": shot["id"], "slug": shot["slug"], "model": model, "why": why, "duration": dur, "resolution": res,
-            "audio": with_audio, "frame": frame, "est": est, "prompt": prompt, "notes": notes,
+            "audio": with_audio, "audio_src": src, "audio_start": src_start, "audio_ref": shot.get("audio_ref") or "mix",
+            "frame": frame, "est": est, "prompt": prompt, "notes": notes,
             "start": shot["start"], "image_mode": info.get("image_mode", "first_frame"),
             "send_false": info.get("send_generate_audio_false", False), "slot": shot["end"] - shot["start"]}
+
+
+def audio_source(plan: dict, shot: dict) -> tuple[str | None, float]:
+    """(file, start seconds) for a shot's audio reference. Song or stem: sliced at the shot start. Other path: from 0."""
+    ref = shot.get("audio_ref") or "mix"
+    if ref == "mix":
+        return pl.resolve_path(plan, plan.get("audio")), shot["start"]
+    stems = plan.get("stems") or {}
+    if ref in stems:
+        return pl.resolve_path(plan, stems[ref]), shot["start"]
+    if ref in ("vocals", "instrumental"):
+        return None, shot["start"]  # a stem name the plan does not map
+    p = pl.resolve_path(plan, ref)
+    return (p if p and os.path.exists(p) else None), 0.0
 
 
 def print_plan(jobs: list[dict], skipped: list[str], ceiling: float | None) -> float:
     print(f"{'shot':<6}{'model':<30}{'dur':>4} {'res':<6}{'mode':<12}{'est $':>8}  notes")
     total = 0.0
     for j in jobs:
-        mode = "song+frame" if j["audio"] else ("frame(ref)" if j["image_mode"] == "reference" else "first-frame")
+        mode = (j["audio_ref"][:5] + "+frame") if j["audio"] else ("frame(ref)" if j["image_mode"] == "reference" else "first-frame")
         est = "?" if j["est"] is None else f"{j['est']:.2f}"
         total += j["est"] or 0.0
         print(f"{j['id']:<6}{j['model']:<30}{j['duration']:>3}s {str(j['resolution'] or 'auto'):<6}{mode:<12}{est:>8}  {'; '.join(j['notes'])}")
@@ -148,7 +176,7 @@ def api(key: str, url: str, body: dict | None = None):
         return json.loads(r.read())
 
 
-def run_job(j: dict, plan: dict, audio_path: str | None, a, key: str, ledger: Ledger, work: str, clips: str):
+def run_job(j: dict, plan: dict, a, key: str, ledger: Ledger, work: str, clips: str):
     sid = j["id"]
     out = os.path.join(clips, f"{sid}-{j['slug']}.mp4")
     est = j["est"] or 0.0
@@ -163,8 +191,8 @@ def run_job(j: dict, plan: dict, audio_path: str | None, a, key: str, ledger: Le
         if j["audio"]:
             # audio only works with the keyframe as a reference; a pinned first frame silently drops it
             mp3 = os.path.join(work, f"{sid}.mp3")
-            subprocess.run(["ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-ss", f"{j['start']:.3f}", "-t", str(j["duration"]),
-                            "-i", audio_path, "-af", f"apad=whole_dur={j['duration']}", "-c:a", "libmp3lame", "-b:a", "160k", mp3], check=True)
+            subprocess.run(["ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-ss", f"{j['audio_start']:.3f}", "-t", str(j["duration"]),
+                            "-i", j["audio_src"], "-af", f"apad=whole_dur={j['duration']}", "-c:a", "libmp3lame", "-b:a", "160k", mp3], check=True)
             body["input_references"] = [img, {"type": "audio_url", "audio_url": {"url": upload_public(mp3)}}]
         elif j["image_mode"] == "reference":
             body["input_references"] = [img]
@@ -181,7 +209,8 @@ def run_job(j: dict, plan: dict, audio_path: str | None, a, key: str, ledger: Le
                 job = api(key, API, body)
             except urllib.error.HTTPError as e:
                 msg = e.read().decode(errors="replace")[:400]
-                hint = " -> face filter: set this shot's face to 'human' or give it a 'model' override" if "SensitiveContent" in msg else ""
+                hint = (" -> face filter (free refusal): give this shot a 'model' override, e.g. minimax/hailuo-3-max (silent)"
+                        " or minimax/hailuo-3; never edit the image to sneak it past" if "SensitiveContent" in msg else "")
                 return sid, f"SUBMIT {e.code} {msg}{hint}", 0.0
             jid = job["id"]
             with open(pending, "w", encoding="utf-8") as f:
@@ -215,7 +244,8 @@ def run_job(j: dict, plan: dict, audio_path: str | None, a, key: str, ledger: Le
             os.remove(pending)
         with open(os.path.join(clips, f"{sid}-{j['slug']}.json"), "w", encoding="utf-8") as f:
             json.dump({"job": jid, "model": j["model"], "routed_by": j["why"], "prompt": j["prompt"], "duration": j["duration"],
-                       "resolution": j["resolution"], "audio_ref": j["audio"], "cost": actual, "plan_time": [j["start"], j["start"] + j["slot"]],
+                       "resolution": j["resolution"], "audio_ref": j["audio_ref"] if j["audio"] else None,
+                       "audio_ref_start": j["audio_start"] if j["audio"] else None, "cost": actual, "plan_time": [j["start"], j["start"] + j["slot"]],
                        "made": time.strftime("%Y-%m-%dT%H:%M:%S%z")}, f, indent=1)
         return sid, "ok", actual
     except Exception as e:  # one bad shot must not sink the batch
@@ -252,7 +282,8 @@ def main(argv=None) -> int:
     routing = pl.load_routing(a.routing)
     frames = a.frames_dir or os.path.join(plan["_dir"], "frames")
     clips = a.clips_dir or os.path.join(plan["_dir"], "clips")
-    audio_path = a.audio or pl.resolve_path(plan, plan.get("audio"))
+    if a.audio:
+        plan["audio"] = os.path.abspath(a.audio)
     shots = [s for s in plan["shots"] if not a.only or s["id"] in a.only]
     if a.only and len(shots) != len(set(a.only)):
         print(f"unknown shot id(s): {sorted(set(a.only) - {s['id'] for s in shots})}", file=sys.stderr)
@@ -289,8 +320,10 @@ def main(argv=None) -> int:
         print("OPENROUTER_API_KEY is not set in the environment.", file=sys.stderr)
         return 2
     if any(j["audio"] for j in jobs):
-        if not audio_path or not os.path.exists(audio_path):
-            print("--audio-refs needs the song file (plan 'audio' or --audio).", file=sys.stderr)
+        bad = [j["id"] for j in jobs if j["audio"] and not (j["audio_src"] and os.path.exists(j["audio_src"]))]
+        if bad:
+            print(f"--audio-refs: audio reference file missing for {', '.join(bad)} (plan 'audio', 'stems', or the shot's audio_ref path).",
+                  file=sys.stderr)
             return 2
         print("NOTICE: uploading song slices to a public temporary host (uguu.se / litterbox.catbox.moe).", file=sys.stderr)
 
@@ -306,7 +339,7 @@ def main(argv=None) -> int:
 
     ledger, spent_total = Ledger(a.max_usd), 0.0
     with cf.ThreadPoolExecutor(max_workers=a.workers) as ex:
-        for sid, status, cost in ex.map(lambda j: run_job(j, plan, audio_path, a, key, ledger, work, clips), jobs):
+        for sid, status, cost in ex.map(lambda j: run_job(j, plan, a, key, ledger, work, clips), jobs):
             spent_total += cost
             print(f"{sid:>5} {status} ${cost:.3f}", flush=True)
     print(f"TOTAL ${spent_total:.2f}")

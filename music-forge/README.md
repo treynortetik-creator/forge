@@ -13,7 +13,7 @@ claude plugin marketplace add treynortetik-creator/forge
 claude plugin install music-forge@forge
 ```
 
-Restart the session or `/clear` so the skills load. You need `uv` (https://docs.astral.sh/uv/) for the scripts; there is nothing to `pip install`. The video skill also needs `ffmpeg`/`ffprobe` and, for PNG captions and end cards, ImageMagick (`magick`), plus an `OPENROUTER_API_KEY` in your environment to animate shots.
+Restart the session or `/clear` so the skills load. You need `uv` (https://docs.astral.sh/uv/) for the scripts; there is nothing to `pip install`. The video skill also needs `ffmpeg`/`ffprobe` and, for PNG captions and end cards, ImageMagick (`magick`), plus an `OPENROUTER_API_KEY` in your environment to animate shots. `sync_offset.py` and `chain_join.py` pull numpy (and OpenCV for `chain_join.py align`) through `uv run --with`.
 
 ## Four skills
 
@@ -21,7 +21,7 @@ Restart the session or `/clear` so the skills load. You need `uv` (https://docs.
 |---|---|
 | **lyric-writer** | writing, revising or reviewing lyrics. Brief, draft, **measure**, critic pass against a 13-point checklist, up to three revision passes, then a Suno-ready block: Title, Style (about 1000 characters or fewer), Exclude Styles, tagged Lyrics, Performance notes, and the measured numbers |
 | **sung-vs-written** | a song has been generated. Splits out the vocals, transcribes them, aligns the transcript to your written lyrics, and flags lines worth a listen |
-| **music-video** | you have a finished song and want a video. Shot plan, still prompts, animation through OpenRouter video models (routed, resumable, cost-capped), a frame-exact cut with the original song and burned captions, a look-at-the-frames review loop, and 16:9 plus vertical teasers |
+| **music-video** | you have a finished song and want a video. Shot plan, still prompts, animation through OpenRouter video models (routed by shot type, resumable, cost-capped), sung clips synced to the vocal by their own audio, chained shots aligned at the join, camera sweeps in post, a frame-exact cut with the original song and burned captions, a review loop, and 16:9 plus vertical teasers. Hard-won rules and dated model notes from a real 3:39 video live in `skills/music-video/references/` |
 | **track-check** | you want to read a track: tempo, key, loudness curve, sections and a spectrogram; or compare a singer's isolated vocals across tracks. Carries the rule that the voice score is a speech model's guess, never a verdict |
 
 ## The scripts
@@ -96,28 +96,33 @@ uv run --with pronouncing python scripts/test_lyric_meter.py
 
 ## The video scripts (`scripts/video/`)
 
-All take the shot plan (`shot-plan.json`: title, audio, style line, character looks, shots with id / `MM:SS.ss-MM:SS.ss` / slug / description / sing / frame) and default to `frames/`, `clips/`, `cuts/` beside it. Stdlib Python 3.11+ plus ffmpeg.
+The plan scripts take the shot plan (`shot-plan.json`: title, audio, optional stems, style line, character looks, shots with id / `MM:SS.ss-MM:SS.ss` / slug / description / sing / frame, plus optional routing fields framing / kind / face / audio_ref) and default to `frames/`, `clips/`, `cuts/` beside it. Stdlib Python 3.11+ plus ffmpeg, except where noted.
 
 | Script | Does |
 |---|---|
 | `plan_check.py` | gaps, overlaps, total vs audio length, missing frames, shots longer than their model's clip limit |
 | `still_prompts.py` | character-sheet template and one still prompt per shot, looks not names |
-| `build_clips.py` | keyframe (+ song slice with `--audio-refs`) to a clip per shot via OpenRouter `/api/v1/videos`; `--dry-run` prices the plan with no key, `--max-usd` is a hard ceiling, resumable, 5 workers, per-clip sidecar JSON |
-| `cut.py` | frame-exact slots from the plan's times, original song on top, SRT captions (ffmpeg subtitles filter if present, else ImageMagick PNG overlays), plus a `-small.mp4` under a size target |
+| `build_clips.py` | keyframe (+ an audio reference with `--audio-refs`: song, stem or TTS file per shot's `audio_ref`) to a clip per shot via OpenRouter `/api/v1/videos`; `--dry-run` prices the plan with no key, `--max-usd` is a hard ceiling, resumable, 5 workers, per-clip sidecar JSON |
+| `sync_offset.py` | cross-correlates a sung clip's own soundtrack against the stem or song it was made from: the song time at its first frame, written to the sidecar for `cut.py`. Flags clips that do not carry the audio. numpy |
+| `chain_join.py` | `last-frame` to chain from, `align` (ECC scale/shift registration, colour match, duplicate frame dropped, 2-frame dissolve, optional de-judder), `check` (frame-difference profile around a join). numpy + OpenCV |
+| `post_sweep.py` | a free camera move on a locked-off clip: per-frame push-in plus a cosine-eased pan; `--print-filter` gives the ffmpeg string |
+| `cut.py` | frame-exact slots from the plan's times, measured sync offsets from sidecars, original song on top, SRT captions (ffmpeg subtitles filter if present, else ImageMagick PNG overlays), plus a `-small.mp4` under a size target |
 | `review_frames.py` | a frame per shot for you to look at, and audio of each singing clip for a whisper check |
 | `teasers.py` | N windows, each 16:9 and 9:16 blurred-fill, with fades and an optional end card |
-| `data/model-routing.json` | which model for which kind of shot, with prices. Every rule is dated and marked as drifting |
+| `data/model-routing.json` | which model for which kind of shot (sung close-up, sung wide, instrumental, emotional acting, action, default), with prices. Every rule is dated (2026-10-14) and marked as drifting |
 
 ```bash
 python3 scripts/video/plan_check.py shot-plan.json
 python3 scripts/video/build_clips.py shot-plan.json --dry-run
 python3 scripts/video/build_clips.py shot-plan.json --max-usd 15
+uv run --with numpy python scripts/video/sync_offset.py clips/14-*.mp4 --ref stems/vocals.wav --write-sidecar
+python3 scripts/video/post_sweep.py clips/22-wide.mp4 clips/redo/22-wide.mp4
 python3 scripts/video/cut.py shot-plan.json --out cuts/video.mp4 --captions lyrics.srt
 ```
 
 **`--audio-refs` uploads song slices to a public temporary file host** (uguu.se, fallback litterbox.catbox.moe, 1 hour). It is off by default. Keyframes go inline and are never uploaded.
 
-Tests: `uv run python scripts/video/test_plan_check.py` and `uv run python scripts/video/test_cut.py` (synthetic sine song, colour clips, a local mock of the video API; no network, no key). `build_clips.py` has not been run against live OpenRouter in this form; do one cheap live shot before a big run.
+Tests: `uv run python scripts/video/test_plan_check.py`, `uv run python scripts/video/test_cut.py` (synthetic sine song, colour clips, a local mock of the video API; no network, no key) and `uv run --with numpy --with opencv-python-headless python scripts/video/test_post_tools.py` (synthetic stem with a known 0.4 s offset, a synthetic chained clip 2.5% larger and shifted, a sweep on a test pattern). `build_clips.py` has not been run against live OpenRouter in this form; do one cheap live shot before a big run.
 
 ## The audio scripts (`scripts/audio/`)
 
@@ -136,13 +141,14 @@ music-forge/
   skills/
     lyric-writer/       SKILL.md  references/{craft.md, suno-notes.md, genres/emo-pop-punk*.md}
     sung-vs-written/    SKILL.md
-    music-video/        SKILL.md
+    music-video/        SKILL.md  references/{routing.md, prompt-rules.md, sync-and-chaining.md, post.md}
     track-check/        SKILL.md
   scripts/
     lyric_meter.py  rhymes.py  sung_check.py  test_lyric_meter.py
     data/cliches.txt  data/genres/emo-pop-punk{.json,-flags.txt}  fixtures/sample.txt
-    video/  plan_lib.py plan_check.py still_prompts.py build_clips.py cut.py review_frames.py teasers.py
-            test_plan_check.py test_cut.py  data/{model-routing.json,shot-plan.schema.json}  fixtures/
+    video/  plan_lib.py plan_check.py still_prompts.py build_clips.py sync_offset.py chain_join.py post_sweep.py
+            cut.py review_frames.py teasers.py
+            test_plan_check.py test_cut.py test_post_tools.py  data/{model-routing.json,shot-plan.schema.json}  fixtures/
     audio/  song_scan.py voice_match.py
 ```
 

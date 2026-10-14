@@ -4,7 +4,10 @@
 Slots are whole frames computed from the plan's start times at a fixed fps (shot i runs from
 round(start_i*fps) to round(start_{i+1}*fps); the last runs to the audio end), so cuts cannot drift.
 Generated clips may re-sing, so their audio is dropped and the real song is used. A shot with no clip falls
-back to a slow push-in on its keyframe. Optional burned captions from an SRT: ffmpeg's subtitles filter if
+back to a slow push-in on its keyframe. A clip whose sidecar JSON carries `song_t0` (the song time at the clip's first
+frame, measured by sync_offset.py --write-sidecar) enters at that offset instead of at its first frame, so a sung
+take lands on the vocal it was generated from; when the take starts after its slot, its first frame is held for
+the gap. Optional burned captions from an SRT: ffmpeg's subtitles filter if
 this ffmpeg has it (libass), else ImageMagick PNG overlays. Also writes <out>-small.mp4 under a size target.
 
 Run (stdlib; ffmpeg + ffprobe on PATH; ImageMagick `magick` only for PNG captions):
@@ -58,17 +61,35 @@ def find_clip(clips_dir: str, shot: dict, extra_dirs: list[str]) -> str | None:
     return None
 
 
-def make_segment(shot, n, clip, frame, w, h, fps, pad, work, i) -> tuple[str, bool]:
+def sync_offset_for(clip: str | None, slot_start: float) -> float | None:
+    """Seconds into the clip to enter at, from its sidecar's measured song_t0. None when unmeasured."""
+    if not clip:
+        return None
+    side = os.path.splitext(clip)[0] + ".json"
+    try:
+        with open(side, encoding="utf-8") as f:
+            t0 = json.load(f).get("song_t0")
+    except (OSError, ValueError):
+        return None
+    return None if t0 is None else slot_start - float(t0)
+
+
+def make_segment(shot, n, clip, frame, w, h, fps, pad, work, i, offset: float | None = None) -> tuple[str, bool]:
     out = os.path.join(work, f"seg{i:03d}.mp4")
     enc = ["-c:v", "libx264", "-crf", "17", "-preset", "fast", "-pix_fmt", "yuv420p", "-an"]
     base = f"scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h},fps={fps},setsar=1"
     if clip:
+        seek, head = [], ""
+        if offset and offset > 0:
+            seek = ["-ss", f"{offset:.3f}"]  # the take started before the slot: skip into it
+        elif offset and offset < 0:
+            head = f",tpad=start_mode=clone:start_duration={-offset:.3f}"  # the take starts late: hold its first frame
         if pad == "loop":
-            sh("ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-stream_loop", "-1", "-i", clip, "-vf", base,
+            sh("ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-stream_loop", "-1", *seek, "-i", clip, "-vf", base + head,
                "-frames:v", str(n), *enc, out)
         else:  # hold: freeze the last frame if the clip is shorter than the slot
-            sh("ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-i", clip,
-               "-vf", base + f",tpad=stop_mode=clone:stop_duration={n / fps + 1:.3f}", "-frames:v", str(n), *enc, out)
+            sh("ffmpeg", "-nostdin", "-loglevel", "error", "-y", *seek, "-i", clip,
+               "-vf", base + head + f",tpad=stop_mode=clone:stop_duration={n / fps + 1:.3f}", "-frames:v", str(n), *enc, out)
         return out, True
     if frame:
         zp = (f"scale={w * 2}:{h * 2}:force_original_aspect_ratio=increase,crop={w * 2}:{h * 2},"
@@ -174,6 +195,7 @@ def main(argv=None) -> int:
     ap.add_argument("--small-mb", type=float, default=45.0, help="also write <out>-small.mp4 under this size (default 45)")
     ap.add_argument("--no-small", action="store_true")
     ap.add_argument("--keep-work", action="store_true", help="keep the temporary segment folder")
+    ap.add_argument("--no-sync", action="store_true", help="ignore measured song_t0 offsets in clip sidecars (enter every clip at frame 0)")
     a = ap.parse_args(argv)
 
     plan = pl.load_plan(a.plan)
@@ -202,11 +224,17 @@ def main(argv=None) -> int:
         return 1
 
     slots = frame_slots(plan["shots"], fps, audio_s)
-    segs, stills = [], []
+    segs, stills, synced = [], [], []
+    slot_start = 0
     for i, (shot, n) in enumerate(slots):
+        start_s, slot_start = slot_start / fps, slot_start + n
         if n <= 0:
             continue
-        seg, real = make_segment(shot, n, find_clip(clips, shot, a.prefer_dir), pl.resolve_frame(shot, frames), w, h, fps, a.pad, work, i)
+        clip = find_clip(clips, shot, a.prefer_dir)
+        off = None if a.no_sync else sync_offset_for(clip, start_s)
+        if off is not None:
+            synced.append(f"{shot['id']} {'+' if off >= 0 else ''}{off:.3f}s")
+        seg, real = make_segment(shot, n, clip, pl.resolve_frame(shot, frames), w, h, fps, a.pad, work, i, off)
         segs.append(seg)
         if not real:
             stills.append(shot["id"])
@@ -225,6 +253,8 @@ def main(argv=None) -> int:
     vdur = pl.probe_duration(out)
     print(f"wrote {out}  {vdur:.3f}s (audio {audio_s:.3f}s, {1 / fps:.3f}s per frame)  "
           f"captions: {mode if a.captions else 'none'}  stills instead of clips: {', '.join(stills) or 'none'}")
+    if synced:
+        print(f"entered at measured sync offsets (clip seconds; negative = first frame held): {', '.join(synced)}")
     if not a.no_small:
         small = os.path.splitext(out)[0] + "-small.mp4"
         height, size = make_small(out, small, a.small_mb, total_s)

@@ -119,15 +119,20 @@ class Routing(unittest.TestCase):
     def test_rules_and_override(self):
         r = pl.load_routing()
         self.assertEqual(pl.pick_model({"sing": True}, r)[0], "minimax/hailuo-3")
+        self.assertEqual(pl.pick_model({"sing": True, "framing": "wide"}, r)[0], "minimax/hailuo-3")
+        self.assertEqual(pl.pick_model({"sing": True, "framing": "close"}, r)[0], "heygen/heygen-video-1")
+        self.assertEqual(pl.pick_model({"audio_ref": "instrumental"}, r)[0], "minimax/hailuo-3")
+        self.assertEqual(pl.pick_model({"kind": "acting", "face": "human"}, r)[0], "minimax/hailuo-3-max")
+        self.assertEqual(pl.pick_model({"kind": "action"}, r)[0], "bytedance/seedance-2.5")
         self.assertEqual(pl.pick_model({"face": "human"}, r)[0], "bytedance/seedance-1-5-pro")
-        self.assertEqual(pl.pick_model({"face": "creature"}, r)[0], "bytedance/seedance-2.5")
+        self.assertEqual(pl.pick_model({"face": "creature"}, r)[0], "bytedance/seedance-1-5-pro")
         self.assertEqual(pl.pick_model({}, r)[0], r["default_model"])
         self.assertEqual(pl.pick_model({"sing": True, "model": "x/y"}, r), ("x/y", "shot override"))
 
     def test_every_rule_carries_checked_and_note(self):
         r = pl.load_routing()
         for rule in r["rules"]:
-            self.assertEqual(rule["checked"], "2026-10-10")
+            self.assertEqual(rule["checked"], "2026-10-14")
             self.assertTrue(rule["note"])
             self.assertIn(rule["use"], r["models"])
         for m in r["models"].values():

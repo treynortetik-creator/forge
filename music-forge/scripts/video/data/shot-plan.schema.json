@@ -11,6 +11,11 @@
     "fps": {"type": "integer", "minimum": 12, "maximum": 60, "default": 30},
     "aspect": {"enum": ["16:9", "9:16"], "default": "16:9"},
     "style": {"type": "string", "description": "One line prepended to every shot prompt."},
+    "stems": {
+      "type": "object",
+      "description": "Stem name -> audio file (relative to the plan), same length and timing as the song, e.g. {\"vocals\": \"stems/vocals.wav\", \"instrumental\": \"stems/instrumental.wav\"}.",
+      "additionalProperties": {"type": "string"}
+    },
     "identities": {
       "type": "object",
       "description": "Character name -> look string. Names in shot descriptions are replaced by the look; video models do not know your names.",
@@ -30,6 +35,9 @@
           "sing": {"type": "boolean", "default": false},
           "frame": {"type": "string", "description": "Keyframe filename in the frames directory (extension optional)."},
           "face": {"enum": ["human", "creature", "none"], "description": "Used by model routing. Leave out when unsure."},
+          "framing": {"enum": ["close", "medium", "wide"], "description": "Used by model routing: sung close and medium shots go to the cheap lip-sync model, sung wides to Hailuo 3."},
+          "kind": {"enum": ["performance", "acting", "action", "insert", "establishing"], "description": "Used by model routing: 'acting' = silent emotional acting, 'action' = physical action or a state change."},
+          "audio_ref": {"type": "string", "description": "Audio reference with --audio-refs: 'mix' (default, the song), a key of 'stems' (sliced at the shot start), or a file path used from its start (e.g. a TTS line)."},
           "model": {"type": "string", "description": "Optional per-shot model override."}
         }
       }

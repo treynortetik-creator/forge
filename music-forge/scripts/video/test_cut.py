@@ -83,6 +83,33 @@ class Cut(unittest.TestCase):
             self.assertTrue(os.path.exists(small))
             self.assertLessEqual(os.path.getsize(small), 1 * 1024 * 1024)
 
+    def test_measured_sync_offset_slides_the_clip(self):
+        with tempfile.TemporaryDirectory() as d:
+            plan = make_project(d)
+            # shot 01 (slot 0-2.5 s): a take that is red for 1 s, then yellow, as if generated starting 1 s early
+            c1 = os.path.join(d, "clips", "01-shot-red.mp4")
+            subprocess.run(FF + ["-f", "lavfi", "-i", "color=c=red:s=640x360:r=30:d=1", "-f", "lavfi", "-i", "color=c=yellow:s=640x360:r=30:d=3",
+                                 "-filter_complex", "[0:v][1:v]concat=n=2:v=1[v]", "-map", "[v]", "-pix_fmt", "yuv420p", c1], check=True)
+            out = os.path.join(d, "o.mp4")
+            # benign: no measured song_t0, the clip enters at its first frame (red at 0.5 s)
+            self.assertEqual(cut.main([plan, "--out", out, "--no-small"]), 0)
+            px = pixel(out, 0.5)
+            self.assertTrue(px[0] > 150 and px[1] < 100, px)
+            # measured: song time at clip pts 0 is -1.0 s, so the cut enters 1 s in (yellow at 0.5 s)
+            with open(os.path.join(d, "clips", "01-shot-red.json"), "w") as f:
+                json.dump({"song_t0": -1.0}, f)
+            # and shot 03 (slot starts 4.0 s) measured as starting 0.5 s late: its first frame is held, length unchanged
+            with open(os.path.join(d, "clips", "03-shot-blue.json"), "w") as f:
+                json.dump({"song_t0": 4.5}, f)
+            self.assertEqual(cut.main([plan, "--out", out, "--no-small"]), 0)
+            px = pixel(out, 0.5)
+            self.assertTrue(px[0] > 150 and px[1] > 150, px)
+            self.assertLessEqual(abs(pl.probe_duration(out) - SONG_S), 1 / FPS + 1e-3)
+            # --no-sync ignores the sidecars
+            self.assertEqual(cut.main([plan, "--out", out, "--no-small", "--no-sync"]), 0)
+            px = pixel(out, 0.5)
+            self.assertTrue(px[0] > 150 and px[1] < 100, px)
+
     def test_missing_clip_falls_back_to_still(self):
         with tempfile.TemporaryDirectory() as d:
             plan = make_project(d)
@@ -236,6 +263,41 @@ class BuildClips(unittest.TestCase):
                 self.assertIn("face filter", buf.getvalue())
             finally:
                 srv.shutdown()
+
+    def test_audio_ref_sources(self):
+        with tempfile.TemporaryDirectory() as d:
+            plan_p = make_project(d)
+            with open(plan_p) as f:
+                p = json.load(f)
+            os.makedirs(os.path.join(d, "stems"))
+            for name in ("vocals", "instrumental"):
+                shutil.copy(os.path.join(d, "song.m4a"), os.path.join(d, "stems", f"{name}.m4a"))
+            shutil.copy(os.path.join(d, "song.m4a"), os.path.join(d, "line.m4a"))
+            p["stems"] = {"vocals": "stems/vocals.m4a", "instrumental": "stems/instrumental.m4a"}
+            p["shots"][0].update(sing=True, framing="close", audio_ref="vocals")
+            p["shots"][1].update(audio_ref="instrumental")
+            p["shots"][2].update(sing=True, audio_ref="line.m4a")
+            with open(plan_p, "w") as f:
+                json.dump(p, f)
+            plan = pl.load_plan(plan_p)
+            r = pl.load_routing()
+            jobs = [bc.build_job(plan, s, r, None, None, True, os.path.join(d, "frames")) for s in plan["shots"]]
+            # benign: without --audio-refs nothing gets audio
+            silent = [bc.build_job(plan, s, r, None, None, False, os.path.join(d, "frames")) for s in plan["shots"]]
+            self.assertFalse(any(j["audio"] for j in silent))
+            # sung close-up: HeyGen, vocal stem sliced at the shot start
+            self.assertEqual(jobs[0]["model"], "heygen/heygen-video-1")
+            self.assertTrue(jobs[0]["audio"])
+            self.assertTrue(jobs[0]["audio_src"].endswith("stems/vocals.m4a"))
+            self.assertEqual(jobs[0]["audio_start"], 0.0)
+            # instrumental band shot: not sung, still gets the instruments-only stem; no sing suffix in the prompt
+            self.assertEqual(jobs[1]["model"], "minimax/hailuo-3")
+            self.assertTrue(jobs[1]["audio"] and jobs[1]["audio_src"].endswith("instrumental.m4a"))
+            self.assertEqual(jobs[1]["audio_start"], 2.5)
+            self.assertNotIn(bc.SING_SUFFIX.strip(), jobs[1]["prompt"])
+            # a file (e.g. a TTS line) is used from its own start
+            self.assertTrue(jobs[2]["audio_src"].endswith("line.m4a"))
+            self.assertEqual(jobs[2]["audio_start"], 0.0)
 
     def test_dry_run_needs_no_key(self):
         os.environ.pop("OPENROUTER_API_KEY", None)

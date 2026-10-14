@@ -11,6 +11,7 @@ music-forge is MIT for the original work (see `LICENSE`). It adapts or is inspir
 
 - **suno-songwriting-skill** by NuNaught (Apache-2.0): the idea of a fixed Title / Lyrics / Style / Analysis output contract for Suno-ready results.
 - **Hermes songwriting skill** (MIT, Teknium / Hermes Agent): the idea of respelling words phonetically for AI singers, and the style-box formula of describing the sound journey instead of naming artists.
+- **claudia-bot** by anabology (MIT, https://github.com/anabologyco-maker/claudia-bot): the budget rule of planning for about twice the seconds the cut uses, the one-change image-edit prompt for fixing stills, the note that a face refused as a first frame may pass as a reference image, and the general idea of measuring lip sync from the clip's own audio. Written here in our own words; `sync_offset.py` was written for this plugin, not ported.
 
 ## Data and services
 

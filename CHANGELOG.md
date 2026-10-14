@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-14
+
+### music-forge 0.3.0
+
+Lessons from producing a 3:39 music video end to end (about 60 paid clips, three rounds of notes), folded into `music-video`.
+
+- **Routing by shot type** (`data/model-routing.json`, checked 2026-10-14 against the live model list): sung close-ups to HeyGen Video 1 with the vocal stem, sung wides and instrumental band shots to Hailuo 3 with the full mix or an instruments-only mix, silent emotional acting to Hailuo 3 Max, action and state changes to Seedance 2.5, everything else to Seedance 1.5 Pro at 480p. New optional shot fields `framing`, `kind`, `audio_ref` and a plan-level `stems` map; `plan_check.py` validates them.
+- `build_clips.py`: per-shot audio reference (song, a stem, or a file such as a TTS line for a mouthed spoken line); instrumental shots can take audio without `sing`; the sidecar records the audio window; refusal hint now points at a model override.
+- New `sync_offset.py`: cross-correlates a sung clip's own soundtrack against the stem or song it was made from and writes the song time at its first frame to the sidecar. `cut.py` enters each measured clip at that offset (`--no-sync` to ignore).
+- New `chain_join.py`: `last-frame`, `align` (scale/shift registration, colour match, duplicate frame dropped, 2-frame dissolve, `--dedupe` for padded frames), `check` (join frame-difference profile).
+- New `post_sweep.py`: camera sweep in post (per-frame push-in plus cosine-eased pan), free and deterministic.
+- `SKILL.md`: routing table, an 11-point "Hard-won rules" section, a sync/chain/sweep step, review discipline (strips, one retry per shot, note rounds, canon list, per-round budgets). Depth in new `references/` (routing, prompt rules, sync and chaining, post).
+- Tests: `test_post_tools.py` (7), plus sync-offset and audio-reference cases in `test_cut.py` and routing cases in `test_plan_check.py`.
+
 ## 2026-10-13
 
 ### music-forge 0.2.1

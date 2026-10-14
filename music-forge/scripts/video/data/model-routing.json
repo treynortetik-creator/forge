@@ -1,34 +1,63 @@
 {
-  "_readme": "Video-model behaviour and prices drift week to week. Every rule and model entry below was last checked on the date it carries; treat older entries as hypotheses and re-check against GET https://openrouter.ai/api/v1/videos/models (and a real paid probe for behaviour) before a big run. est_usd_per_second feeds --dry-run and --max-usd only; the real cost of each clip is read from the API and written to its sidecar.",
-  "checked": "2026-10-10",
+  "_readme": "Video-model behaviour and prices drift week to week. Every rule and model entry below was last checked on the date it carries; treat older entries as hypotheses and re-check against GET https://openrouter.ai/api/v1/videos/models (free, no key; prices are in pricing_skus) and a real paid probe for behaviour before a big run. est_usd_per_second feeds --dry-run and --max-usd only; the real cost of each clip is read from the API and written to its sidecar. Rules match shot fields: sing, face, framing, kind, audio_ref. First match wins; a shot's own 'model' beats every rule.",
+  "checked": "2026-10-14",
   "default_model": "bytedance/seedance-1-5-pro",
   "rules": [
     {
-      "id": "sing-lipsync",
+      "id": "sung-close-up",
+      "if": {"sing": true, "framing": ["close", "medium"]},
+      "use": "heygen/heygen-video-1",
+      "reason": "Sung close-ups and medium shots: keyframe plus the VOCAL-STEM slice as input_references. Audio-match 0.82-0.99 on eight close-ups at a fraction of Hailuo 3's price. It rejects a first_frame plus references, so the keyframe goes in as a reference (build_clips.py does this).",
+      "checked": "2026-10-14",
+      "note": "OBSERVATION from one project (2026-10-14). It invents props near the mouth (a microphone, a gloved mic hand) unless the prompt says no microphone and keeps the hands out of frame."
+    },
+    {
+      "id": "sung-wide",
       "if": {"sing": true},
       "use": "minimax/hailuo-3",
-      "reason": "A shot that must lip-sync to the song keeps the real vocal best on Hailuo 3. Seedance 2.5 audio references re-sang unreliably or ignored the song on wide shots.",
-      "checked": "2026-10-10",
-      "note": "OBSERVATION from one project on 2026-10-10, not a guarantee. Without --audio-refs a singing shot is generated silent on the same model and the mouth will not match; the cut lays the original song over it anyway."
+      "reason": "Sung band wides and hero performance shots: Hailuo 3 with the FULL MIX as the audio reference, so hands and drums move to the music. Faces held far better than HeyGen Video 1 at this width.",
+      "checked": "2026-10-14",
+      "note": "OBSERVATION. Non-singing band members still mouth along about half the time, even with 'mouth closed' per character; the keyframe's open mouths get copied. Crop them out in post if a retake does not fix it. 2K output only."
     },
     {
-      "id": "human-face",
-      "if": {"face": "human"},
-      "use": "bytedance/seedance-1-5-pro",
-      "reason": "Seedance 2.5 refused photoreal human faces (400 InputImageSensitiveContentDetected.PrivacyInformation, 'may contain real person'). Silent human-face shots go to Seedance 1.5 Pro (first frame only). Use Hailuo 3 instead if you want more motion or need the face in a song-synced shot.",
-      "checked": "2026-10-10",
-      "note": "Refusals were per image, not per character. Re-prompting the shot as 'fictional' did not help. Filters tighten over time; re-test with a real submit."
+      "id": "instrumental-performance",
+      "if": {"audio_ref": "instrumental"},
+      "use": "minimax/hailuo-3",
+      "reason": "Band shots during an instrumental: an instruments-only stem mix as the audio reference plus 'nobody sings, all mouths stay closed' in the prompt. Hands and heads move to the music and nobody mouths words.",
+      "checked": "2026-10-14",
+      "note": "OBSERVATION. Mouths open in the keyframe stay open for the first second or so; trim the head of the clip in the cut."
     },
     {
-      "id": "non-human-face",
-      "if": {"face": ["creature", "none"]},
+      "id": "emotional-acting",
+      "if": {"kind": "acting"},
+      "use": "minimax/hailuo-3-max",
+      "reason": "Silent emotional acting (fear, grief, a scream, a tear): Hailuo 3 Max at 480p acted better than Seedance 1.5 Pro in a head-to-head on the same chained frame, and took faces Seedance 2.5 refused.",
+      "checked": "2026-10-14",
+      "note": "OBSERVATION. Pads its frames with a repeated frame about every 4th frame (judder): drop duplicates and re-interpolate (chain_join.py align --dedupe). One take jumped to a close-up mid-clip; say 'one continuous shot'."
+    },
+    {
+      "id": "action",
+      "if": {"kind": "action"},
       "use": "bytedance/seedance-2.5",
-      "reason": "Non-human, robot and faceless shots passed the Seedance 2.5 filter and it gave the most energetic motion.",
-      "checked": "2026-10-10",
-      "note": "Same caveat: per-image filter. Set a shot's face to 'human' and re-run if a creature frame is refused."
+      "reason": "Physical action and state changes (a yank, a slam, candles snuffed row by row, boots walking at floor level) and no-face shots that need real physics. Seedance 1.5 Pro failed these.",
+      "checked": "2026-10-14",
+      "note": "OBSERVATION. Refused photoreal faces, including a photoreal creature, as 'may contain real person' (400, $0). Fall back to minimax/hailuo-3-max with a per-shot 'model' override."
     }
   ],
   "models": {
+    "heygen/heygen-video-1": {
+      "label": "HeyGen Video 1",
+      "audio_reference": true,
+      "image_mode": "reference",
+      "send_generate_audio_false": false,
+      "duration": [5, 15],
+      "resolution": "480p",
+      "est_usd_per_second": {"default": 0.07, "480p": 0.07, "768p": 0.10, "2K": 0.18},
+      "est_usd_per_ref_image": 0.0,
+      "price_note": "listed $0.07/s at 480p with a reference (reference_duration_seconds_480p); actually billed $0.035/s at 480p on 2026-10-14. The estimate uses the listed price so --max-usd stays conservative. Checked 2026-10-14.",
+      "checked": "2026-10-14",
+      "notes": "Image and audio both go in input_references; a first_frame plus references is rejected. Passes the reference audio through into its soundtrack, so sync_offset.py can measure it. Video starts at pts ~0.083 s."
+    },
     "minimax/hailuo-3": {
       "label": "Hailuo 3",
       "audio_reference": true,
@@ -38,9 +67,35 @@
       "resolution": null,
       "est_usd_per_second": {"default": 0.13},
       "est_usd_per_ref_image": 0.04,
-      "price_note": "about $0.13/s plus about $0.04 per reference image; 2K output only (omit the resolution field). Checked 2026-10-10.",
-      "checked": "2026-10-10",
-      "notes": "Needs an image reference when given audio. Kept the sung vocal on the wide-band shots where Seedance 2.5 did not. Accepted a human face where Seedance 2.5 refused."
+      "price_note": "$0.13/s plus $0.04 per reference image; 2K output only (omit the resolution field). Checked 2026-10-14.",
+      "checked": "2026-10-14",
+      "notes": "Audio-match 0.96-0.98 with a vocal or full-mix reference. Copies the keyframe faithfully, flaws included (a human hand on a werewolf, a gripped mic stand). Prompted camera sweeps on wides barely moved: do sweeps in post."
+    },
+    "minimax/hailuo-3-max": {
+      "label": "Hailuo 3 Max",
+      "audio_reference": false,
+      "image_mode": "first_frame",
+      "send_generate_audio_false": false,
+      "duration": [5, 15],
+      "resolution": "480p",
+      "est_usd_per_second": {"default": 0.08, "480p": 0.05, "768p": 0.08},
+      "est_usd_per_ref_image": 0.0,
+      "price_note": "$0.05/s at 480p, $0.08/s at 768p, silent. Checked 2026-10-14.",
+      "checked": "2026-10-14",
+      "notes": "Best silent emotional acting found. Took photoreal faces Seedance 2.5 refused. One take changed a character's hair colour; check identity on the strip."
+    },
+    "bytedance/seedance-1-5-pro": {
+      "label": "Seedance 1.5 Pro",
+      "audio_reference": false,
+      "image_mode": "first_frame",
+      "send_generate_audio_false": true,
+      "duration": [4, 12],
+      "resolution": "480p",
+      "est_usd_per_second": {"default": 0.026, "480p": 0.013, "720p": 0.026},
+      "est_usd_per_ref_image": 0.0,
+      "price_note": "token-priced; billed about $0.049 per 4 s at 480p and $0.105 per 4 s at 720p on 2026-10-14. Checked 2026-10-14.",
+      "checked": "2026-10-14",
+      "notes": "The cheap workhorse for silent shots and inserts; took every photoreal face in a 50-shot video. Weak at physics and state changes (it grew a giant candle for 'candles go out', giant boots for 'boots walk the aisle'). Text-to-video works for simple faceless inserts."
     },
     "bytedance/seedance-2.5": {
       "label": "Seedance 2.5",
@@ -51,48 +106,60 @@
       "resolution": "480p",
       "est_usd_per_second": {"default": 0.10, "480p": 0.10, "720p": 0.23},
       "est_usd_per_ref_image": 0.0,
-      "price_note": "token-priced; roughly $0.10/s at 480p and $0.23/s at 720p by token arithmetic. Checked 2026-10-10.",
-      "checked": "2026-10-10",
-      "notes": "Audio works only when the keyframe is sent as input_references. Pinning it as first_frame silently drops the audio. Refuses some photoreal human faces. Camera moves on wide band shots can hallucinate a duplicate character."
+      "price_note": "token-priced; billed $0.08-0.10/s at 480p on 2026-10-14 ($0.415 per 5 s silent, $1.34 for 13 s). Checked 2026-10-14.",
+      "checked": "2026-10-14",
+      "notes": "Strongest motion and physics. Refuses some photoreal faces, creatures included, per image. Audio works only when the keyframe is sent as input_references; a pinned first_frame silently drops it. Size words in an action prompt made a character double in size."
     },
-    "bytedance/seedance-1-5-pro": {
-      "label": "Seedance 1.5 Pro",
+    "alibaba/wan-3.0": {
+      "label": "Wan 3.0",
       "audio_reference": false,
       "image_mode": "first_frame",
-      "send_generate_audio_false": true,
-      "duration": [4, 12],
-      "resolution": "720p",
-      "est_usd_per_second": {"default": 0.026},
+      "send_generate_audio_false": false,
+      "duration": [2, 30],
+      "resolution": "480p",
+      "est_usd_per_second": {"default": 0.05, "480p": 0.05, "720p": 0.10},
       "est_usd_per_ref_image": 0.0,
-      "price_note": "about $0.13 per 5 s clip at 720p, silent. Checked 2026-10-10.",
-      "checked": "2026-10-10",
-      "notes": "First and last frame only, no audio input. Passed the face filter on human faces in the 2026-10-10 test."
+      "price_note": "$0.05/s listed at 480p, about $0.042/s billed on 2026-10-14. Checked 2026-10-14.",
+      "checked": "2026-10-14",
+      "notes": "Not routed. Long multi-scene clips: cuts landed within 0.05 s of the beat, but only the first frame is pinned, so identity drifted after scene 1 and a body changed scale. If used: one scene set per request, about 13 s max."
     },
-    "heygen/heygen-video-1": {
-      "label": "HeyGen Video 1",
+    "x-ai/grok-imagine-video-1.5-lite": {
+      "label": "Grok Imagine 1.5 Lite",
+      "audio_reference": false,
+      "image_mode": "first_frame",
+      "send_generate_audio_false": false,
+      "duration": [1, 15],
+      "resolution": "480p",
+      "est_usd_per_second": {"default": 0.02, "480p": 0.02, "720p": 0.03},
+      "est_usd_per_ref_image": 0.01,
+      "price_note": "$0.02/s at 480p plus $0.01 per input image. Checked 2026-10-14.",
+      "checked": "2026-10-14",
+      "notes": "Not routed. Asked for a multi-scene clip it morphs between scenes instead of hard-cutting (max frame difference 8/255)."
+    },
+    "heygen/avatar-iv": {
+      "label": "HeyGen Avatar IV",
       "audio_reference": true,
       "image_mode": "reference",
       "send_generate_audio_false": false,
-      "duration": [5, 15],
-      "resolution": "768p",
-      "est_usd_per_second": {"default": 0.03},
+      "resolution": "720p",
+      "est_usd_per_second": {"default": 0.05},
       "est_usd_per_ref_image": 0.0,
-      "price_note": "about $0.15 per 5 s shot. Checked 2026-10-10.",
-      "checked": "2026-10-10",
-      "notes": "Cheapest model found that keeps a vocal; motion was stiffer than the others. Not in the routing rules; use it with a per-shot 'model' override or --model."
+      "price_note": "$0.05/s. Checked 2026-10-14.",
+      "checked": "2026-10-14",
+      "notes": "Not routed. Exact audio passthrough (match 1.00) but a static talking head that reframes tight: rejected for performance shots."
     },
     "kwaivgi/kling-v3.0-pro": {
       "label": "Kling 3 Pro",
       "audio_reference": false,
       "image_mode": "first_frame",
       "send_generate_audio_false": false,
-      "duration": [5, 10],
+      "duration": [3, 15],
       "resolution": null,
       "est_usd_per_second": {"default": 0.112},
       "est_usd_per_ref_image": 0.0,
-      "price_note": "about $0.112/s. Checked 2026-10-10.",
-      "checked": "2026-10-10",
-      "notes": "Held character identity well; rejects audio references. Good silent story shots."
+      "price_note": "$0.112/s. Checked 2026-10-14 (price); behaviour last tested 2026-10-10.",
+      "checked": "2026-10-14",
+      "notes": "Held character identity well on 2026-10-10; rejects audio references. Good silent story shots."
     },
     "google/veo-3.1-fast": {
       "label": "Veo 3.1 Fast",
@@ -103,8 +170,8 @@
       "resolution": "720p",
       "est_usd_per_second": {"default": 0.08},
       "est_usd_per_ref_image": 0.0,
-      "price_note": "about $0.08/s at 720p, no audio. Checked 2026-10-10.",
-      "checked": "2026-10-10",
+      "price_note": "$0.08/s at 720p without audio. Checked 2026-10-14 (price); behaviour last tested 2026-10-10.",
+      "checked": "2026-10-14",
       "notes": "Drifted character identity in the 2026-10-10 test. Listed so the dry run can price it, not as a recommendation."
     }
   }

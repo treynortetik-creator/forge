@@ -19,6 +19,7 @@ import plan_lib as pl
 
 REQUIRED_TOP = ("title", "audio", "style", "shots")
 REQUIRED_SHOT = ("id", "time", "slug", "description", "frame")
+KINDS = ("performance", "acting", "action", "insert", "establishing")
 
 
 def check(plan: dict, frames_dir: str, audio_override: str | None = None, tol: float = 0.011,
@@ -44,6 +45,15 @@ def check(plan: dict, frames_dir: str, audio_override: str | None = None, tol: f
             errors.append(f"shot {s['id']}: end {pl.fmt_time(s['end'])} is not after start {pl.fmt_time(s['start'])}")
         if s.get("face") not in (None, "human", "creature", "none"):
             warnings.append(f"shot {s['id']}: face={s['face']!r} is not human/creature/none; routing treats it as unknown")
+        if s.get("framing") not in (None, "close", "medium", "wide"):
+            warnings.append(f"shot {s['id']}: framing={s['framing']!r} is not close/medium/wide; routing treats it as unknown")
+        if s.get("kind") not in (None, *KINDS):
+            warnings.append(f"shot {s['id']}: kind={s['kind']!r} is not one of {'/'.join(KINDS)}; routing treats it as unknown")
+        ref = s.get("audio_ref")
+        if ref and ref != "mix" and ref not in (plan.get("stems") or {}):
+            p = pl.resolve_path(plan, ref) if "_dir" in plan else ref
+            if not (p and os.path.isfile(p)):
+                errors.append(f"shot {s['id']}: audio_ref {ref!r} is neither 'mix', a key of the plan's 'stems', nor a file on disk")
 
     ordered = sorted(shots, key=lambda s: s["start"])
     if [s["id"] for s in ordered] != [s["id"] for s in shots]:
