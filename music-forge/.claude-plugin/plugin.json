@@ -4,7 +4,7 @@
   "version": "0.3.0",
   "description": "Make a song and then a video for it, measured instead of eyeballed: write lyrics for AI music generators with scripts that count syllables and rhymes, check what was actually sung, turn a finished song plus a shot plan into a frame-exact music video through OpenRouter video models and ffmpeg, and scan tracks for tempo, key and singer consistency.",
   "author": {
-    "name": "Treynor Tetik"
+    "name": "treynortetik-creator"
   },
   "homepage": "https://github.com/treynortetik-creator/forge",
   "repository": "https://github.com/treynortetik-creator/forge",
