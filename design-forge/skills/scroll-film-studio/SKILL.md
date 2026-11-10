@@ -6,11 +6,8 @@ description: >-
   pitches 2-3 named concepts, art-directs the world, then builds it from scratch.
   Two lanes: free pure-code GSAP/Lenis motion (zero setup, works for anyone) or a
   cinematic footage film from the user's own image-to-video engine (Higgsfield Seedance
-  2.0 or newer is the reference and the required model; Kie.ai also serves the same
-  Seedance 2.0 as `bytedance/seedance-2` and is the fallback when Higgsfield is down,
-  Veo only as a last resort — the default film is 5 clips x ~5s = 25s / ~600
-  frames, chained with BOTH ends pinned; a single ≤15s take is the shorter fallback used
-  only when the engine will not honour a start pin).
+  2.0 or newer is the reference; Kie.ai is the fallback, Veo a last resort — default
+  5 clips x ~5s chained with both ends pinned).
   Trigger on "scroll-film", "cinematic scroll site", "scrollytelling website", "build me
   an animated/scroll website", "film-scroll site", "one continuous shot website", or any
   request for a premium scroll-scrubbed animated site. NOT for slide decks / HTML
