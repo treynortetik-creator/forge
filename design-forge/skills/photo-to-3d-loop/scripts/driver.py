@@ -486,6 +486,9 @@ def iterate(tag, script):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        print(__doc__)
+        sys.exit(0)
     cmd = sys.argv[1] if len(sys.argv) > 1 else "check"
     if cmd == "check":
         for p in (9876, 9877):
