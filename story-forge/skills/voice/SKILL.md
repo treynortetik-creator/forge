@@ -1,6 +1,6 @@
 ---
 name: voice
-description: Use when extracting an author voice fingerprint or style sheet from writing samples, produces the voice spec that all story-forge drafting skills (chapter-generation, de-sloppifier, etc.) consume. Triggers on "build my voice profile", "extract my writing style", "create a style sheet from my samples", "voice fingerprint", or any request to anchor AI generation to a specific author's prose.
+description: Use when extracting an author voice fingerprint or style sheet from writing samples. Produces the voice spec that the story-forge drafting and editing skills (outline-to-chapters, short-story-draft, de-sloppifier) consume. Triggers on "build my voice profile", "extract my writing style", "create a style sheet from my samples", "voice fingerprint", or any request to anchor AI generation to a specific author's prose.
 allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
 ---
 

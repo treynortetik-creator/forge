@@ -1,6 +1,6 @@
 ---
 name: short-story-hacker
-description: Use when structurally analyzing a short story and produce a reusable breakdown covering the magic sword, try/fail cycles, heart's-desire arc, inciting incident, conceptual hook, and verbatim prose examples. Invoke with a short story text in hand (pasted or file path).
+description: Use when structurally analyzing a short story. Produces a reusable breakdown covering the magic sword, try/fail cycles, heart's-desire arc, inciting incident, conceptual hook, and verbatim prose examples. Invoke with a short story text in hand (pasted or file path).
 allowed-tools: [Read, Write, Bash]
 ---
 
