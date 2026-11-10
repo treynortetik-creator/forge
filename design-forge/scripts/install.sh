@@ -21,7 +21,12 @@ have() { command -v "$1" >/dev/null 2>&1; }
 say()  { printf "${BOLD}%s${RST}\n" "$*"; }
 note() { printf "${DIM}  %s${RST}\n" "$*"; }
 
-if [ "$MODE" = "--check" ]; then exec bash "$ROOT/scripts/doctor.sh"; fi
+case "$MODE" in
+  --plugin|--tools|--all) ;;
+  --check) exec bash "$ROOT/scripts/doctor.sh" ;;
+  -h|--help) sed -n '2,12p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+  *) echo "unknown option: $MODE (use --tools, --all, --check or --help)" >&2; exit 2 ;;
+esac
 
 say "design-forge installer"
 note "plugin root: $ROOT"
