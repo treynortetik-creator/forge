@@ -1,184 +1,75 @@
 ---
 name: dossier-to-outline
-description: "Use when you have a finished story dossier and need to build the three structural production documents: a character bible, a worldbuilding sheet, and a chapter-by-chapter outline. Each document goes through a generate, critique, rewrite cycle. Run after braindump-to-dossier. Triggers on \"build my outline\", \"generate characters and worldbuilding\", \"turn the dossier into an outline\", \"dossier to outline\", or \"run dossier-to-outline\"."
-allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
+description: "Orchestrator: turns a finished story dossier into the full novel story bible by calling dossier-to-characters, then dossier-to-worldbuilding, then outline-generator, and adds a chapter-contract pass (wants, opposition, outcome, cost) to the outline. Run after braindump-to-dossier. Triggers on \"dossier to outline\", \"run dossier-to-outline\", \"turn the dossier into an outline\", or \"build the whole story bible\"."
+allowed-tools: [Read, Write, Edit, Bash, Glob, Grep, Skill]
 ---
 
 # Role
 
-Producer. Takes one dossier and outputs three finished documents: character bible, worldbuilding sheet, chapter outline. Each document is generated once, critiqued against specific criteria, then rewritten with targeted changes only. No document is used downstream until its rewrite cycle is complete.
+Producer. Takes one dossier and gets three finished documents built: character bible, worldbuilding
+sheet, chapter outline. It writes none of them itself. Each is built by its dedicated skill, which
+carries the real prompts, critique criteria and rewrite loops. This layer handles order, artifact
+routing, the chapter contract, and the human-review gate.
+
+If the user asks for only one of the three documents, send them to that skill directly:
+`dossier-to-characters`, `dossier-to-worldbuilding` or `outline-generator`.
 
 ---
 
 # Dependency Check (REQUIRED FIRST STEP)
 
-Before anything else, confirm the prerequisite exists.
-
-**Required input:** a story dossier produced by the `braindump-to-dossier` skill. The dossier must include at minimum: log line, synopsis, character list with roles, worldbuilding element list, and key outline moments (opening image, inciting incident, midpoint, climax, closing image).
+**Required input:** a story dossier produced by the `braindump-to-dossier` skill. The dossier must
+include at minimum: log line, synopsis, character list with roles, worldbuilding element list, and key
+outline moments (opening image, inciting incident, midpoint, climax, closing image).
 
 If the dossier is missing or incomplete, STOP here and say:
 
 > "This skill needs a completed story dossier. Build it first by running the `braindump-to-dossier` skill, or supply your existing dossier file."
 
-Do not generate anything without a valid dossier in hand.
+Also confirm: book title, project directory, and any author notes. Ask for anything not supplied.
+Author notes can be blank. Ask once whether the author has a plot template, tropes doc or themes doc;
+they are optional inputs to `outline-generator`.
 
-Also confirm: book title and any author notes the author wants applied. Ask for both if not supplied. Author notes can be blank.
+**Resume rule:** if `[project-name]-characters.md` or `[project-name]-worldbuilding.md` already exists
+in the project directory, ask whether to reuse it or rebuild it before running its step.
 
 ---
 
 # Process
 
-The three documents are produced in sequence: characters first, then worldbuilding, then outline. The outline depends on both prior documents being finished.
+Run the three skills in this order. Each one depends on the documents before it. Do not start a step
+until the previous file is written and confirmed on disk.
 
----
+## Step 1: Character bible
 
-## Phase 1: Character Bible
+Invoke the **dossier-to-characters** skill with the dossier and author notes. It builds the bible one
+character at a time with a per-character logic check, then a relationship map.
 
-### Step 1.1, Generate
+**Output:** `[project-name]-characters.md`. Confirm it exists before continuing.
 
-Using the dossier, produce a fleshed-out character bible covering every character needed for this book.
+## Step 2: Worldbuilding sheet
 
-**For each major character, produce all of the following:**
+Invoke the **dossier-to-worldbuilding** skill with the dossier **and the finished character bible**
+as context. It builds the sheet one element at a time and re-reads the growing sheet so later elements
+stay consistent with earlier ones.
 
-1. Physical description (precise and generatable, not vague flattery)
-2. Primary role in the story (protagonist, antagonist, love interest, henchman, etc.)
-3. Personality profiles: MBTI, Enneagram, Clifton Strengths
-4. Core motivation: the heart's desire driving this character most of the time
-5. Background before the story begins
-6. A quirk, hobby, or trait that does not fit neatly into the plot but makes the character feel like a real person
-7. Dialogue style: how they talk, what they reach for, what they avoid
-8. Dialogue samples in four registers: relaxed, stressed, thoughtful, excited. These samples do not have to come from this story; they exist to demonstrate vocal pattern
-9. Slider baselines (see `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md`): rate each of the 15 behavioral dimensions on a -10 to +10 scale with brief behavioral notes at this character's baseline. Dimensions: Stress/Calm, Fear/Courage, Suspicion/Trust, Callous/Empathic, Impulsivity/Self-Control, Dominance/Submission, Pessimism/Optimism, Introverted/Extroverted, Gut/Logic, Detail-Focused/Big-Picture, Cautious/Risk-Taker, Seriousness/Humor, Deception/Honesty, Stability/Sensitivity, Shame/Self-Worth
-10. Character arc: how they begin, what pushes them into the plot, a midpoint moment, a climax moment, how they have changed by the last page
+**Output:** `[project-name]-worldbuilding.md`. Confirm it exists before continuing.
 
-**For each minor character:** 1-2 sentences covering background, core desire, and relationship to the plot.
+## Step 3: Chapter outline
 
-**Format:**
+Invoke the **outline-generator** skill with the dossier, character bible, worldbuilding sheet, author
+notes, and any plot template, tropes or themes doc the author supplied. It carries the 6-dimension
+emotional audit, the anchored scene sliders, and the outline logic check.
 
-```
-## [BOOK TITLE]
+When it finishes, save its final outline as `[project-name]-outline.md` in the project directory (it
+may propose a `drafts/` filename; this pipeline expects the name above).
 
-### [MAJOR CHARACTER NAME]
-* Physical Description: ...
-* Role in Story: ...
-* Personality Profiles: ...
-* Core Motivation: ...
-* Background: ...
-* Quirk: ...
-* Dialogue Style: ...
-* Dialogue Samples: ...
-* Slider Baselines: ...
-* Character Arc: ...
+## Step 4: Chapter contract pass
 
-### Minor Characters
-* [NAME]: [1-2 sentences]
-```
+`outline-generator` scores how each chapter feels. It does not record what is at stake. Add the
+contract below to every chapter of `[project-name]-outline.md`, changing nothing else in the outline.
 
-No preamble, no commentary, nothing outside this format.
-
-Craft note: the slider rubric is fully documented in `${CLAUDE_PLUGIN_ROOT}/references/writing/character-system.md`. The motivation architecture (Ghost/Wound/Lie/Weakness) lives in `${CLAUDE_PLUGIN_ROOT}/references/writing/character-motivation.md`. Every major character's heart's desire must be specific and emotional, not functional.
-
-### Step 1.2, Critique
-
-Read the generated character bible and produce an improvement plan. Critique against these criteria only:
-
-- **Dossier fidelity:** does every character fully match the author's dossier in intent, tone, details, and spirit? Are any characters who appear in the dossier missing or misrepresented?
-- **Storytelling best practices:** do the characters fit their narrative roles according to solid story craft? Is each major character distinct enough to carry their role?
-- **Heart's desire:** does each major character have a clear, emotionally specific heart's desire? Could any of them be made more moving to a reader? Does the desire have a plausible origin in their background?
-
-Do not rewrite the bible. Output an improvement plan with specific examples of what to change and why.
-
-### Step 1.3, Rewrite
-
-Take the original character bible and the improvement plan. Implement only the suggested changes. Do not alter anything the critique did not flag. Reproduce the entire bible with the changes applied.
-
-No preamble, no commentary.
-
----
-
-## Phase 2: Worldbuilding Sheet
-
-Run after the character bible rewrite is complete. Use the finished character bible as context.
-
-### Step 2.1, Generate
-
-Using the dossier, produce a fleshed-out worldbuilding sheet covering all settings, systems, factions, and elements needed for this book.
-
-**Organization:** group all elements into categories. Use only the categories that apply to this book. Possible categories (not all will apply):
-
-- High-Level Worldbuilding
-- Settings and Locations
-- Objects and Artifacts
-- Magic Systems and Technology
-- Groups and Races
-- Gods and Deities
-- Geography and Nature
-- Population and Politics
-- Culture
-- History and Lore
-- Religion and Beliefs
-- Languages
-
-For each element: **classify it, then follow that category's full profile format** from
-`${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-categories.md`. Each category has its own
-document structure — Hard Rules vs Soft Rules for a magic system, The Truth Behind the Myth for a
-deity, Details to Use in Prose for a culture. **3-4 generic sentences per element produces a
-glossary, not a world.** Minimum 3-4 sentences per section where the format calls for prose. Write each profile to feel lived in and three-dimensional, not like a stage backdrop. Cover physical reality, emotional resonance, the people or forces connected to it, and its role in the story. See the full category-specific profile format in `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md`.
-
-**Format:**
-
-```
-## [BOOK TITLE]
-
-### [WORLDBUILDING CATEGORY]
-* [ELEMENT NAME]: [3-4 sentences, specific details]
-* [ELEMENT NAME]: [3-4 sentences, specific details]
-
-### [NEXT WORLDBUILDING CATEGORY]
-* [ELEMENT NAME]: [3-4 sentences, specific details]
-```
-
-No preamble, no commentary. Only the categories and elements this story actually needs.
-
-Craft note: every element should serve the story, not just exist for texture. The worldbuilding-scope-creep risk is real: if the dossier over-identifies elements, trim before generating so downstream context stays lean. See `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-method.md` for the full format; see `${CLAUDE_PLUGIN_ROOT}/references/writing/worldbuilding-consistency.md` for the iceberg principle and cause-and-effect rules.
-
-### Step 2.2, Critique
-
-Read the generated worldbuilding sheet and produce an improvement plan. Critique against these criteria only:
-
-- **Dossier fidelity:** does this fully match the story dossier in intent, tone, details, and spirit?
-- **Storytelling best practices:** do all worldbuilding elements actively serve the story? Is each element interesting in its own right?
-- **Category integrity:** do all categories used make sense for this book? Is every element assigned to the correct category?
-
-Do not rewrite the sheet. Output an improvement plan with specific examples.
-
-### Step 2.3, Rewrite
-
-Take the original worldbuilding sheet and the improvement plan. Implement only the suggested changes. Reproduce the entire sheet with the changes applied.
-
-No preamble, no commentary.
-
----
-
-## Phase 3: Chapter Outline
-
-Run after both the character bible and worldbuilding sheet rewrites are complete. Both documents are active context for this phase.
-
-### Step 3.1, Generate
-
-Using the dossier, finished character bible, finished worldbuilding sheet, and genre conventions, generate a chapter-by-chapter outline for the full book.
-
-Per chapter, produce:
-
-- A summary of approximately 100 words in paragraph form. Use specific details, not vague allusions. Write it as if handing it to a ghostwriter to produce the first draft.
-- Viewpoint character (name only)
-- Scene sliders (1-10 scale) for each of: Tension, Dread, Emotional Intimacy, Relationship Tension, Pacing Energy, Humor. **Full anchor definitions: `${CLAUDE_PLUGIN_ROOT}/references/writing/scene-sliders.md`. Load it before scoring** — otherwise you are inventing six numbers per chapter against nothing.
-- **The chapter contract** — four fields, described below. This is the part that decides whether the
-  book is any good, and it is the part every generic outline omits.
-
-The number of chapters should reflect the genre conventions and the scale of the story in the dossier. Follow the story structure the dossier implies (inciting incident, midpoint, climax, closing image all land at appropriate chapter positions).
-
-### 🔴 The chapter contract
+### 🔴 The chapter contract (this skill's own pass)
 
 **The sliders measure how a chapter FEELS. They do not measure whether anything is at stake.** A
 chapter can sit at Tension 9 with nothing to lose. Those are different objects, and an outline that
@@ -211,7 +102,7 @@ book sags and no amount of drafting skill will save it.
 **Format:**
 
 ```
-### Chapter [N]: [Title or working description]
+#### Chapter [N]: [Title or working description]
 [~100-word paragraph with specific details]
 
 **Viewpoint:** [character name]
@@ -222,67 +113,19 @@ book sags and no amount of drafting skill will save it.
 **Sliders:** Tension [X] | Dread [X] | Emotional Intimacy [X] | Relationship Tension [X] | Pacing Energy [X] | Humor [X]
 ```
 
-No preamble, no commentary.
-
-Craft note: the outline is a blueprint for human review before chapter generation begins. Specific details now prevent drift later. See `${CLAUDE_PLUGIN_ROOT}/references/writing/outlining-method.md` for the full system; see `${CLAUDE_PLUGIN_ROOT}/references/writing/plot-coherence.md` for the six audit categories that run next.
-
-### Step 3.2, Critique
-
-Read the full outline and produce an improvement plan. Critique against these criteria:
-
-**Plot coherence (from `${CLAUDE_PLUGIN_ROOT}/references/writing/plot-coherence.md`):**
-- Premise Logic: does the core premise hold together internally? Are stakes and conflicts consistent with stated world rules?
-- Character-World Fit: do characters' roles, goals, and capabilities make sense in this world? Do motivations align with the premise?
-- Worldbuilding Coherence: do world elements support the premise without internal contradiction?
-- Plot Setup Plausibility: are there logistical impossibilities? Motivation gaps that would stop the story from starting? Is the inciting incident plausible?
-- Early-Stage Convenience Flags: does any chapter rely on unlikely coincidence? Do any characters exist purely to solve a plot problem? Are there "because the plot needs it" moments with no in-world logic?
-
-**Emotional arc:**
-- Is there enough emotion across the arc? Are there genuine gut-punch moments? Or is this a sequence of events with flat affect?
-- Do the slider values match what the chapter summaries actually describe?
-
-**Structural integrity:**
-- Does the outline honor the key moments in the dossier (opening image, inciting incident, midpoint, climax, closing image) at appropriate positions?
-- Are character arcs from the character bible tracked correctly across chapters?
-
-Do not rewrite the outline. Output an improvement plan with specific examples.
-
-Scratchpad directive: before writing the final critique, systematically work through the full outline and identify all characters, world rules, and established facts. Check each audit category methodically. Note every contradiction or plausibility gap. Final output is the improvement plan only, not the scratchpad.
-
-### Step 3.3, Rewrite
-
-Take the original outline and the improvement plan. Implement only the suggested changes. Reproduce the entire outline with changes applied.
-
-No preamble, no commentary.
-
 ---
 
 # Output
 
-Three files delivered on completion:
+Three files in the project directory:
 
-- `[project-name]-characters.md` (finished character bible)
-- `[project-name]-worldbuilding.md` (finished worldbuilding sheet)
-- `[project-name]-outline.md` (finished chapter outline with sliders)
+- `[project-name]-characters.md` (from `dossier-to-characters`)
+- `[project-name]-worldbuilding.md` (from `dossier-to-worldbuilding`)
+- `[project-name]-outline.md` (from `outline-generator`, plus the chapter contract)
 
-Save all three to the project's working directory, or ask where to write them if no project directory has been established.
-
-Flag the outline for human review before proceeding to chapter generation. The outline is the most consequential document: structural problems caught here are cheap to fix; the same problems in a finished draft are expensive.
-
----
-
-# Quality Rules
-
-These apply across all generation steps in this skill:
-
-- No banned words (see `${CLAUDE_PLUGIN_ROOT}/references/writing/banned-words.md`). Feed the list as a `<prohibited_words>` constraint at every generation step.
-- No em dashes anywhere in the output. Convert any to commas, periods, or colons.
-- No negative parallelism ("not just X, but Y").
-- No rule-of-three padding (adjective, adjective, and adjective).
-- Emotions must be specific and concrete, not labeled. "Her stomach dropped" is a cliche. Show the behavior, the physical signal, the thought.
-- Every major character's heart's desire must be emotionally specific. "She wants to belong" is vague. "She wants the High Priestess to say her name with the same respect she uses for the Order's best students" is specific.
-- Worldbuilding elements that do not serve the story are waste. Do not generate them.
-- Dialogue samples must demonstrate the character's actual vocal patterns, not just vary their topic.
+Flag the outline for human review before chapter generation. The outline is the most consequential
+document: structural problems caught here are cheap to fix; the same problems in a finished draft are
+expensive.
 
 ---
 
@@ -291,5 +134,4 @@ These apply across all generation steps in this skill:
 - Slider levels in the outline are working targets; the author should adjust them before running chapter generation.
 - After chapter generation begins, loop back and update the outline for the next 2-3 chapters with specifics gathered from chapters already written.
 - The character bible is a living document: update slider baselines and arc position notes as the draft reveals things the bible missed.
-- The worldbuilding sheet carries forward across a series; only new elements introduced in later books need to be added.
-- This skill feeds directly into the `outline-to-chapters` skill (chapter generation pipeline). See `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md` for what the pipeline expects from these output documents.
+- These three files feed the `outline-to-chapters` skill. See `${CLAUDE_PLUGIN_ROOT}/references/writing/chapter-generation-pipeline.md` for what it expects.

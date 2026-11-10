@@ -13,7 +13,7 @@ These run in order. The artifact each one produces is the input to the next.
 **1. braindump-to-dossier.** Turns a raw story idea into a structured dossier. Give it a braindump and a title; it generates premises, picks the strongest on logic, originality, and emotional gut-punch, then builds a full dossier (characters, worldbuilding, synopsis, outline plan) through a critique-and-rewrite loop.
 - *Needs:* a braindump and a title. *Produces:* the dossier.
 
-**2. dossier-to-outline.** Turns the dossier into the three production documents: a character bible, a worldbuilding sheet, and a chapter-by-chapter outline. Each goes through generate, critique, rewrite.
+**2. dossier-to-outline.** Orchestrator. Turns the dossier into the three production documents by calling `dossier-to-characters`, then `dossier-to-worldbuilding`, then `outline-generator`, and adds the chapter contract (wants, opposition, outcome, cost) to every chapter.
 - *Needs:* a dossier (from step 1). *Produces:* character bible, worldbuilding sheet, outline.
 
 **3. outline-generator.** The advanced outliner. Builds a chapter-by-chapter outline with a six-dimension emotional audit and per-chapter sliders (Tension, Dread, Emotional Intimacy, Relationship Tension, Pacing Energy, Humor), plus a logic check. Use it when you want the richer, instrumented outline before drafting.

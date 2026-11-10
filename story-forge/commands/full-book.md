@@ -9,7 +9,7 @@ allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]
 
 **Orchestration command.** This command chains four skills in sequence, passing artifacts on disk between them. The individual skills hold the real prompts and craft logic. This layer handles sequencing, dependency gating, and artifact routing only.
 
-**Chain order:** voice (if needed) → braindump-to-dossier → dossier-to-outline → **outline-generator** → outline-to-chapters → **de-sloppifier** → **logic-check**
+**Chain order:** voice (if needed) → braindump-to-dossier → dossier-to-outline (runs dossier-to-characters → dossier-to-worldbuilding → outline-generator) → outline-to-chapters → **de-sloppifier** → **logic-check**
 
 **Project directory:** `$ARGUMENTS` (where dossier, character bible, worldbuilding sheet, outline, and draft files are written). If not supplied, ask for it before proceeding.
 
@@ -57,13 +57,6 @@ Do not proceed to Step 3 without a resolved dossier file path.
 
 ## Step 3: Dossier to Outline (Conditional)
 
-> **Deeper alternative.** `dossier-to-outline` builds the character bible and world in **single passes**
-> — faithful to the automation it was ported from, and fine for a short or fast project. For a full
-> novel, run **`dossier-to-characters`** then **`dossier-to-worldbuilding`** first: they work
-> **one item at a time** with a per-item logic check, and worldbuilding re-reads the accumulating sheet
-> so later elements stay consistent with earlier ones. Then use Step 3 for the outline only.
-
-
 **Purpose:** Expand the dossier into three production documents: character bible, worldbuilding sheet, and chapter outline.
 
 **Dependency check:** Search `$ARGUMENTS` for all three expected outputs from this stage. The file naming pattern is `[project-name]-characters.md`, `[project-name]-worldbuilding.md`, and `[project-name]-outline.md`. If all three exist, confirm with the user whether to use them or rebuild them.
@@ -71,6 +64,8 @@ Do not proceed to Step 3 without a resolved dossier file path.
 **If any of the three files are missing:**
 
 Invoke the **dossier-to-outline** skill, passing the dossier file from Step 2 as context. The skill will conduct its own dependency check and confirm the dossier is present and complete before generating anything. Do not bypass that check.
+
+`dossier-to-outline` is an orchestrator: it runs **dossier-to-characters**, then **dossier-to-worldbuilding**, then **outline-generator** (which carries the 6-dimension emotional audit, the anchored scene sliders and the outline logic check), then adds the chapter contract. Do not run those three skills again separately.
 
 The skill produces three files. When it completes, confirm all three were written, note their paths, and carry all three into Step 4.
 
@@ -102,29 +97,6 @@ If any are missing, stop here and report which artifact is absent and which skil
 Invoke the **outline-to-chapters** skill, providing the paths to all four prerequisite files. The skill will ask which chapters to generate, what tense the book uses, and any author notes for the session. Those questions belong to the skill; answer them as they come.
 
 The skill appends each completed chapter to the draft file. When it completes its run, report to the user: chapters generated, draft file path, and total word count if available via `wc -w`.
-
----
-
----
-
-## Step 3.5: Instrumented Outline Pass (Recommended)
-
-Invoke the **outline-generator** skill on the outline from Step 3.
-
-This is the only place in the plugin that carries the **6-dimension emotional audit**, the **anchored
-scene-slider rubric**, and the **7-category outline logic check**. Skipping it means those three
-instruments never run on your book.
-
-**Input:** the outline, character sheet and worldbuilding sheet from Step 3.
-**Output:** `$ARGUMENTS/[project-name]-outline.md`, re-emitted with per-chapter sliders and both audits
-applied.
-
-**If no genre plot template is available**, follow that skill's degradation branch — it reassigns
-chapter count to the dossier, asks the author to declare the three content ratings once, and disables
-the checks that would otherwise validate invented numbers against a document that does not exist.
-
-**This step is skippable but not silently.** If the user declines, say plainly which three instruments
-are being skipped.
 
 ---
 
@@ -165,9 +137,9 @@ provenance characters without altering a word.
 |---|---|---|
 | Voice spec | voice | `$ARGUMENTS/voice-[name].md` |
 | Story dossier | braindump-to-dossier | `$ARGUMENTS/dossier-[slug].md` |
-| Character bible | dossier-to-outline | `$ARGUMENTS/[project]-characters.md` |
-| Worldbuilding sheet | dossier-to-outline | `$ARGUMENTS/[project]-worldbuilding.md` |
-| Chapter outline | dossier-to-outline | `$ARGUMENTS/[project]-outline.md` |
+| Character bible | dossier-to-characters (via dossier-to-outline) | `$ARGUMENTS/[project]-characters.md` |
+| Worldbuilding sheet | dossier-to-worldbuilding (via dossier-to-outline) | `$ARGUMENTS/[project]-worldbuilding.md` |
+| Chapter outline | outline-generator + chapter contract (via dossier-to-outline) | `$ARGUMENTS/[project]-outline.md` |
 | Draft chapters | outline-to-chapters | `$ARGUMENTS/[project]-draft.md` (appended per chapter) |
 
 ---
@@ -178,11 +150,7 @@ provenance characters without altering a word.
 - Steps are conditional at 2 and 3: if valid artifacts already exist on disk, the user can choose to reuse them and skip the build. Always confirm before reusing.
 - Step 4 produces the draft. **Steps 5-7 are what make it finished** — a draft is not done when the last chapter is written.
 
-> 🔴 **Three skills were missing from this chain and have been added.**
-> **`outline-generator`** carries the 6-dimension emotional audit, the anchored slider rubric and the
-> 7-category logic check — none of which exist anywhere else in the plugin, so the default pipeline
-> ran without them entirely.
-> **`de-sloppifier`** and **`logic-check`** were also absent, which meant a completed `/full-book` run
+> 🔴 **`outline-generator`** (now run inside Step 3), **`de-sloppifier`** and **`logic-check`** were once missing from this chain, which meant a completed `/full-book` run
 > handed back a **raw, un-line-edited draft** with no pointer to what came next. A draft is not
 > finished when the last chapter is written.
 - The human review pause at the end of Step 3 is mandatory, not optional.

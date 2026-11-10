@@ -21,8 +21,8 @@ Confirm all prerequisite files are present. If anything is missing, STOP complet
 **Required inputs:**
 
 1. **Story dossier** (produced by the `braindump-to-dossier` skill)
-2. **Character sheet** (produced by the `dossier-to-outline` skill)
-3. **Worldbuilding sheet** (also produced by the `dossier-to-outline` skill)
+2. **Character sheet** (produced by the `dossier-to-characters` skill)
+3. **Worldbuilding sheet** (produced by the `dossier-to-worldbuilding` skill)
 4. **Plot template (OPTIONAL):** a chapter-by-chapter structural template for the genre, if you have
 one. Without it, work from built-in genre knowledge and say so — a template makes the beats
 genre-correct, it is not required to produce an outline. Each chapter in the template specifies narrative purpose, structural beats, spice level, violence level, and swearing level.
@@ -35,7 +35,7 @@ genre-correct, it is not required to produce an outline. Each chapter in the tem
 
 **If the dossier, character sheet or worldbuilding sheet is missing, STOP. Report plainly:**
 
-> "This skill needs [missing item]. Build it first by running `dossier-to-outline`, or provide the
+> "This skill needs [missing item]. Build it first by running `dossier-to-characters` or `dossier-to-worldbuilding`, or provide the
 > file directly."
 
 **A missing plot template is NOT a stop — but it IS a degradation, and you must handle it explicitly.**

@@ -19,8 +19,8 @@ Before doing anything else, check that all four prerequisite artifacts exist. If
 **Required artifacts:**
 
 1. **Outline** (producer: `dossier-to-outline` or `outline-generator`). Chapter-level breakdown with plot summary, POV, levels, and sliders for each chapter.
-2. **Character bible** (producer: `dossier-to-outline`). Full profiles for all major characters including slider baselines, MBTI/Enneagram, dialogue samples, and arc notes.
-3. **Worldbuilding sheet** (producer: `dossier-to-outline`). All active locations, systems, factions, and objects organized by category.
+2. **Character bible** (producer: `dossier-to-characters`, usually via `dossier-to-outline`). Full profiles for all major characters including slider baselines, MBTI/Enneagram, dialogue samples, and arc notes.
+3. **Worldbuilding sheet** (producer: `dossier-to-worldbuilding`, usually via `dossier-to-outline`). All active locations, systems, factions, and objects organized by category.
 4. **Voice spec** (producer: `voice`). Prose style sheet extracted from the author's own finished fiction: sentence rhythm, vocabulary tier, dialogue handling, POV habits, and a prose anchor passage.
 
 If all four exist, ask the user for:
