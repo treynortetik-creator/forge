@@ -205,8 +205,13 @@ def fit_pose(lens):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        print(__doc__)
+        sys.exit(0)
     what = sys.argv[1] if len(sys.argv) > 1 else "focal"
     if what == "focal":
         fit_focal()
     elif what == "pose":
         fit_pose(float(sys.argv[2]))
+    else:
+        sys.exit(f"unknown command {what!r}: use focal or pose")

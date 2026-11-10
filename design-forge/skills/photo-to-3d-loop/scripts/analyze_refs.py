@@ -259,7 +259,12 @@ def bezel(path=REFS / "ref-01.jpg", dark="45%"):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        print(__doc__)
+        sys.exit(0)
     what = sys.argv[1] if len(sys.argv) > 1 else "all"
+    if what not in ("all", "roll", "section", "corners", "bezel"):
+        sys.exit(f"unknown command {what!r}: use all, roll, section, corners or bezel")
     if what in ("all", "roll"):
         print("\n  IN-PLANE ROLL")
         for f in ("ref-01.jpg", "ref-02.jpg", "ref-04.jpg", "ref-05.jpg",

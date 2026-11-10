@@ -132,6 +132,9 @@ def trend():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        print(__doc__)
+        sys.exit(0)
     cmd = sys.argv[1] if len(sys.argv) > 1 else "trend"
     if cmd == "score":
         report(sys.argv[2], score(sys.argv[2]))
@@ -139,3 +142,5 @@ if __name__ == "__main__":
         sys.exit(0 if judge(sys.argv[2], sys.argv[3]) else 1)
     elif cmd == "trend":
         trend()
+    else:
+        sys.exit(f"unknown command {cmd!r}: use score, judge or trend")

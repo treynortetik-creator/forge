@@ -51,6 +51,9 @@ NOISE = re.compile(
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        print(__doc__)
+        sys.exit(0)
     if len(sys.argv) < 2:
         sys.exit("usage: vector-check.py <storyboard.json>")
     sb = json.load(open(sys.argv[1]))

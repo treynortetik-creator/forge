@@ -33,6 +33,10 @@ import sys
 import time
 import urllib.request
 
+if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+    print(__doc__)
+    sys.exit(0)
+
 KEY = (os.environ.get("KIE_API_KEY")
        or (open(os.path.expanduser("~/.config/kie/key")).read().strip()
            if os.path.exists(os.path.expanduser("~/.config/kie/key")) else None))
