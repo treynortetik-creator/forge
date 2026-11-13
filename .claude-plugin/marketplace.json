@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "forge",
-  "description": "Claude Code plugins for making things and then checking them: design-forge for visual work, story-forge for long-form fiction, deck-forge for presentations, proof-forge for verifying exports, music-forge for songs and music videos. All built on the same idea \u2014 judgment stays with the model, and anything expressed as a number gets measured instead of eyeballed.",
+  "description": "Claude Code plugins for making things and then checking them: design-forge for visual work, story-forge for long-form fiction, deck-forge for presentations, proof-forge for verifying exports, music-forge for songs and music videos, game-forge for making games. All built on the same idea — judgment stays with the model, and anything expressed as a number gets measured instead of eyeballed.",
   "owner": {
     "name": "treynortetik-creator"
   },
@@ -71,7 +71,7 @@
     {
       "name": "proof-forge",
       "displayName": "Proof Forge",
-      "description": "Verify what came out of the render. Compare two exports and mark exactly where they differ \u2014 video with timecoded markers and an EDL, stills with a bounding box, audio with a phase-invert null test. The threshold is derived from the pair being compared, so a routine re-encode produces nothing and one bad second produces one marker.",
+      "description": "Verify what came out of the render. Compare two exports and mark exactly where they differ — video with timecoded markers and an EDL, stills with a bounding box, audio with a phase-invert null test. The threshold is derived from the pair being compared, so a routine re-encode produces nothing and one bad second produces one marker.",
       "source": "./proof-forge",
       "category": "productivity",
       "license": "MIT",
@@ -111,6 +111,30 @@
         "music-video",
         "openrouter",
         "ffmpeg"
+      ]
+    },
+    {
+      "name": "game-forge",
+      "displayName": "Game Forge",
+      "description": "Make a game with Claude Code agents, measured instead of eyeballed: 3D models baked to 2D sprite sheets in Blender, free local image-to-3D and local asset models on Apple Silicon, batched art waves from an image model with crop and palette checks, bot-played deterministic playtests and screenshot proof, voice casting before paid generation, and the hard-won lessons from shipping a roguelite and a tower-defense game.",
+      "source": "./game-forge",
+      "category": "development",
+      "license": "MIT",
+      "author": {
+        "name": "treynortetik-creator"
+      },
+      "keywords": [
+        "gamedev",
+        "phaser",
+        "blender",
+        "sprites",
+        "3d",
+        "image-to-3d",
+        "playtest",
+        "bots",
+        "voice",
+        "tower-defense",
+        "roguelite"
       ]
     }
   ]

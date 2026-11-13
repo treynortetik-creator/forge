@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-12
+
+### game-forge 0.1.0 (new)
+
+Ten skills from building a Phaser 4 roguelite and a Phaser 3 tower-defense game with Claude Code agents.
+
+- `build-a-game`: the end-to-end tutorial. Fourteen ordered phases from stack research to a shipped demo, each with the skill to load, a measured done-gate and the top traps, plus the agent team workflow, the trailer method and how to add a lesson.
+- `game-lessons` (architecture, Phaser 4 traps, game feel, agent workflow, shipping), `game-qa-loop` (CLI, tiered bots, headless screenshots, proof ladder, perf, feedback loop, highlight reel), `sprite-pipeline-3d` (Blender bake to 8-direction sprites with gates), `local-3d-gen` (Pixal3D and TRELLIS.2 on Apple Silicon), `local-models` (the free local model menu with licences), `art-waves` (batched 2D art with `art-measure`, `palette-audit` and a taste file), `levels-and-backgrounds` (room templates, layered backgrounds, tower-defense levels), `typography` (pen-writer hands and font gates), `game-audio` (voice casting, music gates, loudness).
+- Scripts are generalised from the two games' tooling; no third-party code or model weights are vendored. Smoke notes per skill are in the README: Blender, sharp and Python scripts were run on synthetic inputs, audio packers and several gates were syntax-checked only.
+
 ## 2026-10-14
 
 ### music-forge 0.3.0

@@ -1,6 +1,6 @@
 # Forge
 
-Five Claude Code plugins for making things, and checking them.
+Six Claude Code plugins for making things, and checking them.
 
 <table align="center">
 <tr>
@@ -26,6 +26,7 @@ Five Claude Code plugins for making things, and checking them.
 | **[deck-forge](deck-forge/)** | Presentations — a component library that never builds a native chart, and a harness that measures legibility at distance and contrast against the real backdrop |
 | **[proof-forge](proof-forge/)** | Exports — compare two renders and mark exactly where they differ, on video, stills or audio |
 | **[music-forge](music-forge/)** | Songs and their videos — scripts count syllables and rhymes while the model judges taste, a vocal-stem transcript flags where the sung words differ from the written ones, then a finished song plus a shot plan becomes a frame-exact music video (cost-capped OpenRouter animation, original-song cut, teasers), and tracks can be scanned for tempo, key and singer consistency |
+| **[game-forge](game-forge/)** | Games — a deterministic sim you can test headless, 3D models baked to 2D sprite sheets in Blender, free local image-to-3D and asset models, batched art waves with measured crop and palette gates, levels, typography and audio as data plus checks, and an end-to-end tutorial from stack research to a shipped demo |
 
 They share one idea: **judgment stays with the model, and anything expressed as a number gets measured
 instead of eyeballed.**
@@ -56,7 +57,8 @@ claude plugin install design-forge@forge     # any of them,
 claude plugin install story-forge@forge      # or
 claude plugin install deck-forge@forge       # or
 claude plugin install proof-forge@forge      # or
-claude plugin install music-forge@forge      # all five
+claude plugin install music-forge@forge      # or
+claude plugin install game-forge@forge       # all six
 ```
 
 Or clone and install locally:

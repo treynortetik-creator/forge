@@ -1,0 +1,11 @@
+{
+  "name": "game-forge",
+  "displayName": "Game Forge",
+  "version": "0.1.0",
+  "description": "Make a game with Claude Code agents, measured instead of eyeballed: 3D models baked to 2D sprite sheets in Blender, free local image-to-3D and local asset models on Apple Silicon, batched art waves from an image model with crop and palette checks, bot-played deterministic playtests and screenshot proof, voice casting before paid generation, and the hard-won lessons from shipping a roguelite and a tower-defense game.",
+  "author": { "name": "treynortetik-creator" },
+  "homepage": "https://github.com/treynortetik-creator/forge",
+  "repository": "https://github.com/treynortetik-creator/forge",
+  "license": "MIT",
+  "keywords": ["gamedev", "phaser", "blender", "sprites", "3d", "image-to-3d", "playtest", "bots", "voice", "tower-defense", "roguelite"]
+}

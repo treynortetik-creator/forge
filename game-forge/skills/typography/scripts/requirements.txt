@@ -1,0 +1,7 @@
+fonttools==4.67.0
+freetype-py==2.5.1
+numpy==2.5.4
+pillow==13.0.0
+scikit-image==0.26.0
+scipy==1.18.1
+uharfbuzz==0.56.3

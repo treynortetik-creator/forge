@@ -1,0 +1,145 @@
+{
+ "_provenance": "EXAMPLE of the file format. Calibrated on one dark ink-and-paper enemy style (64 good frames vs bad frames of two other looks). Do NOT use these limits for other art: run calibrate-thresholds.py on your own labelled sprites.",
+ "sprite": {
+  "metrics": {
+   "tone.near_black_pct": {
+    "dir": "max",
+    "warn": 19.299,
+    "fail": 21.794,
+    "good_worst": 14.31,
+    "bad_p10": 24.288
+   },
+   "tone.L_p10": {
+    "dir": "min",
+    "warn": 24.0,
+    "fail": 22.5,
+    "good_worst": 27.0,
+    "bad_p10": 21.0
+   },
+   "tone.L_median": {
+    "dir": "min",
+    "warn": 80.68,
+    "fail": 67.87,
+    "good_worst": 106.3,
+    "bad_p10": 55.06
+   },
+   "tone.sat_mean": {
+    "dir": "max",
+    "warn": 0.27,
+    "fail": 0.29,
+    "good_worst": 0.23,
+    "bad_p10": 0.31
+   },
+   "tone.moss_pct": {
+    "dir": "max",
+    "warn": 0.118,
+    "fail": 0.177,
+    "good_worst": 0.0,
+    "bad_p10": 0.236
+   },
+   "outline.ink_weight_px": {
+    "dir": "max",
+    "warn": 2.033,
+    "fail": 2.22,
+    "good_worst": 1.66,
+    "bad_p10": 2.406
+   },
+   "outline.coverage_pct": {
+    "dir": "max",
+    "warn": 83.915,
+    "fail": 90.022,
+    "good_worst": 71.7,
+    "bad_p10": 96.13
+   },
+   "outline.contour_L_mean": {
+    "dir": "min",
+    "warn": 50.585,
+    "fail": 42.127,
+    "good_worst": 67.5,
+    "bad_p10": 33.67
+   },
+   "feather.ramp_px": {
+    "dir": "max",
+    "warn": 8.005,
+    "fail": 9.303,
+    "good_worst": 5.41,
+    "bad_p10": 10.601
+   },
+   "hatch.hatch_pct": {
+    "dir": "max",
+    "warn": 2.74,
+    "fail": 1000000000.0,
+    "good_worst": 2.74,
+    "bad_p10": null,
+    "note": "warn only: no BAD hatched sprite in the calibration set"
+   },
+   "hatch.largest_area_pct": {
+    "dir": "max",
+    "warn": 1.9,
+    "fail": 1000000000.0,
+    "good_worst": 1.9,
+    "bad_p10": null,
+    "note": "warn only: no BAD hatched sprite in the calibration set"
+   }
+  },
+  "info_only": [
+   "outline.width_px",
+   "feather.partial_ring_pct"
+  ],
+  "ref_tolerance": {
+   "tone.near_black_pct": 4.353,
+   "tone.L_p10": 13.651,
+   "tone.L_median": 20.091,
+   "tone.sat_mean": 0.01,
+   "tone.moss_pct": 0.001,
+   "outline.ink_weight_px": 0.457,
+   "outline.coverage_pct": 15.241,
+   "outline.contour_L_mean": 17.266,
+   "outline.width_px": 0.445,
+   "feather.ramp_px": 2.107,
+   "feather.partial_ring_pct": 11.426,
+   "hatch.hatch_pct": 2.288,
+   "hatch.largest_area_pct": 1.591
+  }
+ },
+ "screen": {
+  "hatch_tile_pct": 35,
+  "moss_tile_pct": 3,
+  "metrics": {
+   "hatch.largest_area_pct": {
+    "dir": "max",
+    "warn": 2.111,
+    "fail": 2.891,
+    "good_worst": 0.55,
+    "bad_p10": 3.672
+   },
+   "hatch.hatch_tile_pct": {
+    "dir": "max",
+    "warn": 4.25,
+    "fail": 5.875,
+    "good_worst": 1.0,
+    "bad_p10": 7.5
+   },
+   "ink.thin_black_ink_pct": {
+    "dir": "max",
+    "warn": 0.284,
+    "fail": 1000000000.0,
+    "good_worst": 0.109,
+    "bad_p10": 0.459,
+    "note": "warn only: black lettering and dark wall ornament both read as thin black ink"
+   },
+   "ink.max_tile_ink_pct": {
+    "dir": "max",
+    "warn": 4.007,
+    "fail": 1000000000.0,
+    "good_worst": 1.98,
+    "bad_p10": 6.034,
+    "note": "warn only: black lettering and dark wall ornament both read as thin black ink"
+   }
+  },
+  "info_only": [
+   "moss.max_tile_moss_pct",
+   "moss.moss_tiles"
+  ]
+ }
+}

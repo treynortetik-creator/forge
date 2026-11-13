@@ -1,0 +1,13 @@
+{
+  "_note": "Example only: a dark ink-and-paper ramp plus two power colours. Replace every value with your own style's tokens.",
+  "ramp": ["#120A10", "#4A3F35", "#8C7E6A", "#CDBFA4", "#E8DCC4"],
+  "exempt": {"accent_green": "#8CE01E", "accent_blue": "#2F7BFF", "blood_red": "#B3122E"},
+  "named_ramps": {},
+  "chroma_min": 12,
+  "hue_tol": 14,
+  "token_de": 9,
+  "chroma_frac": 0.6,
+  "warm_hue": [30, 68],
+  "warm_limit_pct": 0.5,
+  "limit_pct": 0.5
+}
