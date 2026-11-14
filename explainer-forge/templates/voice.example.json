@@ -1,0 +1,12 @@
+{
+  "_comment": "Copy to voice.json in the folder you run the voice scripts from; it overrides voice_common.py. Keys are case-insensitive. 'voices' replaces the whole candidate set, so list every candidate you want to audition (3 is the sweet spot). Write each one fully: accent chosen on purpose, age, pitch, texture, pace, and what to avoid.",
+  "voices": {
+    "A": "A mid-range alto voice, mellow and even. Speaks American English with a neutral General American accent, no foreign accent. Adult woman around 30. Casual and smooth, warm, low-key and conversational, like a friendly coworker walking you through a tool. Slow, relaxed medium pace, calm and restrained intonation with modest pitch variation. Not bubbly, not dramatic, not announcer-like, not breathy.",
+    "B": "A lower-pitched, soft alto voice, grounded and calm, a bit deeper than average. Speaks American English with a neutral General American accent, no foreign accent. Adult woman around 30. Casual and smooth, warm, low-key and conversational. Calm and restrained intonation. Not bubbly, not dramatic, not announcer-like, not breathy.",
+    "C": "A mid-range baritone voice, relaxed and clear. Speaks American English with a neutral General American accent, no foreign accent. Adult man around 35. Friendly and easygoing, like a coworker showing you a tool. Calm, modest pitch variation. Not announcer-like, not dramatic."
+  },
+  "passage": "Let's walk through it together. First, open the settings panel and find the section marked Sharing. You'll see three choices: just you, your group, or everyone. Each option shows a short note about who can view, edit, or measure your work. Pick the one that fits, then press Save. A small green check appears when the change is stored. If something looks off, you can always undo it later. Quick, quiet, and nothing breaks along the way.",
+  "temperature": 0.6,
+  "seed": 42,
+  "ref_tempo": 0.75
+}

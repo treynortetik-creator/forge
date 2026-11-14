@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "forge",
-  "description": "Claude Code plugins for making things and then checking them: design-forge for visual work, story-forge for long-form fiction, deck-forge for presentations, proof-forge for verifying exports, music-forge for songs and music videos, game-forge for making games. All built on the same idea — judgment stays with the model, and anything expressed as a number gets measured instead of eyeballed.",
+  "description": "Claude Code plugins for making things and then checking them: design-forge for visual work, story-forge for long-form fiction, deck-forge for presentations, proof-forge for verifying exports, music-forge for songs and music videos, game-forge for making games, explainer-forge for narrated explainer videos. All built on the same idea — judgment stays with the model, and anything expressed as a number gets measured instead of eyeballed.",
   "owner": {
     "name": "treynortetik-creator"
   },
@@ -135,6 +135,31 @@
         "voice",
         "tower-defense",
         "roguelite"
+      ]
+    },
+    {
+      "name": "explainer-forge",
+      "displayName": "Explainer Forge",
+      "description": "Make narrated explainer and instructional videos, measured instead of eyeballed: one narrator voice designed once and cloned for every line, narration stitched to exact cue times, product footage captured with sample data and human pacing, a frame-exact render to MP4 with word-timed captions, and a proof pass over every scene, callout and the A/V sync.",
+      "source": "./explainer-forge",
+      "category": "productivity",
+      "license": "MIT",
+      "author": {
+        "name": "treynortetik-creator"
+      },
+      "keywords": [
+        "explainer",
+        "instructional-video",
+        "tutorial",
+        "product-demo",
+        "narration",
+        "tts",
+        "voice-clone",
+        "captions",
+        "gsap",
+        "playwright",
+        "ffmpeg",
+        "whisper"
       ]
     }
   ]

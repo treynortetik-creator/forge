@@ -1,0 +1,17 @@
+[
+ {"id": "s1c0", "scene": 1, "scene_title": "Hook",
+  "caption": "Renting a bike downtown used to mean a phone call, a paper form and a cash deposit.",
+  "text": "Renting a bike downtown used to mean a phone call, a paper form and a cash deposit."},
+ {"id": "s1c1", "scene": 1, "scene_title": "Hook",
+  "caption": "The Velloq kiosk puts every step of the rental on one touch screen.",
+  "text": "The Vell-ock kiosk puts every step of the rental on one touch screen."},
+ {"id": "s2c0", "scene": 2, "scene_title": "Pick a bike",
+  "caption": "Scan the QR code on a handlebar, and the screen shows that bike's battery and brake check.",
+  "text": "Scan the Q R code on a handlebar, and the screen shows that bike's battery and brake check."},
+ {"id": "s2c1", "scene": 2, "scene_title": "Pick a bike",
+  "caption": "Choose where you'll drop it off, and Velloq holds an empty dock there until you arrive.",
+  "text": "Choose where you'll drop it off, and Vell-ock holds an empty dock there until you arrive."},
+ {"id": "s3c0", "scene": 3, "scene_title": "Ride home",
+  "caption": "Park, tap your card once more, and the receipt lands in your inbox before the lock clicks shut.",
+  "text": "Park, tap your card once more, and the receipt lands in your inbox before the lock clicks shut."}
+]
