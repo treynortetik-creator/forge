@@ -2,6 +2,13 @@
 
 ## 2026-11-14
 
+### explainer-forge 0.1.1
+
+Bundles a default narrator voice, so a new explainer can skip voice design and audition.
+
+- `voices/default-narrator/`: `reference.wav` (33 s, mono 24 kHz) + `reference.txt`, a 29 s `sample.m4a` at the approved 180 wpm, and a README with the model (Qwen3-TTS 1.7B Base, Apache-2.0), settings and the exact render command. The voice is designed from a text description; no real person's voice was recorded or cloned.
+- `narrator-voice`, `references/voice.md`, README and `voice.example.json` now name the bundled voice as the default; audition-and-design stays as the alternative. No script changes.
+
 ### explainer-forge 0.1.0 (new)
 
 Five skills from two real explainer runs: a set of narrated interactive explainers, and a product-demo video approved on its second cut.

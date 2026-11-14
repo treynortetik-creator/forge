@@ -45,10 +45,12 @@ numpy. The narrator voice runs locally on Apple Silicon through `mlx-audio` (Pyt
 | `scripts/inline_build.py`, `decimate_glb.py` | one-file HTML; web-sized 3D props |
 | `scripts/make_video.sh` | stitch → captions → prep → render → verify in one command |
 
-Templates: `stage.html` + `timeline.js` (the timeline engine), `scenes.example.js`, `lines.example.json`,
+Voice: `voices/default-narrator/`. Templates: `stage.html` + `timeline.js` (the timeline engine), `scenes.example.js`, `lines.example.json`,
 `script-template.md`, `voice.example.json`. Lessons and numbers: `references/`.
 
-**Not included:** voice reference clips (bring your own or design one with `narrator-voice`), brand assets, fonts.
+**Bundled:** one default narrator voice, `voices/default-narrator/` (a designed, fully synthetic reference clip, its transcript and a 29 s sample at about 180 wpm). Use it as is or design your own with `narrator-voice`.
+
+**Not included:** brand assets, fonts, model weights.
 
 ## Test status (0.1.0 draft)
 
