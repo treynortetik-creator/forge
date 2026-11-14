@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-14
+
+### explainer-forge 0.1.0 (new)
+
+Five skills from two real explainer runs: a set of narrated interactive explainers, and a product-demo video approved on its second cut.
+
+- `make-an-explainer`: the ordered recipe with gates (length cap, fact-checked script, style sample first, voice spec and cost plan before spend, proof before send).
+- `narrator-voice` (design three candidates, the owner picks, clone every line from one reference, whisper/pitch/pace check, TTS-only respellings, one tempo set by ear; approved pace about 180 wpm), `app-footage` (sample data with a badge, fake cursor, human-paced typing, time-lapsed waits, a manifest, tracked patches), `render-and-caption` (cue-exact stitch, word-timed captions and SRT, seek-per-frame MP4 render, one-file HTML), `explainer-proof` (2-second review sheets, ring crops, A/V sync under 50 ms, names grep, deck tests).
+- Scripts are generalised from the two runs' tooling; no voice reference clips, model weights, brand assets or footage are included. Python compiles, JavaScript passes `node --check`, shell passes `bash -n`; not yet run end to end on a fresh project.
+
 ## 2026-11-12
 
 ### game-forge 0.1.0 (new)
