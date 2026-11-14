@@ -18,7 +18,7 @@ each time (pitch spread 4.1 semitones, 174-258 wpm across three lines); cloned f
 
 Scripts (in `${CLAUDE_PLUGIN_ROOT}/scripts/voice/`, run with the voice venv's python from a working folder such as
 `voice/`): `design_voices.py`, `render_lines.py`, `analyze_clip.py`, `drift_test.py`, `voice_common.py` (settings).
-Overrides: a `voice.json` in the working folder (`${CLAUDE_PLUGIN_ROOT}/templates/voice.example.json`).
+Bundled voice: `${CLAUDE_PLUGIN_ROOT}/voices/default-narrator/`. Overrides: a `voice.json` in the working folder (`${CLAUDE_PLUGIN_ROOT}/templates/voice.example.json`).
 
 ## 0. Setup (once, about 5 min plus model download)
 
@@ -42,6 +42,11 @@ Three candidates that differ on ONE axis (pitch, brightness, gender) beat three 
 Send `samples/candidate-A/B/C.m4a`, labelled, with one line each on how they differ. The owner picks by ear;
 `samples/report.json` only rules out broken takes (high WER, odd pitch). Optional: `drift_test.py` proves the clone
 holds steady. **If the owner has an approved reference clip already, skip to step 3 with it.**
+
+**Default: use the bundled narrator.** `${CLAUDE_PLUGIN_ROOT}/voices/default-narrator/` holds a designed, fully synthetic
+reference (`reference.wav` + `reference.txt`) and a 29 s sample at the approved 180 wpm. Play the sample to the owner;
+if they like it, skip design and audition and go to step 3 with `--voice default` (copy the clip to
+`ref/ref-default.wav` and `ref/ref-default.txt`, see that folder's README). Otherwise audition and design your own.
 
 ## 3. Render every line in the chosen voice (about 3 min for 33 lines)
 
@@ -72,5 +77,6 @@ called "a snail"), play 30 seconds to the owner, adjust. Tempo over 1.25 is flag
 - Same text + same reference + same model, precision and seed = identical audio. Changing any of them changes the
   voice: pin them in `voice.json` and keep the reference WAV with the project.
 - A quantised model (6-bit, 8-bit) will not reproduce bf16 output exactly.
-- Never clone a real person's recording without their written consent; never commit reference clips to a public repo.
+- Never clone a real person's recording without their written consent. The bundled reference is synthetic and may ship;
+  keep any other reference clip out of public repos.
 - Very short lines garble ("That's the uh..."). Add words.

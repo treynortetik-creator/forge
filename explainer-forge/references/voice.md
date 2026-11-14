@@ -3,6 +3,9 @@
 From one product-demo explainer (Nov 2026) that the owner approved on the second cut, after a slower first cut was
 rejected, and from an earlier run of interactive explainers that used stock preset voices and was rejected for them.
 
+**Default:** use the bundled narrator in `voices/default-narrator/` (a designed, fully synthetic reference, Apache-2.0
+model), or audition and design your own with the steps below.
+
 ## Why this method
 
 | Approach | What happened |
@@ -93,4 +96,5 @@ the same three lines cloned from each, compared on pitch, pace and WER.
 
 The description alone gives a similar but different person. To get the SAME voice you need: the reference WAV and
 its transcript (`ref-<k>.wav` + `.txt`), the same clone model and precision, the settings above, and mlx-audio at the
-same version. Keep reference clips out of public repos; they are the voice.
+same version. The bundled `voices/default-narrator/reference.wav` + `reference.txt` is that pair for the default voice, designed from a
+text description (no real person). Keep any other reference clip out of public repos; it is the voice.
