@@ -103,7 +103,8 @@ shipped half its scenes on reused art with code-only motion; the owner called th
 44. **Record story narration in one take, not scene by scene.** Clips generated separately drift in tone and the
     viewer hears it at the scene changes. Generate the whole script in one request, put pauses and delivery notes in
     the text with the model's own inline direction tags (look up the tag syntax and the length limit first), then cut
-    scenes from that single take by word timings. Re-record everything, not one scene, when a line changes.
+    scenes from that single take by word timings. Re-record everything, not one scene, when a line changes. The tag
+    syntax, limits and timestamp call for one cloud voice are in `cloud-voice.md`.
 
 ## Time, from the two runs
 

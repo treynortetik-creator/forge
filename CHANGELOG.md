@@ -5,6 +5,7 @@
 ### explainer-forge 0.1.2
 
 - `references/lessons.md`: new section "Drawn character animation" (rules 27-44) from a 2-minute clay-style story film: shared kit and cast sheets first, props on the scale chart, screen direction in the shot list, drawn poses instead of code motion on one drawing, usage limits checked before a fan-out, prompts and assembly commands kept in the project, frame-strip proof plus a ranked review, stopping at SHIP, and recording narration in one take. Documentation only; no script changes.
+- `references/cloud-voice.md` (new): directing a cloud TTS narrator in one take. Audio tags, pauses without SSML, per-request character limits, cutting scenes from character timestamps, and what the vendor docs did not say, with sources checked 2026-11-16.
 
 ## 2026-11-14
 
