@@ -50,6 +50,91 @@ harness decides which one wins.*
 
 ---
 
+## Every skill inside (44)
+
+Each one is a real workflow, written down and checked. Install a plugin and its skills load on their own.
+
+### design-forge (5)
+
+| Skill | What it does |
+|---|---|
+| [art-department](design-forge/skills/art-department/) | Decision tree, cleared asset sources, model costs and house style for visual work. |
+| [design-audit](design-forge/skills/design-audit/) | Measures a rendered page for type, contrast, accents, spacing and alignment, as numbers. |
+| [design-loop](design-forge/skills/design-loop/) | Builder plus three fresh critics iterate against a real reference until all agree. |
+| [photo-to-3d-loop](design-forge/skills/photo-to-3d-loop/) | Models a real object in Blender from photos, checked against silhouettes. |
+| [scroll-film-studio](design-forge/skills/scroll-film-studio/) | Builds a scroll-driven cinematic animated website, in free code motion or generated footage. |
+
+### story-forge (17)
+
+| Skill | What it does |
+|---|---|
+| [voice](story-forge/skills/voice/) | Extracts a voice spec from writing samples for the drafting and editing skills. |
+| [braindump-to-dossier](story-forge/skills/braindump-to-dossier/) | Turns a raw story idea into a critiqued, rewritten story dossier. |
+| [dossier-to-characters](story-forge/skills/dossier-to-characters/) | Builds a character bible one person at a time, plus a relationship map. |
+| [dossier-to-worldbuilding](story-forge/skills/dossier-to-worldbuilding/) | Builds a worldbuilding sheet one element at a time, each logic-checked. |
+| [outline-generator](story-forge/skills/outline-generator/) | Makes a chapter-by-chapter outline with emotional audit and per-chapter tension sliders. |
+| [dossier-to-outline](story-forge/skills/dossier-to-outline/) | Runs characters, worldbuilding and outline in order, adding a contract per chapter. |
+| [outline-to-chapters](story-forge/skills/outline-to-chapters/) | Drafts each chapter through a 13-step pipeline with chronology checks and rewrite. |
+| [de-sloppifier](story-forge/skills/de-sloppifier/) | Three-pass line edit that strips generic AI prose, cliches and inflated vocabulary. |
+| [logic-check](story-forge/skills/logic-check/) | Audits drafts and outlines for plot holes, timeline breaks and foreshadowing gaps. |
+| [clean-export](story-forge/skills/clean-export/) | Strips invisible provenance characters from a manuscript without changing any words. |
+| [book-summarizer](story-forge/skills/book-summarizer/) | Per-chapter summaries, characters, conflicts, tropes and quotable lines in one document. |
+| [story-hacker](story-forge/skills/story-hacker/) | Reverse-engineers a book or script into a reusable, anonymized plot template. |
+| [short-story-dossier](story-forge/skills/short-story-dossier/) | Builds a short-story-sized dossier: effect, central change, small cast, hook. |
+| [short-story-outline](story-forge/skills/short-story-outline/) | Maps a short-story dossier onto a five to eight scene outline. |
+| [short-story-draft](story-forge/skills/short-story-draft/) | Drafts the full 5,000 to 7,000 word short story, scene by scene. |
+| [short-story-hacker](story-forge/skills/short-story-hacker/) | Breaks a short story into a reusable structure with verbatim prose examples. |
+| [public-domain-cleanup](story-forge/skills/public-domain-cleanup/) | Modernizes spelling and fixes OCR errors in public-domain text, vocabulary unchanged. |
+
+### deck-forge (2)
+
+| Skill | What it does |
+|---|---|
+| [deck-builder](deck-forge/skills/deck-builder/) | Builds PowerPoint decks from shapes that import into Google Slides fully editable. |
+| [deck-audit](deck-forge/skills/deck-audit/) | Measures a deck for legibility, contrast, charts that will flatten, and off-slide shapes. |
+
+### proof-forge (1)
+
+| Skill | What it does |
+|---|---|
+| [render-diff](proof-forge/skills/render-diff/) | Compares two exports and marks exactly where video, stills or audio differ. |
+
+### music-forge (4)
+
+| Skill | What it does |
+|---|---|
+| [lyric-writer](music-forge/skills/lyric-writer/) | Writes lyrics with meter and rhyme checks, a critic pass and a Suno-ready block. |
+| [sung-vs-written](music-forge/skills/sung-vs-written/) | Transcribes a generated song's vocals and reports where the sung words differ. |
+| [track-check](music-forge/skills/track-check/) | Scans tracks for tempo, key, loudness and structure, and compares singers across songs. |
+| [music-video](music-forge/skills/music-video/) | Turns a song, shot plan and keyframes into a frame-exact cut music video. |
+
+### game-forge (10)
+
+| Skill | What it does |
+|---|---|
+| [build-a-game](game-forge/skills/build-a-game/) | Fourteen ordered phases from stack research to a shipped demo. |
+| [game-lessons](game-forge/skills/game-lessons/) | Playbook distilled from two real game builds: architecture, workflow, feel and budgets. |
+| [game-qa-loop](game-forge/skills/game-qa-loop/) | Proves a browser game works unattended with headless play, bots and screenshots. |
+| [art-waves](game-forge/skills/art-waves/) | Produces 2D game art in consistent batches with measured crop and palette gates. |
+| [sprite-pipeline-3d](game-forge/skills/sprite-pipeline-3d/) | Bakes 3D characters to 8-direction 2D sprite sheets with headless Blender. |
+| [local-3d-gen](game-forge/skills/local-3d-gen/) | Runs free image-to-3D on a Mac, with rigging steps and a licence table. |
+| [local-models](game-forge/skills/local-models/) | Menu of free on-device models for game images, voice, music and transcripts. |
+| [levels-and-backgrounds](game-forge/skills/levels-and-backgrounds/) | Builds game levels and layered backgrounds as data with measured validation checks. |
+| [typography](game-forge/skills/typography/) | Original script fonts, a pen-writes-this text effect, logos and UI type for games. |
+| [game-audio](game-forge/skills/game-audio/) | Voice casting, music generation and audio wiring for games, with cost and licence checks. |
+
+### explainer-forge (5)
+
+| Skill | What it does |
+|---|---|
+| [make-an-explainer](explainer-forge/skills/make-an-explainer/) | End-to-end recipe from topic to verified explainer video, with a gate per step. |
+| [narrator-voice](explainer-forge/skills/narrator-voice/) | Designs, auditions and clones one consistent local narrator voice, checking every line. |
+| [app-footage](explainer-forge/skills/app-footage/) | Captures real web-app footage on sample data, with a manifest for the editor. |
+| [render-and-caption](explainer-forge/skills/render-and-caption/) | Renders narration and a timeline page into an MP4 with word-timed captions. |
+| [explainer-proof](explainer-forge/skills/explainer-proof/) | Frame-by-frame review of an explainer: sync, captions, names and every scene. |
+
+---
+
 ## Install
 
 ```bash
@@ -84,7 +169,7 @@ a browser.
 
 <img src="media/forge-designs.gif" width="180" align="right" alt="">
 
-Eight skills. The one that earns its keep is **`design-audit`** — a read-only browser harness that
+Five skills. The one that earns its keep is **`design-audit`** — a read-only browser harness that
 computes what a screenshot cannot show.
 
 Three pages once went through **four rounds** of the critic loop and were declared finished. The
