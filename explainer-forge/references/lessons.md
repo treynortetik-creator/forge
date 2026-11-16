@@ -1,7 +1,7 @@
 # Lessons, merged
 
-Two sources: a run of narrated interactive HTML explainers for internal decision reviews (Nov 2026) and a product-demo
-MP4 built on the same kit and approved on its second cut. Each line is a rule because a real cut was rejected or a
+Three sources: a run of narrated interactive HTML explainers for internal decision reviews (Nov 2026) and a product-demo
+MP4 built on the same kit and approved on its second cut; plus a drawn character-animation story film (rules 27-43). Each line is a rule because a real cut was rejected or a
 reviewer caught it.
 
 ## What the viewer and the owner want
@@ -57,6 +57,48 @@ reviewer caught it.
     spent nothing (all graphics drawn in SVG, CSS and GSAP).
 25. **Drafts go to the owner first.** The owner posts; the agent never sends to the audience.
 26. **Label every proof image** you send for review with what it shows (scene, before/after).
+
+## Drawn character animation
+
+From a 2-minute clay-style story film (7 scenes, about 300 generated drawings, three overnight passes). The first cut
+shipped half its scenes on reused art with code-only motion; the owner called the two key actions "flimsy".
+
+27. **Lock script, voice and storyboard before any drawing.** Narration and captions then stay frozen: check the
+    decoded-audio hash and the frame count of every scene after each rebuild, so redraws never move sync.
+28. **Build a shared kit first, then one builder per scene.** Cast reference sheets (turnaround, expressions), a scale
+    chart, motion helpers, one render script, padded audio per scene. Attach the cast sheets to every image prompt.
+29. **Write the character's fixed facts as rules every builder gets**: expression, which side a one-sided detail is on,
+    "never mirror this character". Mirroring a drawing silently moves an asymmetric detail to the wrong side.
+30. **Put recurring props on the scale chart, not only characters.** A prop drawn by two builders came back at two
+    sizes and the mismatch was the first thing a reviewer saw.
+31. **State the screen direction of every action in the shot list.** Shots drawn in isolation flipped a fall from
+    rightward to leftward across one cut.
+32. **An action needs drawn poses.** Rotating, sliding or gliding one drawing reads as flimsy however it is eased.
+    Aim for a new drawing every 2 to 3 frames at 30 fps during action; hold only on stillness. A figure frozen while a
+    prop moves is the same fault.
+33. **Give weight three beats**: anticipation, the action, follow-through and settle. A thrown object keeps its held
+    size for the first frames of flight; an effect (splash, dust) is drawn in stages sized to what caused it.
+34. **Machine interpolation is a bonus, not the plan.** It only works between near-identical drawings and ghosts on
+    limbs and fingers. Budget for drawn in-betweens and reject any interpolated frame you would not draw.
+35. **One fresh image session per drawing.** Long resumed sessions stalled. Look at every image as it lands and
+    regenerate off-model ones at once.
+36. **Find the usage limit of the image tool before fanning out**, order the work so the most-watched shots are drawn
+    first, and tell builders to stop cleanly at a limit and list the missing images with their prompt paths.
+37. **Prompts, raw art and every assembly command live in the project folder**, never a temp folder. A final encode
+    whose command was not saved had to be rediscovered by trial on the next pass.
+38. **Keep every previous cut and scene file under a pass name.** Rollback is then one rename, and before/after proof
+    is free.
+39. **Proof for motion you cannot watch**: a strip of every 2nd or 3rd frame per action, a frame every 4 s for the
+    film, the frame pair at every join. Then a separate reviewer on the strongest model returns SHIP or FIX FIRST with
+    at most 8 ranked findings, each with a fix that needs only a few drawings.
+40. **The owner's first viewing is the real motion review.** Send the cut as soon as it exists with the known flaws
+    listed first; two notes from a viewing steered the next pass better than eight findings from stills.
+41. **Stop at SHIP.** List the remaining polish with its likely gain and let the owner decide; for a teaser the last
+    10 to 15 percent was not worth another pass.
+42. **Test the image route on one frame, side by side, before the build.** The same prompt and references through two
+    routes of the same provider differed visibly in finish; switching mid-film would have split the look.
+43. **A logo is a file, not a font rendering.** Ask which mark is meant (icon or wordmark) when both exist, use the
+    exact file, and check its real pixel size first: canvas metadata can be wrong and crop it silently.
 
 ## Time, from the two runs
 

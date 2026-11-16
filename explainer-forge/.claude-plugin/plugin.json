@@ -1,7 +1,7 @@
 {
   "name": "explainer-forge",
   "displayName": "Explainer Forge",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Make instructional and explainer videos with Claude Code, measured instead of eyeballed: a narrator voice designed once and cloned for every line (drift, pace and words checked by script), narration stitched to exact cue times, real product footage captured with fake data and human pacing, a deterministic frame-by-frame render to MP4 with word-timed captions, and a proof pass that looks at every scene, every callout and the A/V sync before anyone else does. Outputs an MP4 with an SRT, or one self-contained interactive HTML explainer.",
   "author": {
     "name": "treynortetik-creator"
