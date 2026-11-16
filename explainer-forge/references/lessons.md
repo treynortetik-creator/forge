@@ -1,7 +1,7 @@
 # Lessons, merged
 
 Three sources: a run of narrated interactive HTML explainers for internal decision reviews (Nov 2026) and a product-demo
-MP4 built on the same kit and approved on its second cut; plus a drawn character-animation story film (rules 27-43). Each line is a rule because a real cut was rejected or a
+MP4 built on the same kit and approved on its second cut; plus a drawn character-animation story film (rules 27-44). Each line is a rule because a real cut was rejected or a
 reviewer caught it.
 
 ## What the viewer and the owner want
@@ -99,6 +99,11 @@ shipped half its scenes on reused art with code-only motion; the owner called th
     routes of the same provider differed visibly in finish; switching mid-film would have split the look.
 43. **A logo is a file, not a font rendering.** Ask which mark is meant (icon or wordmark) when both exist, use the
     exact file, and check its real pixel size first: canvas metadata can be wrong and crop it silently.
+
+44. **Record story narration in one take, not scene by scene.** Clips generated separately drift in tone and the
+    viewer hears it at the scene changes. Generate the whole script in one request, put pauses and delivery notes in
+    the text with the model's own inline direction tags (look up the tag syntax and the length limit first), then cut
+    scenes from that single take by word timings. Re-record everything, not one scene, when a line changes.
 
 ## Time, from the two runs
 

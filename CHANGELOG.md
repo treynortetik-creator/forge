@@ -4,7 +4,7 @@
 
 ### explainer-forge 0.1.2
 
-- `references/lessons.md`: new section "Drawn character animation" (rules 27-43) from a 2-minute clay-style story film: shared kit and cast sheets first, props on the scale chart, screen direction in the shot list, drawn poses instead of code motion on one drawing, usage limits checked before a fan-out, prompts and assembly commands kept in the project, frame-strip proof plus a ranked review, and stopping at SHIP. Documentation only; no script changes.
+- `references/lessons.md`: new section "Drawn character animation" (rules 27-44) from a 2-minute clay-style story film: shared kit and cast sheets first, props on the scale chart, screen direction in the shot list, drawn poses instead of code motion on one drawing, usage limits checked before a fan-out, prompts and assembly commands kept in the project, frame-strip proof plus a ranked review, stopping at SHIP, and recording narration in one take. Documentation only; no script changes.
 
 ## 2026-11-14
 
