@@ -43,7 +43,7 @@ Send `samples/candidate-A/B/C.m4a`, labelled, with one line each on how they dif
 `samples/report.json` only rules out broken takes (high WER, odd pitch). Optional: `drift_test.py` proves the clone
 holds steady. **If the owner has an approved reference clip already, skip to step 3 with it.**
 
-**Default: use the bundled narrator.** `${CLAUDE_PLUGIN_ROOT}/voices/default-narrator/` holds a designed, fully synthetic
+**Default: use the bundled narrator** (per-line with `--voice default`, or one take with `one_take.py`). `${CLAUDE_PLUGIN_ROOT}/voices/default-narrator/` holds a designed, fully synthetic
 reference (`reference.wav` + `reference.txt`) and a 29 s sample at the approved 180 wpm. Play the sample to the owner;
 if they like it, skip design and audition and go to step 3 with `--voice default` (copy the clip to
 `ref/ref-default.wav` and `ref/ref-default.txt`, see that folder's README). Otherwise audition and design your own.
@@ -70,6 +70,28 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/stitch_narration.py ... --tempo 1.5     # 
 ```
 One pitch-preserving tempo for every clip. Start at 180 wpm (the approved pace, about 1.5x a first cut that was
 called "a snail"), play 30 seconds to the owner, adjust. Tempo over 1.25 is flagged: listen for clipped words.
+
+## 6. One take for the whole script (the other way)
+
+Per-line clones (steps 3 to 5) give exact cue times but the timbre can shift at line and scene changes. For a
+narrated explainer where continuity matters more than exact cues, render the WHOLE script in one pass:
+
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/make_narration.py script.md --out narration.json --say-map saymap.json
+.venv/bin/python ${CLAUDE_PLUGIN_ROOT}/scripts/voice/one_take.py --narration narration.json --out audio/take-raw.wav   # bundled narrator
+.venv/bin/python ${CLAUDE_PLUGIN_ROOT}/scripts/take_check.py --take audio/take-raw.wav --narration narration.json
+.venv/bin/python ${CLAUDE_PLUGIN_ROOT}/scripts/audio_build.py --take audio/take-raw.wav --narration narration.json --out audio --wpm 200
+.venv/bin/python ${CLAUDE_PLUGIN_ROOT}/scripts/sync_check.py --audio audio/narration.m4a --cues audio/cues.json --narration narration.json
+```
+`one_take.py` takes the reference clip, its exact transcript, seed, temperature and top_k as arguments (default: the
+bundled narrator, seed 42). `make_narration.py` splits the script into one chunk per sentence and keeps what the
+viewer reads (`show`) apart from what the voice says (`say`, from a respelling map: `templates/saymap.example.json`).
+`audio_build.py` measures the take's speaking pace, applies ONE uniform tempo to reach `--wpm` (faster or slower; the
+owner decides by ear), cuts only between scenes, adds capped scene gaps (`--gap-base`, `--gap-before 6=0.35`,
+`--max-gap 1.2`), trims the tail at the last script word, normalises to -16 LUFS and writes `cues.json`,
+`captions.srt` and `check.json`. The cues are alignments, not sums: `sync_check.py` measures their real error
+(plan for about 150 ms). A misread line means re-rendering the whole take (another `--seed`) or rewording the line.
+Pace guidance: two approved cuts measured about 180 and about 207 speaking wpm; neither is a rule.
 
 ## Gotchas
 

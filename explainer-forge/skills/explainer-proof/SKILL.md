@@ -19,11 +19,17 @@ checklist with pass marks: `${CLAUDE_PLUGIN_ROOT}/references/proof.md`.
 
 ```bash
 bash ${CLAUDE_PLUGIN_ROOT}/scripts/verify_video.sh build/explainer.mp4 build/cues.json build/proof      # sheets + sync
+node ${CLAUDE_PLUGIN_ROOT}/scripts/proof.mjs --page build/page.html --out proof --cues audio/cues.json --audio audio/narration.m4a   # engine pages
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/sync_check.py --audio audio/narration.m4a --cues audio/cues.json --narration narration.json    # one-take sync
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/dead_air.py --cues audio/cues.json --audio audio/narration.m4a                                 # silence over 1.2 s
 node ${CLAUDE_PLUGIN_ROOT}/scripts/ring_check.mjs --page build/stage.html                             # ring crops
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/name_check.py --names people.txt lines.json build/ script.md      # 0 hits
 node ${CLAUDE_PLUGIN_ROOT}/scripts/deck_proof.mjs --page explainer.html                                # interactive only
 node ${CLAUDE_PLUGIN_ROOT}/scripts/deck_proof.mjs --page explainer.html --sync cues.json --rate 2       # 0 mismatches
 ```
+`proof.mjs` writes one still per cue chunk (at 75 percent of the chunk), lists page errors, lists every visible text under
+24 px measured AFTER camera scale, and runs the dead-air check; exit 1 on any. `verify_video.sh` honours
+`SYNC_LIMIT_MS` (150 for a one-take voice) and reads either cue sheet.
 Exit codes: `verify_video.sh` 1 when sync is over 50 ms; `ring_check.mjs` 1 when a ring never lands; `name_check.py`
 1 on any listed name; `deck_proof.mjs` 1 on small text, overflow, page errors or a sync mismatch.
 

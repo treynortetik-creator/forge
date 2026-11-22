@@ -46,9 +46,14 @@ Measured: median pitch 234 Hz on the design sample, 209 Hz on clones; spread abo
 
 - Natural cloned pace varied by line (155 wpm average over 33 lines, 187 on one designed clip).
 - The first cut ran at about 120 wpm overall and was called "the personification of a snail".
-- The approved cut is about 1.5x the first: **about 180 wpm on the base gaps** (188 wpm of pure speech, 165 overall
-  once extra footage pauses count), gaps 0.3 s head, 0.15 s between lines, 0.35 s between scenes, 2.6 s tail.
-- How: `stitch_narration.py` trims every clip and applies ONE pitch-preserving `atempo` to all of them (1.213 on that
+- Two approved cuts, both **measured results, not targets**: the product demo (per-line clips) at about 180 wpm on the
+  base gaps (188 wpm of pure speech, 165 overall once footage pauses count), and a later one-take explainer at about
+  207 wpm speaking, 201 overall. Pick a starting number, play 30 seconds, and let the owner's ear move it up or down.
+  "wpm" must say which: speaking pace excludes the pauses between scenes, overall does not.
+- Gaps: the per-line stitch uses 0.3 s head, 0.15 s between lines, 0.35 s between scenes and a tail of 0.8 to 1.0 s.
+  A 2.6 s tail (the old default) and 2 s holds mid-film were flagged as dead air; cap every audible gap at 1.2 s.
+- One-take voice (a single render of the whole script): `audio_build.py --wpm N` measures the take's speaking pace and
+  applies ONE tempo to reach N, faster or slower. Per-line clips: `stitch_narration.py` trims every clip and applies ONE pitch-preserving `atempo` to all of them (1.213 on that
   build). Flag anything over 1.25 and listen for clipped words. A calm voice prompt keeps it calm at speed; do not
   slow the narration to sound calm.
 - Use the time a faster voice frees up for more demo, not padding.

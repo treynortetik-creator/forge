@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>/*TITLE*/</title>
+<meta name="description" content="/*DESCRIPTION*/">
+<style>
+/*FONTS*/
+/*CSS*/
+/*THEME*/
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+  <svg id="bg" width="1920" height="1080" viewBox="0 0 1920 1080" aria-hidden="true">
+    <defs>
+/*FILTERS*/
+    </defs>
+    <rect id="bgfill" width="1920" height="1080" fill="var(--paper)"/>
+    <rect width="1920" height="1080" filter="url(#grain)"/>
+  </svg>
+<!--SCENES_HTML-->
+  <div id="cap"><span id="capT"></span></div>
+</div></div>
+<div id="big" role="button" tabindex="0" aria-label="Play"><div>/*PLAY_LABEL*/</div></div>
+<div id="bar">
+  <button id="pp" aria-label="Play or pause">Play</button>
+  <div id="scrub"><div id="ticks"></div><input id="pos" type="range" min="0" max="1" step="0.01" value="0" aria-label="Seek"></div>
+  <span id="time">0:00 / 0:00</span>
+  <button id="spd" aria-label="Playback speed">1&times;</button>
+  <button id="cc" aria-label="Captions on or off">CC</button>
+</div>
+<audio id="au" preload="auto" src="/*AUDIO*/"></audio>
+<script>/*GSAP*/</script>
+<script>
+const CUES = /*CUES*/;
+const IMGS = /*IMGS*/;
+const IMGAR = /*IMGAR*/;
+const EF_KEY = "/*STORAGE_KEY*/";
+</script>
+<script>
+/*ENGINE*/
+</script>
+<script>
+/*SCENES_JS*/
+</script>
+<script>
+EF.start();
+</script>
+</body>
+</html>

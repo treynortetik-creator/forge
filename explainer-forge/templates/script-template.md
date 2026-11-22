@@ -22,3 +22,16 @@
 ## 5 Close
 <The name again, inside a full sentence (a bare "Meet X." garbles).>
 <What the viewer can do next.>
+
+
+<!-- ONE-TAKE ROUTE (scripts/make_narration.py, skill sprite-explainer): the parser reads `## Scene N. Title`, then a
+     `**Narration (N words):**` block of ordinary sentences (one chunk per sentence), then optional bold-labelled
+     notes such as `**On screen:**` that it ignores. Respellings go in saymap.json (templates/saymap.example.json),
+     never in the script, so captions keep the real spelling:
+
+## Scene 1. Hook
+**Narration (14 words):**
+A parcel arrives at the sorting room. Someone has to decide where it goes.
+
+**On screen:** what the viewer sees while this is said.
+-->

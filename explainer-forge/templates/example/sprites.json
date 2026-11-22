@@ -1,0 +1,4 @@
+{
+  "_comment": "Height table for prep_sprites.py: file stem -> the LARGEST on-screen height in px (stage px, before camera zoom). The page gets height x zoom (default 1.6) so a close-up stays sharp.",
+  "heights": {"parcel": 380, "scanner": 420, "bin-a": 220, "bin-b": 220, "slat": 40}
+}

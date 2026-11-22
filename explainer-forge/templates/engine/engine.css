@@ -1,0 +1,70 @@
+/* Explainer engine: stage shell, plaques, tags, caption bar, player bar. Neutral light palette: swap the tokens in
+   your project's styles/theme.css, never here. The stage is ALWAYS 1920x1080; everything on it is absolute px.
+   Safe areas (px on the 1920x1080 stage): --safe-x left/right gutter, --safe-top top gutter, --cap-bottom caption
+   bottom offset, --cap-bottom-hi the offset when art sits low (see capHigh() in engine.js). */
+:root{
+  --paper:#F6F0E6; --ink:#2B2A28; --muted:#5C5750; --accent:#C4533B; --ok:#5E7F4E; --info:#2F7F8F; --warm:#D99A2B;
+  --tag-ink:#4C4540; --tag-text:#FFFBF2; --shadow:#3b2a1a;
+  --bar:#2B2A28; --bar-ink:#F6F0E6; --focus:#F2C98B;
+  --safe-x:90px; --safe-top:40px; --cap-bottom:30px; --cap-bottom-hi:70px;
+  --font-body:"EF Body",system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  --font-head:"EF Head",Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bar:#1C1B1A; } }
+:root[data-theme="dark"]{ --bar:#1C1B1A; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--paper);color:var(--ink);font-family:var(--font-body);overflow:hidden}
+#wrap{position:fixed;inset:0 0 64px 0}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;background:var(--paper);overflow:hidden}
+#bg{position:absolute;inset:0}
+.scene{position:absolute;inset:0;opacity:0;visibility:hidden}
+.abs{position:absolute}
+.pre{opacity:0}
+.sp{position:absolute;display:block;pointer-events:none;will-change:transform}
+.sh{position:absolute;border-radius:50%;background:var(--shadow);opacity:.2;filter:blur(12px)}
+/* plaque: a 9-slice image when your project ships a `plaque` sprite, else a plain rounded card */
+.plq{position:absolute;color:var(--ink);white-space:nowrap;padding:22px 34px;border-radius:26px;background:#FFFBF4;
+  box-shadow:inset 0 -5px 0 rgba(0,0,0,.06),0 7px 14px rgba(59,42,26,.2)}
+.has-plaque .plq{padding:0;border-radius:0;background:none;box-shadow:none;border-style:solid;border-width:30px 36px;
+  border-image:var(--plaque) 95 110 fill / 30px 36px stretch;filter:drop-shadow(0 7px 8px rgba(59,42,26,.22))}
+.plq .h{font-family:var(--font-head);font-weight:600;line-height:1.1}
+.plq .t{font-size:30px;line-height:1.25}
+.plq .m{color:var(--muted)}
+.ttl{left:var(--safe-x);top:60px}
+.ttl .h{font-size:50px}
+/* pill tags */
+.tag{position:absolute;padding:6px 20px 8px;border-radius:22px;font-weight:600;font-size:28px;color:var(--tag-text);opacity:0;white-space:nowrap;
+  box-shadow:inset 0 -5px 0 rgba(0,0,0,.16),inset 0 4px 0 rgba(255,255,255,.22),0 5px 8px rgba(59,42,26,.25);transform-origin:50% 100%}
+.tag.bad{background:var(--accent)} .tag.ok{background:var(--ok)} .tag.ink{background:var(--tag-ink)} .tag.info{background:var(--info)}
+/* world: one persistent layer the camera moves (see cam() in engine.js) */
+#world{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;opacity:0;visibility:hidden}
+.lab{position:absolute;width:290px;text-align:center;opacity:.55}
+.lab b{display:block;font-family:var(--font-head);font-weight:600;font-size:34px;line-height:1.1}
+.lab span{display:block;font-size:27px;line-height:1.22;color:var(--muted);margin-top:4px}
+.tok{position:absolute;left:0;top:0;width:0;height:0;will-change:transform}
+.tok img{position:absolute;left:-36px;top:-64px;width:72px;height:72px;object-fit:contain}
+.tok .tsh{position:absolute;left:-28px;top:2px;width:56px;height:12px;border-radius:50%;background:#1d1a16;opacity:.3;filter:blur(4px)}
+.tok .dot{position:absolute;left:14px;top:-70px;width:24px;height:24px;border-radius:50%;background:var(--ok);opacity:0;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.18),inset 0 3px 0 rgba(255,255,255,.25)}
+/* captions: bottom centre, 36 px, at most ~70 characters a piece; .hi lifts it clear of low art */
+#cap{position:absolute;left:var(--safe-x);right:var(--safe-x);bottom:var(--cap-bottom);text-align:center;pointer-events:none}
+#cap.hi{bottom:var(--cap-bottom-hi)}
+#cap span{display:inline-block;max-width:1500px;background:rgba(43,42,40,.86);color:#FFFBF2;font-size:36px;font-weight:600;line-height:1.3;padding:8px 24px;border-radius:12px}
+#cap span:empty{display:none}
+body.nocap #cap{display:none}
+/* player bar (outside the 1080 frame) */
+#bar{position:fixed;left:0;right:0;bottom:0;height:64px;background:var(--bar);color:var(--bar-ink);display:flex;align-items:center;gap:14px;padding:0 16px;font-size:16px}
+#bar button{background:transparent;color:var(--bar-ink);border:1px solid rgba(246,240,230,.35);border-radius:6px;height:38px;min-width:44px;padding:0 12px;font:600 16px var(--font-body);cursor:pointer}
+#bar button:focus-visible,#pos:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+#scrub{flex:1;position:relative;height:38px;display:flex;align-items:center}
+#scrub input{width:100%;accent-color:var(--focus)}
+#ticks{position:absolute;left:0;right:0;top:2px;height:8px;pointer-events:none}
+#ticks i{position:absolute;width:2px;height:8px;background:rgba(246,240,230,.6)}
+#time{font-variant-numeric:tabular-nums;min-width:96px;text-align:right}
+#big{position:fixed;inset:0 0 64px 0;display:flex;align-items:center;justify-content:center;cursor:pointer}
+#big div{background:var(--ink);color:#FFFBF2;font-size:22px;font-weight:600;padding:18px 30px;border-radius:14px;box-shadow:0 6px 14px rgba(59,42,26,.25)}
+@media (max-width:520px){ #bar{gap:8px;padding:0 8px} #bar button{min-width:38px;padding:0 8px} #time{min-width:0;font-size:13px} }
+/* render mode (?render): the bare 1920x1080 stage, no player, for frame-by-frame capture and stills */
+body.render #bar,body.render #big{display:none}
+body.render #wrap{inset:0}
+body.render #stage{transform:none!important}
