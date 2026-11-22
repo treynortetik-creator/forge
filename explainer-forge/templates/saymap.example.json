@@ -1,0 +1,14 @@
+{
+  "_comment": "show/say map for make_narration.py --say-map. `show` is the sentence as written (captions, proof). `say` is what the voice reads. Applied in order: literal replace, regex replace, then every character in `drop` is removed. Put product names respelled by syllable, acronyms spelled out, numbers and clock times as words. Only the spoken form changes: captions keep the real spelling. Whisper cannot confirm a pronunciation, so play the line to the owner.",
+  "replace": [
+    ["Velloq", "Vell-ock"],
+    ["1,160", "eleven hundred and sixty"],
+    ["3:22", "three twenty-two"]
+  ],
+  "regex": [
+    ["\\bAIs\\b", "A Is"],
+    ["\\bAI\\b", "A I"],
+    ["\\bQR\\b", "Q R"]
+  ],
+  "drop": ["\"", "“", "”"]
+}

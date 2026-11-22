@@ -1,0 +1,25 @@
+<!-- Grain and clay filters, pasted into the stage's background <svg><defs>. `grain` = paper tooth over the whole stage,
+     `clay` = soft surface noise for flat shapes (marks, belts, plaques), `emboss` = pressed-in / raised edges,
+     `soft` = blur for shadows. `clay` and `soft` use a fixed user-space region (the stage plus a margin) on purpose: a percentage region of a straight horizontal
+     or vertical line is zero-height, and the browser then draws nothing. Tune baseFrequency and the last matrix value (opacity) to taste; keep them subtle. -->
+<filter id="grain" x="0" y="0" width="100%" height="100%">
+  <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7"/>
+  <feColorMatrix values="0 0 0 0 .32  0 0 0 0 .25  0 0 0 0 .18  0 0 0 .07 0"/>
+</filter>
+<filter id="clay" filterUnits="userSpaceOnUse" x="-200" y="-200" width="2320" height="1480">
+  <feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="3" result="n"/>
+  <feColorMatrix in="n" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .16 0" result="n2"/>
+  <feComposite in="n2" in2="SourceAlpha" operator="in" result="n3"/>
+  <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="n3"/></feMerge>
+</filter>
+<filter id="soft" filterUnits="userSpaceOnUse" x="-200" y="-200" width="2320" height="1480"><feGaussianBlur stdDeviation="10"/></filter>
+<filter id="emboss" x="-20%" y="-20%" width="140%" height="140%">
+  <feGaussianBlur in="SourceAlpha" stdDeviation="1.4" result="b"/>
+  <feOffset in="b" dx="1.2" dy="2.2" result="o"/>
+  <feComposite in="o" in2="SourceAlpha" operator="out" result="sh"/>
+  <feFlood flood-color="#3b2a1a" flood-opacity=".35"/><feComposite in2="sh" operator="in" result="shc"/>
+  <feOffset in="b" dx="-1" dy="-1.4" result="o2"/>
+  <feComposite in="SourceAlpha" in2="o2" operator="out" result="hl"/>
+  <feFlood flood-color="#ffffff" flood-opacity=".55"/><feComposite in2="hl" operator="in" result="hlc"/>
+  <feMerge><feMergeNode in="shc"/><feMergeNode in="SourceGraphic"/><feMergeNode in="hlc"/></feMerge>
+</filter>

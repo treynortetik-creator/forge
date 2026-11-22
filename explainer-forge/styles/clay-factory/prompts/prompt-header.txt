@@ -1,0 +1,7 @@
+Use your built-in image generation tool (do not write code to draw anything). STYLE: match style-reference and
+station-example exactly: matte soft 3D modelling-clay / plasticine look, chunky rounded forms, visible soft clay
+texture with tiny fingerprint-like surface variation, warm palette (cream, terracotta coral, mustard, slate blue, sage,
+teal), soft studio light from top-left. Each image is ONE object (or one small group), centered, complete and not
+cropped. NO text, letters, numbers or logos anywhere. NO ground shadow and no floor. BACKGROUND: fully transparent
+alpha PNG. Generate each image separately at the highest quality and save each as a PNG in the current folder with
+exactly the file name given. Do not stop until every file exists. When finished, list the files.

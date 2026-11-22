@@ -1,0 +1,15 @@
+{
+  "_comment": "Read by scripts/build_explainer.py. Paths are relative to this file. Everything but title, scenes and audio is optional.",
+  "title": "Parcel sorting",
+  "description": "A tiny three-scene example for the explainer engine.",
+  "scenes_html": "scenes.html",
+  "scenes_js": "scenes.js",
+  "theme_css": null,
+  "fonts": [],
+  "sprites_dir": "img",
+  "audio": "audio/narration.m4a",
+  "cues": "audio/cues.json",
+  "out": "parcel-sorting.html",
+  "storage_key": "parcel-",
+  "play_label": "Play the example, about 15 seconds, with sound"
+}

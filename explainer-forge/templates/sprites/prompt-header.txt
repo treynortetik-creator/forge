@@ -1,0 +1,7 @@
+Use your image generation tool (do not write code to draw anything). Make ONE object as a transparent PNG.
+STYLE: matte soft 3D modelling-clay look, chunky rounded forms with no sharp edges, a visible soft clay surface with tiny
+fingerprint-like variation, a warm light palette (cream, terracotta, mustard, slate blue, sage, teal), one soft key light
+from the top left, a gentle contact shadow baked into the object only if asked. No text, no logo, no watermark.
+FRAMING: the whole object, centred, three-quarter view unless the item says otherwise, a little empty margin on every
+side, nothing cropped. BACKGROUND: fully transparent (real alpha), no floor, no backdrop, no cast shadow outside the object.
+OUTPUT: a PNG, about 1024 px on the long side, named exactly as the item.

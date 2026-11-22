@@ -1,75 +1,105 @@
 ---
 name: make-an-explainer
 description: >
-  The end-to-end recipe for an instructional or explainer video, from a topic, ticket, feature or doc to a verified
-  MP4 with captions or one self-contained interactive HTML explainer. Ordered steps with a gate at each: brief and
-  length cap, a script fact-checked against the source, a style sample the owner approves before any build, a voice
-  spec and cost plan before any paid generation, narration stitched to exact cues, real product footage on fake data,
-  a frame-exact render, and a proof pass that looks at every scene. Use as the entry point when asked to "make an
-  explainer", "explainer video", "instructional video", "tutorial video", "how-to video", "product demo video",
-  "walkthrough video", "narrated explainer", "training video", or "turn this ticket/doc into a video".
+  The one entry point for any narrated video: concept explainer, review explainer for a tool or connector, product demo,
+  story film or voiced deck. Runs it in order with a gate at each step: brief, fact pack, beginner-proof script, cold
+  script review, style frame, voice pick, owner go, one-take voice, build, proof, independent review, owner viewing, batched edits,
+  teaser post, retro. Says what the owner approves, which model tier does what, and when money may be spent. Use for
+  "make an explainer", "explainer video", "instructional video", "how-to video", "tutorial video", "product demo",
+  "training video", "narrated video", "voiced deck", "turn this ticket or doc into a video".
 ---
 
 # Make an explainer
 
-**The case in one line:** the owner approved a product demo on its second cut ("You nailed it") after the first was
-too slow, too small and too loose. Every gate below exists because a cut failed it. This skill is the order of work;
-the sibling skills hold the method.
+One recipe, five shapes. Judgment (what to say, what to show, how it feels) stays with the owner and the strongest
+model. Anything that is a number (words per minute, runtime, sync, size, dollars) is measured by a script. An agent's
+"done" is a claim until the frames are open and the numbers are printed.
 
-> Forge's thesis: judgment (what to say, what to show, how it feels) stays with the owner and the model. Anything
-> that is a number (wpm, runtime, sync offset, ring position, word error rate, dollars) is measured by a script. An
-> agent's "done" is a claim until the PNGs are open.
+Siblings: `house-style` (the rules, read first), `narrator-voice` (the voice), `app-footage` (screen capture),
+`sprite-explainer` (the page engine), `render-and-caption` (MP4 and captions), `explainer-proof` (the detail pass), `lessons-loop` (the retro).
 
-Siblings: `narrator-voice` (the voice), `app-footage` (screen capture), `render-and-caption` (MP4 + SRT),
-`explainer-proof` (the detail pass). Also useful: `design-forge:art-department` (images, house style),
-`design-forge:design-audit` (measure a page), `proof-forge:render-diff` (compare two cuts), the `hyperframes` skill
-if the owner prefers that renderer (this plugin's engine is a dependency-light alternative, not a replacement).
+## Start
 
-## The steps
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/new_project.py --list-profiles
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/new_project.py --title "Your title" --profile concept-video --out <folder>
+```
 
-1. **Brief (5 min).** Who watches, what they should be able to do after, where it plays (chat, wiki, a live
-   meeting, an upload). Pick the format now (`${CLAUDE_PLUGIN_ROOT}/references/formats.md`): MP4 for watching,
-   interactive HTML for exploring. Set the length cap: default 3:00-3:30, hard cap 5:00; a talk someone delivers live
-   stays under 10 minutes with three ideas.
-2. **Read the source.** The ticket and every link, the spec, the product itself. Search public vendor docs without
-   naming the requester's organisation. Write `sources.md`.
-3. **Outline: about 7 scenes, one idea each.** Hook (the everyday pain) · what it is · show it · how it works ·
-   the safeguard or decision · close. Merge rather than repeat.
-4. **Script** from `${CLAUDE_PLUGIN_ROOT}/templates/script-template.md`: `## n Title` per scene, one line per clip.
-   About 180 wpm means about 540 words for 3:00. Plain friendly sentences. Then **fact-check every claim against the
-   source** (a reviewer caught three overstatements in one draft) and **ask the owner how every product name is said**.
-   Convert to `lines.json` (`templates/lines.example.json`): `caption` = real spelling, `text` = TTS spelling.
-5. **GATE: style sample.** One image and one rendered scene in the proposed look; the owner approves before you build
-   the rest. Default look: light, warm, off-white, soft clay 3D or flat illustration, one or two accents, no dark
-   neon. Label every image you send.
-6. **GATE: voice spec + cost plan.** Before any paid call: per item, cost, retries, acceptance check, cap. The local
-   voice and all SVG/CSS/GSAP graphics cost nothing; image-to-3D props ran about $0.40 each.
-7. **Voice** (`narrator-voice`): audition 3 designed candidates, the owner picks by ear, clone every line, check
-   every line, then set the speed by ear in the stitch.
-8. **Footage** (`app-footage`), if the subject is software: sample data only, human-paced input, a manifest.
-   Start it in parallel with step 7.
-9. **Build the timeline** from `templates/stage.html` + `timeline.js`. Animations hang off spoken words
-   (`W(id, word)`), never typed seconds. Callouts from boxes measured on the frame.
-10. **Render** (`render-and-caption`): frame-exact MP4 with burned captions and an SRT; or `inline_build.py` for
-    the interactive file.
-11. **GATE: proof** (`explainer-proof`): every 2 s sheet read, every ring crop read, sync under 50 ms, runtime
-    under the cap, `name_check.py` at zero, facts re-read.
-12. **Deliver a draft to the owner only**, as one file plus the SRT, with the runtime and what changed. The owner
-    shares it. Expect one round of notes; re-render only what changed (`--only`, `SKIP_AUDIO=1`).
+It makes the project folder: `brief.md`, `script.md`, `facts.md`, `names.txt`, `owner-notes.md`, `saymap.json`,
+`retro.md`, `env.sh`, and `run.md` with a section per step. Work from `run.md`; every block sources `env.sh` first, so it
+works in a fresh shell. Keep every prompt, raw image, take and command in that folder, never a temp folder.
 
-## Traps
+Pick the profile from `${CLAUDE_PLUGIN_ROOT}/profiles/`:
 
-- **A slow, "calm" narration.** The first cut ran about 120 wpm and was rejected as "a snail". Calm comes from the
-  voice prompt; speed comes from the stitch.
-- **Stock or dramatic voices.** Presets had an accent the owner hated; a cloned house voice was "overly intense".
-- **Footage in little browser cards.** Rejected. Full screen, zoom only to read a number.
-- **Rings placed by eye.** A few pixels off reads as sloppy. Measure on the frame, then check each ring.
-- **Skipping the 2-second pass.** That is where the ring left on after its cut and the caption over a callout hide.
-- **Real names anywhere**: narration, captions, footage, notes. Grep, do not trust memory.
-- **Real-time screen recording of the page.** Drops frames. Render frame by frame.
-- **Old job titles and feature names.** Check them with the owner; teams rename things.
+| Profile | For | Build path scripted in `run.md` |
+|---|---|---|
+| `concept-video` | teach one idea to beginners; 4:00 to 5:00, about 900 words | complete: sprite page, HTML and MP4 |
+| `compliance-connector` | help a committee decide on one tool; 3:00 to 3:30 | partial: the same page works; click-for-detail is hand-written |
+| `product-demo` | show real software working; 2:30 to 3:30 | complete: your footage on the stage page |
+| `story-film` | a told story with drawn characters; about 2:00 | partial: voice, cues, prompts and proof; drawings and motion are hand work |
+| `deck-voiceover` | a short deck that plays itself; one to three slides | partial: the same page works; no slide engine is bundled |
+
+## The order
+
+| # | Step | Who | Gate (what the owner approves, or what must be true) |
+|---|---|---|---|
+| 1 | **Brief.** Who watches, what they can do after, where it plays, the length, the last approved build's folder | strongest model with the owner | owner OK on the one-page brief |
+| 2 | **Fact pack.** Every claim with its source, opened that day; numbers counted fresh | cheaper model gathers, strongest checks | no claim without a source line |
+| 3 | **Script.** Write the scaffolded `script.md` (it is already in the parser's format); beginner-proof; house-style rules W1 to W18 | strongest model | every word a beginner would not know is gone, defined or tagged; `make_narration.py` parses it |
+| 4 | **Cold script review.** A reader who has seen nothing else reads the narration only and reports where they got lost | separate strongest model, no context | findings fixed, or ruled out by the owner |
+| 5 | **Style frame.** One image of the wow scene in the chosen style (`${CLAUDE_PLUGIN_ROOT}/styles/clay-factory/STYLE.md`), from `prompts/style-frame.txt` with the files in `refs/` attached | image tool plus strongest model | owner approves look, labelled image |
+| 6 | **Voice pick.** The profile's bundled voice, or an audition: both bundled samples plus three designed candidates, labelled | cheaper model runs | owner picks by ear |
+| 7 | **Owner go.** Script, style frame, voice letter and cost plan in one message. Story films add the storyboard | owner | an explicit go. Nothing is built or bought before it |
+| 8 | **Voice, one take.** The whole script in one pass, checked word for word against the script, one tempo set by measured pace | cheaper model runs, owner listens | no word missing or added; owner heard the product names |
+| 9 | **Build.** Sprites, scenes and the page (or footage, or drawings); every animation hung on a spoken word | strongest model for design, cheaper for mechanical work | first object by 1 s, no gap over 1.2 s |
+| 10 | **Proof.** Stills of every sentence and every camera move, sync, names grep, runtime | cheaper model runs, strongest reads | every still opened, sync numbers printed, 0 names |
+| 11 | **Independent review.** Someone who did not build it, with the owner's ruling list | strongest model, fresh | SHIP or FIX FIRST, at most 8 findings |
+| 12 | **Owner viewing.** The draft goes to the owner only, flaws listed first | owner | notes |
+| 13 | **Batch edits.** Wait for all notes, say them back, then one rebuild | strongest model | owner says go, then ship |
+| 14 | **Post.** Draft a teaser (one line on what it is, one image). The owner posts | strongest model drafts | owner posts |
+| 15 | **Retro.** `lessons-loop`: rules, numbers, traps | whoever led | rules updated or a reason why not |
+
+`run.md` has a section with the same number for every step, with the commands.
+
+## What the owner approves, and only these
+
+1. The brief. 2. The script. 3. The style frame. 4. The voice. 5. The go. 6. Anything that costs money. 7. The cut.
+Everything else is ours. Never ask them to check fake data, find a file or rerun a step.
+
+## Model tiers
+
+| Tier | Work |
+|---|---|
+| Strongest | brief, script, reviews, scene design, motion, judging stills, the teaser |
+| Middle | building from a clear spec, capture, page code, tests |
+| Cheapest | bulk reading, fact gathering to a list, transcripts. Never anything shipped as is |
+
+## Cost rule
+
+Free first: local voice, local drawing, bundled sprites and code. Before any paid call, write item, price, retries and a
+cap, and get a yes. Over about 1 dollar always needs the yes. Re-check a price on the day; listed prices are not what
+you pay.
+
+## What to say to a builder
+
+Paste: the profile numbers, the house-style rules that apply, the last approved build's folder, the fact pack, the
+owner's ruled-out list, the exact commands in `run.md`, and what done means. Rules from a recipe alone drift; point at
+the last build.
+
+## Traps that cost a pass
+
+- **Percent speed.** Say words per minute while speaking, measured.
+- **A take made from an old script.** Rename stale takes; diff the take against the script before building.
+- **Stitching the voice from pieces.** Tone changes at joins.
+- **Boxes-and-arrows charts.** Show the thing moving.
+- **Building on the first note.** More notes are coming.
+- **A still frame that looks right, and motion that doesn't.** Send early; the owner's viewing is the motion review.
+- **Reviewer suggestions that break an owner ruling.** Give the reviewer the list.
+- **Real names anywhere.** `name_check.py` on script, captions, page and post.
+- **Real-time screen recording.** Render frame by frame.
 
 ## Done means
 
-The MP4 (or HTML) plays start to finish at the agreed length; `explainer-proof` passed with every sheet read; the
-owner has heard the product names said right; nothing went to the audience before the owner saw it.
+The file opens on a double-click and plays start to finish at the agreed length; every proof still was opened; the
+owner has seen it and approved it; the teaser is drafted; the retro is filled in. Nothing reached the audience before
+the owner.

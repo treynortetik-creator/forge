@@ -3,15 +3,22 @@
 From one product-demo explainer (Nov 2026) that the owner approved on the second cut, after a slower first cut was
 rejected, and from an earlier run of interactive explainers that used stock preset voices and was rejected for them.
 
-**Default:** use the bundled narrator in `voices/default-narrator/` (a designed, fully synthetic reference, Apache-2.0
-model), or audition and design your own with the steps below.
+**Default method:** design a voice once, clone it, and record the WHOLE script in ONE take (`scripts/voice/one_take.py`),
+then set one uniform tempo with `audio_build.py` to a measured pace. One clip per line (`render_lines.py` +
+`stitch_narration.py`) is the named fallback, for when exact cue times matter more than continuity (sections below say
+which route a number came from).
+
+**Bundled voices** (designed from a text description, fully synthetic, Apache-2.0 model; no real person):
+`voices/coworker-baritone/` (a man, seed 7, the voice of the approved one-take cut, the default for the clay-factory
+style) and `voices/default-narrator/` (a woman, seed 42, the voice of the earlier per-line demo). Audition both, or
+design your own with the steps below.
 
 ## Why this method
 
 | Approach | What happened |
 |---|---|
 | Stock preset voices from the TTS model | Rejected: a strong accent the owner disliked, on every preset tried. |
-| Cloning a real person's recording | Not used. Needs that person's written consent; read as "too intense" when tried on a house voice. |
+| Cloning a real person's recording | Not used. Needs that person's written consent; a house voice cloned this way was rejected as overbearing. |
 | Designing each line fresh from a text description | A different person on every call: median pitch spread 4.1 semitones across 3 lines, pace 174 to 258 wpm (one voice); 162 to 310 wpm across three voices. |
 | **Design once, clone every line from that one clip** | Same person on every line: pitch spread 2.7 semitones, pace 146 to 194 wpm. Approved. |
 
@@ -45,10 +52,16 @@ Measured: median pitch 234 Hz on the design sample, 209 Hz on clones; spread abo
 ## Speed: set it once, by ear, after the voice is picked
 
 - Natural cloned pace varied by line (155 wpm average over 33 lines, 187 on one designed clip).
-- The first cut ran at about 120 wpm overall and was called "the personification of a snail".
-- The approved cut is about 1.5x the first: **about 180 wpm on the base gaps** (188 wpm of pure speech, 165 overall
-  once extra footage pauses count), gaps 0.3 s head, 0.15 s between lines, 0.35 s between scenes, 2.6 s tail.
-- How: `stitch_narration.py` trims every clip and applies ONE pitch-preserving `atempo` to all of them (1.213 on that
+- The first cut ran at about 120 wpm overall and was called far too slow.
+- Two approved cuts, both **measured results, not targets**: the product demo (per-line clips) at about 180 wpm on the
+  base gaps (188 wpm of pure speech, 165 overall once footage pauses count), and a later one-take explainer at about
+  207 wpm speaking, 201 overall. Pick a starting number, play 30 seconds, and let the owner's ear move it up or down.
+  "wpm" must say which: speaking pace excludes the pauses between scenes, overall does not.
+- Gaps: the per-line stitch (fallback) uses 0.3 s head, 0.15 s between lines, 0.35 s between scenes and a tail of 0.8
+  to 1.0 s; the one-take build uses a 0.45 s scene gap, head 0.8 s and tail 0.8 s. Long tails and 2 s holds mid-film
+  were flagged as dead air: cap every audible gap at 1.2 s, measured on the finished file.
+- One-take voice (a single render of the whole script): `audio_build.py --wpm N` measures the take's speaking pace and
+  applies ONE tempo to reach N, faster or slower. Per-line clips: `stitch_narration.py` trims every clip and applies ONE pitch-preserving `atempo` to all of them (1.213 on that
   build). Flag anything over 1.25 and listen for clipped words. A calm voice prompt keeps it calm at speed; do not
   slow the narration to sound calm.
 - Use the time a faster voice frees up for more demo, not padding.
@@ -69,7 +82,7 @@ Captions keep the real spelling (`caption`); only the TTS sees `text`.
 
 After any change, re-render only that line (`--only <id>`), then read its `hyp` in `check.json`.
 
-## The full recipe, step by step (as run on the approved build)
+## The design recipe, and the per-line route as run on the approved demo build
 
 1. **Design (once).** `Qwen3-TTS-12Hz-1.7B-VoiceDesign-bf16` (mlx-audio 0.6.5, `lang_code="english"`, 24 kHz mono)
    speaks one ~45-word audition passage three times, once per description (A mid-range alto, B lower softer alto,
@@ -84,8 +97,10 @@ After any change, re-render only that line (`--only <id>`), then read its `hyp` 
    rendered at natural pace with no per-line tempo (`--no-pace`); `--check` runs whisper-large-v3-turbo, pitch and wpm.
 5. **Drift check.** Three unrelated sentences, rendered both designed-per-line and cloned-from-reference; compare the
    spread of median pitch (semitones) and wpm. Cloning won (2.7 vs 4.1 semitones).
-6. **Speed, once.** Stitch all lines with one pitch-preserving tempo solved for ~180 wpm on the base gaps (1.213 on
-   that build), loudnorm to -16 LUFS, 48 kHz, AAC 160k.
+6. **Speed, once.** Per-line route: stitch all lines with one pitch-preserving tempo solved for the agreed pace (that
+   demo: ~180 wpm on the base gaps, tempo 1.213), loudnorm to -16 LUFS, 48 kHz, AAC 160k. One-take route: step 4 is
+   replaced by `one_take.py` (the whole script in one request, `split_pattern=""`), and `audio_build.py --wpm N` replaces
+   this step, with the pace measured from the take.
 
 **Re-making a reference on a new passage** (to share a voice without the words it was first designed on): clone the
 approved reference speaking a neutral passage with the settings in step 4, trim it, and tempo-match it to the old

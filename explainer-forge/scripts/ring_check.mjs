@@ -6,25 +6,21 @@
 // A ring counts as fully visible when its opacity times its .scene's opacity is above 0.98. Prints one line per
 // ring with its visible window and screen box; "NEVER fully visible" is a defect (a ring that never lands).
 // Same page contract and Playwright lookup as render_frames.mjs.
-import { createRequire } from 'node:module';
+import { loadPlaywright, launch } from './pw_common.mjs';
 import { mkdirSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const require = createRequire(import.meta.url);
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 if (process.argv.includes('--help') || !arg('page')) {
   console.log('usage: node ring_check.mjs --page <stage.html> [--selector .ring] [--step 0.1] [--from 0] [--out proof/rings] [--width 1920 --height 1080]');
   process.exit(arg('page') ? 0 : 2);
 }
-const pw = (() => {
-  if (process.env.PLAYWRIGHT_PATH) return require(process.env.PLAYWRIGHT_PATH);
-  try { return require('playwright'); } catch { return require('@playwright/test'); }
-})();
+const pw = loadPlaywright();
 const PAGE = resolve(arg('page')), SEL = arg('selector', '.ring'), STEP = +arg('step', 0.1);
 const W = +arg('width', 1920), H = +arg('height', 1080);
 const OUT = resolve(arg('out', join(dirname(PAGE), 'proof', 'rings'))); mkdirSync(OUT, { recursive: true });
-const b = await pw.chromium.launch({ headless: true, args: ['--allow-file-access-from-files'] });
+const b = await launch(pw);
 const p = await b.newPage({ viewport: { width: W, height: H } });
 await p.goto(pathToFileURL(PAGE).href); await p.evaluate(() => window.__ready);
 const total = await p.evaluate(() => window.__total);

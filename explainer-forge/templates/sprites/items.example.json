@@ -1,0 +1,12 @@
+{
+  "_comment": "One line per object. The header (prompt-header.txt) carries the shared look; the item line says only what is different. Keep every item in one batch so they share a look; regenerate a single item by name.",
+  "items": {
+    "parcel": "a cardboard parcel with a strip of tape and a small label with four bars, slightly squashed corners",
+    "scanner": "a chunky arch-shaped scanner gate, slate blue, one round red lamp on top, open underneath",
+    "bin-a": "a low open crate, sage green, empty, seen from slightly above",
+    "bin-b": "a low open crate, terracotta, empty, seen from slightly above",
+    "slat": "one flat belt slat, a thin wide rounded bar, slate grey, seen from above"
+  },
+  "refs": {},
+  "characters": []
+}

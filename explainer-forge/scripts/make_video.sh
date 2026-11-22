@@ -9,7 +9,7 @@
 #   voice/out/<id>.wav [CLIPS]    clips from scripts/voice/render_lines.py (natural pace)
 #   captures/clips/*.mp4 [SRC]    app footage, if any
 #   build/stage.html [PAGE]       the timeline page (templates/stage.html + timeline.js + your scenes)
-# Speed: TARGET_WPM (default 180) or TEMPO (a fixed multiplier, set by ear). Workers: WORKERS (default 8).
+# Speed (per-line fallback route; the default one-take route is make_onetake_video.sh): TARGET_WPM (default 180, one demo's measured pace) or TEMPO (a fixed multiplier, set by ear). Workers: WORKERS (default 8).
 set -euo pipefail
 PLUGIN="${PLUGIN:-${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}}"; S="$PLUGIN/scripts"
 VOICE_PY="${VOICE_PY:-python3}"; LINES="${LINES:-lines.json}"; CLIPS="${CLIPS:-voice/out}"; SRC="${SRC:-captures/clips}"

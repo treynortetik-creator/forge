@@ -2,7 +2,7 @@
 name: render-and-caption
 description: >
   Turn narration clips and a timeline page into a frame-exact MP4 with word-timed captions and an SRT: stitch the
-  clips with one tempo and fixed gaps (exact cue times), caption from whisper word timestamps in 2-row chunks, build
+  clips with one tempo and fixed gaps (the per-line fallback route; the default one-take route is in sprite-explainer), caption from whisper word timestamps in 2-row chunks, build
   the page on a paused GSAP timeline whose time is narration time, render it frame by frame in parallel headless
   Chromium, encode H.264 with AAC, or inline everything into one interactive HTML file. Use when asked to "render the
   explainer", "make the MP4", "add captions", "burn in subtitles", "export the video", "one-file HTML", or after
@@ -18,15 +18,29 @@ Never screen-record the page in real time: it drops frames. Seek the paused time
 ```bash
 PLUGIN=${CLAUDE_PLUGIN_ROOT} VOICE_PY=voice/.venv/bin/python bash ${CLAUDE_PLUGIN_ROOT}/scripts/make_video.sh
 SKIP_AUDIO=1 ... make_video.sh        # visual-only change, about 6 min on a 10-core Apple Silicon Mac
-TEMPO=1.5 ... make_video.sh           # speed by ear instead of TARGET_WPM (default 180)
+TEMPO=1.5 ... make_video.sh           # speed by ear instead of TARGET_WPM (180 was one demo's measured pace; set your own)
 ```
 It runs the steps below in order. Project layout: `lines.json`, `voice/out/<id>.wav`, `captures/clips/*.mp4`,
 `build/stage.html` (+ `timeline.js`, `scenes.js`, `vendor/gsap.min.js`). `gaps.json` adds pauses at footage beats.
 
-## The steps
+## Two routes to the same page contract
+
+- **One take + sprite world (default)**: `scripts/make_onetake_video.sh` (narration, take, check, audio, sprites, build,
+  proof, hero, render), the engine in `templates/engine/`, skill `sprite-explainer`. Cues come from alignment (measure
+  them with `sync_check.py`); captions are one splitter at 70 characters.
+- **Per-line clips + footage (named fallback, below)**: cue times are exact sums, word-timed 2-row captions,
+  `templates/stage.html`. Use it when exact cues matter more than a single continuous voice.
+
+Both routes end in `render_frames.mjs`.
+
+`render_frames.mjs` is shared: it opens the page with `?render=1`, seeks per frame, pipes PNG to ffmpeg (or, with
+`--frames DIR`, writes resumable frame files and encodes once). Playwright and Chrome are found from `--playwright` /
+`$PLAYWRIGHT_PATH` and `--chrome-path` / `$CHROME_PATH` or the usual places; nothing is hard-coded.
+
+## The steps (per-line fallback route)
 
 1. `stitch_narration.py` → `build/narration.m4a`, `cues.json` (exact line starts), `cue-table.md` (wpm per scene),
-   `build/clips/`. Gaps: head 0.3, line 0.15, scene 0.35, tail 2.6 s.
+   `build/clips/`. Gaps: head 0.3, line 0.15, scene 0.35, tail 1.0 s; cap every audible gap at 1.2 s.
 2. `captions.py` (voice venv, needs mlx-whisper) → `captions.json` + `<name>.srt`; whisper word times cached in
    `build/whisper/`, which also feed `W(id, word)`.
 3. `prep_media.py` → short-GOP footage in `build/media/` and `build/data.js`.

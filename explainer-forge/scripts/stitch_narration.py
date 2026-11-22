@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Stitch per-line narration clips into one track with exact cue times. Speed is set HERE, once, for every line.
+"""Stitch per-line narration clips into one track with exact cue times (the per-line FALLBACK; the default is one take: see audio_build.py). Speed is set HERE, once, for every line.
 
   python3 stitch_narration.py --lines lines.json --clips voice/out --out build [--target-wpm 180 | --tempo 1.21]
-                              [--gaps 0.3,0.15,0.35,2.6] [--extra gaps.json]
+                              [--gaps 0.3,0.15,0.35,1.0] [--extra gaps.json]
 
 Each clip is edge-trimmed, then ONE pitch-preserving atempo is applied to all of them (so the voice keeps one pace),
 then they are joined with fixed silences: head, between lines, between scenes, tail. Cue times are exact sums of
 measured clip lengths and gaps, so no alignment step is needed.
 
-Speed: --target-wpm solves the tempo so the narration runs at that rate on the base gaps (180 was the approved
-pace on the reference build). --tempo sets the multiplier directly, for "make it 20% faster" by ear. A tempo
+Speed: --target-wpm solves the tempo so the narration runs at that rate on the base gaps (180 was one product demo's approved
+pace, not a default for other formats). --tempo sets the multiplier directly, for "make it 20% faster" by ear. A tempo
 above 1.25 is flagged: listen for clipped words.
 --extra gaps.json: {"<line id>": seconds} adds a pause before that line for a footage beat. It never changes tempo.
 
@@ -27,7 +27,7 @@ ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDe
 ap.add_argument("--lines", required=True); ap.add_argument("--clips", required=True); ap.add_argument("--out", required=True)
 g = ap.add_mutually_exclusive_group()
 g.add_argument("--target-wpm", type=float, default=180.0); g.add_argument("--tempo", type=float)
-ap.add_argument("--gaps", default="0.3,0.15,0.35,2.6", help="head,line,scene,tail seconds")
+ap.add_argument("--gaps", default="0.3,0.15,0.35,1.0", help="head,line,scene,tail seconds (tail was 2.6 s before 0.2.0: that read as dead air)")
 ap.add_argument("--extra", help="JSON {line_id: extra seconds before it}")
 ap.add_argument("--fps", type=int, default=30)
 a = ap.parse_args()
