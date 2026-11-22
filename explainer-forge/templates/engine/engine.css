@@ -40,7 +40,7 @@ html,body{height:100%;background:var(--paper);color:var(--ink);font-family:var(-
 #world{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0;opacity:0;visibility:hidden}
 .lab{position:absolute;width:290px;text-align:center;opacity:.55}
 .lab b{display:block;font-family:var(--font-head);font-weight:600;font-size:34px;line-height:1.1}
-.lab span{display:block;font-size:27px;line-height:1.22;color:var(--muted);margin-top:4px}
+.lab span{display:block;font-size:27px;line-height:1.22;color:var(--ink);margin-top:4px}
 .tok{position:absolute;left:0;top:0;width:0;height:0;will-change:transform}
 .tok img{position:absolute;left:-36px;top:-64px;width:72px;height:72px;object-fit:contain}
 .tok .tsh{position:absolute;left:-28px;top:2px;width:56px;height:12px;border-radius:50%;background:#1d1a16;opacity:.3;filter:blur(4px)}

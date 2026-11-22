@@ -31,14 +31,17 @@ PASSAGE = ("Let's walk through it together. First, open the settings panel and f
            "appears when the change is stored. If something looks off, you can always undo it later. "
            "Quick, quiet, and nothing breaks along the way.")
 
-COMMON = ("Speaks American English with a neutral General American accent, no foreign accent. Adult woman around 30. "
-          "Casual and smooth, warm, low-key and conversational, like a friendly coworker walking you through a tool. "
-          "Slow, relaxed medium pace, calm and restrained intonation with modest pitch variation. "
-          "Not bubbly, not dramatic, not announcer-like, not breathy.")
+ACCENT = "Speaks American English with a neutral General American accent, no foreign accent. "
+TAIL = ("Casual and smooth, warm, low-key and conversational, like a friendly coworker walking you through a tool. "
+        "Slow, relaxed medium pace, calm and restrained intonation with modest pitch variation. "
+        "Not bubbly, not dramatic, not announcer-like, not breathy.")
+COMMON = ACCENT + "Adult woman around 30. " + TAIL
+# Two women and one man, so an audition always offers both (rule V8). C is the prompt of voices/coworker-baritone.
 VOICES = {
     "A": "A mid-range alto voice, mellow and even. " + COMMON,
     "B": "A lower-pitched, soft alto voice, grounded and calm, a bit deeper than average. " + COMMON,
-    "C": "A mid-range voice, a touch brighter and clearer, friendly and easygoing but still understated. " + COMMON,
+    "C": ("A lower-pitched, warm baritone voice, around 40 years old, grounded and relaxed, understated and calm. "
+          + ACCENT.replace("accent, no foreign accent", "accent, no British or foreign accent") + "Adult man. " + TAIL),
 }
 DEFAULT_VOICE = "A"
 

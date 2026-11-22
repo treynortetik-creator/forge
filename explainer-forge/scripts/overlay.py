@@ -8,6 +8,11 @@ Layout the scripts read (all optional):
   overlay/theme.css       palette and font tokens appended to the page CSS (build_explainer.py)
   overlay/assets/<name>.txt   text pasted into the page for a /*ASSET:name*/ placeholder (e.g. an SVG path string)
   overlay/assets/<file>       any file; /*ASSETURI:file*/ becomes its data: URI
+  overlay/house.md            private house rules and brand notes (read first; see skill house-style)
+  overlay/say-map.json        pronunciations merged into a project's saymap.json (new_project.py)
+  overlay/profiles/*.md       extra profiles, or replacements with the same file name (new_project.py)
+  overlay/public-terms.txt    words that must never reach a public repo, one per line (pre-push grep)
+  overlay/lessons.md          lessons too private for the plugin (lessons-loop)
 """
 import os
 

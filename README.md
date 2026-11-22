@@ -27,7 +27,7 @@ Seven Claude Code plugins for making things, and checking them.
 | **[proof-forge](proof-forge/)** | Exports — compare two renders and mark exactly where they differ, on video, stills or audio |
 | **[music-forge](music-forge/)** | Songs and their videos — scripts count syllables and rhymes while the model judges taste, a vocal-stem transcript flags where the sung words differ from the written ones, then a finished song plus a shot plan becomes a frame-exact music video (cost-capped OpenRouter animation, original-song cut, teasers), and tracks can be scanned for tempo, key and singer consistency |
 | **[game-forge](game-forge/)** | Games — a deterministic sim you can test headless, 3D models baked to 2D sprite sheets in Blender, free local image-to-3D and asset models, batched art waves with measured crop and palette gates, levels, typography and audio as data plus checks, and an end-to-end tutorial from stack research to a shipped demo |
-| **[explainer-forge](explainer-forge/)** | Explainer videos: one narrator voice designed once and cloned, per line with exact cues or as one take for the whole script at a measured pace, a sprite-world engine, product footage on sample data, a frame-exact MP4 render with word-timed captions, and a proof pass that checks every scene, text size, dead air and the A/V sync |
+| **[explainer-forge](explainer-forge/)** | Explainer videos: one narrator voice designed once and cloned, recorded as one take for the whole script at a measured pace (one clip per line stays as a fallback), two bundled voices, a house style and a mascot, a sprite-world engine, product footage on sample data, a frame-exact MP4 render with word-timed captions, and a proof pass that checks every scene, text size, dead air and the A/V sync |
 
 They share one idea: **judgment stays with the model, and anything expressed as a number gets measured
 instead of eyeballed.**
@@ -127,13 +127,13 @@ Each one is a real workflow, written down and checked. Install a plugin and its 
 
 | Skill | What it does |
 |---|---|
-| [make-an-explainer](explainer-forge/skills/make-an-explainer/) | End-to-end recipe from topic to verified explainer video, with a gate per step. |
-| [narrator-voice](explainer-forge/skills/narrator-voice/) | Designs, auditions and clones one consistent local narrator voice, checking every line. |
+| [make-an-explainer](explainer-forge/skills/make-an-explainer/) | The one entry point: scaffolds a project from a format profile and runs it from topic to verified explainer video, with a gate per step. |
+| [narrator-voice](explainer-forge/skills/narrator-voice/) | Auditions two bundled voices or designs three, clones one, records the whole script in one take (per-line is the fallback), and checks it against the script. |
 | [app-footage](explainer-forge/skills/app-footage/) | Captures real web-app footage on sample data, with a manifest for the editor. |
 | [render-and-caption](explainer-forge/skills/render-and-caption/) | Renders narration and a timeline page into an MP4 with word-timed captions. |
 | [explainer-proof](explainer-forge/skills/explainer-proof/) | Frame-by-frame review of an explainer: sync, captions, names, text size, dead air and every scene. |
 | [sprite-explainer](explainer-forge/skills/sprite-explainer/) | One voice take for the whole script, tempo and capped gaps, sprites on a camera engine, proof, hero still and render. |
-| [house-style](explainer-forge/skills/house-style/) | The rules for scripts, voice, pace, picture, length, facts and privacy, each with its why. |
+| [house-style](explainer-forge/skills/house-style/) | The rules for scripts, voice, pace, picture, length, facts and privacy, each with its why, plus the superseded ones and how a private overlay adds house rules. |
 | [lessons-loop](explainer-forge/skills/lessons-loop/) | Turns what a finished video taught into rules the next one starts with. |
 
 ---

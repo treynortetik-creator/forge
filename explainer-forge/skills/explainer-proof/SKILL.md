@@ -44,5 +44,6 @@ Exit codes: `verify_video.sh` 1 when sync is over 50 ms; `ring_check.mjs` 1 when
 - [ ] Footage frames all carry the sample-data badge.
 - [ ] Watch it once, start to finish, at 1x with sound.
 
-When sending proof images to the owner, burn a label into each (`magick in.png -gravity north -pointsize 36
--annotate +0+10 "Scene 3 ring 2" out.png`).
+When sending proof images to the owner, burn a label into each (`magick in.png -font <a .ttf file> -gravity north
+-pointsize 36 -annotate +0+10 "Scene 3 ring 2" out.png`). Give `-font` a real file, for example one from
+`styles/clay-factory/fonts/`: where ImageMagick has no default font, `-annotate` fails without it.

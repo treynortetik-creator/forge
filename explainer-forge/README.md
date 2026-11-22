@@ -25,7 +25,7 @@ bundled) and Python 3.11+ with numpy, soundfile and Pillow. The narrator voice r
 | Skill | Use it when |
 |---|---|
 | **make-an-explainer** | starting from a topic, ticket, feature or doc. The ordered recipe with gates: length cap, fact-checked script, style sample first, voice spec and cost plan before spend, proof before send |
-| **narrator-voice** | you need the voice. Design 3 candidates, the owner picks, clone every line, whisper-check, fix pronunciation in a TTS-only spelling, set speed once by ear |
+| **narrator-voice** | you need the voice. Audition the two bundled voices (a man, a woman) or design 3 candidates, the owner picks, record the whole script in ONE take, whisper-check, fix pronunciation in a TTS-only spelling, one tempo to a measured pace. One clip per line is the named fallback |
 | **app-footage** | the subject is software. Sample data with a badge, fake cursor, human-paced typing, time-lapsed waits, a manifest, tracked patches over ugly UI text |
 | **render-and-caption** | turning clips and a timeline page into a frame-exact MP4 with word-timed captions and an SRT, or one inlined HTML file |
 | **explainer-proof** | before anyone else sees it: 2-second review sheets, ring crops, A/V sync, names grep, text size after camera scale, dead air, slide and sync tests for interactive files |
@@ -37,16 +37,16 @@ bundled) and Python 3.11+ with numpy, soundfile and Pillow. The narrator voice r
 | Script | Does |
 |---|---|
 | `scripts/voice/design_voices.py` | VoiceDesign 3 candidates → audition samples + clone references + report |
-| `scripts/voice/render_lines.py` | clone every line from the reference; `--check` whisper/pitch/wpm per line |
+| `scripts/voice/render_lines.py` | fallback: clone every line from the reference; `--check` whisper/pitch/wpm per line |
 | `scripts/voice/analyze_clip.py`, `drift_test.py` | measure one clip; prove the clone holds steady across lines |
-| `scripts/stitch_narration.py` | trim, ONE tempo for all clips, fixed gaps → narration + exact cues + wpm table |
+| `scripts/stitch_narration.py` | fallback: trim, ONE tempo for all clips, fixed gaps → narration + exact cues + wpm table |
 | `scripts/captions.py` | whisper word times → 2-row caption chunks + SRT |
 | `scripts/prep_media.py` | short-GOP footage for frame-exact seeks + the page's data file |
 | `scripts/track_patch.py`, `detect_band.py` | follow scrolling text; time a cover over a panel |
 | `scripts/render_frames.mjs` | seek-per-frame parallel render → H.264 + AAC; `--frames DIR` makes it resumable |
 | `scripts/ring_check.mjs`, `verify_video.sh`, `name_check.py`, `deck_proof.mjs` | the proof pass (`name_check.py` and the build read an optional private overlay) |
 | `scripts/inline_build.py`, `decimate_glb.py` | one-file HTML; web-sized 3D props |
-| `scripts/make_video.sh` | stitch → captions → prep → render → verify in one command (per-line route) |
+| `scripts/make_video.sh` | stitch → captions → prep → render → verify in one command (the per-line fallback route) |
 | `scripts/make_narration.py` | script markdown → `narration.json`: a chunk per sentence, `show` (captions) apart from `say` (spoken), from a respelling map |
 | `scripts/voice/one_take.py` | the whole script as ONE voice-clone take; reference, seed, temperature, top_k are arguments (default: bundled narrator) |
 | `scripts/take_check.py` | whisper the take, diff against the spoken text, list long silences |
@@ -58,15 +58,15 @@ bundled) and Python 3.11+ with numpy, soundfile and Pillow. The narrator voice r
 | `scripts/make_onetake_video.sh` | narration → take → check → audio → sprites → build → proof → hero → render, one step at a time or all |
 | `scripts/pw_common.mjs`, `overlay.py` | find Playwright and Chrome without hard-coded paths; find the private overlay folder |
 
-Voice: `voices/default-narrator/`. Templates: `stage.html` + `timeline.js` (the per-line timeline), `engine/` (the sprite-world
+Voices: `voices/coworker-baritone/` (a man) and `voices/default-narrator/` (a woman). Templates: `stage.html` + `timeline.js` (the per-line fallback timeline), `engine/` (the sprite-world
 engine: stage, player, camera, belts, tokens, captions), `example/` (a three-scene parcel example that builds to a 16 s
 MP4), `sprites/` (prompt header, item list, the reference-attachment pattern, a placeholder for your own character),
 `saymap.example.json`, `scenes.example.js`, `lines.example.json`, `script-template.md`, `voice.example.json`.
 Lessons and numbers: `references/` (60 lessons).
 
-**Bundled:** one default narrator voice, `voices/default-narrator/` (a designed, fully synthetic reference clip, its transcript and a 29 s sample at about 180 wpm). Use it as is or design your own with `narrator-voice`.
+**Bundled:** two synthetic narrator voices (designed from a text description, no real person): `voices/coworker-baritone/` (a man, seed 7, about 207 wpm sample) and `voices/default-narrator/` (a woman, seed 42, about 180 wpm sample), each with its reference clip and transcript; a house style, `styles/clay-factory/` (palette, rules, prompts, 2 SIL OFL font families with `fonts/OFL.txt`, a sprite library); a mascot, `mascots/ember/`; and format profiles in `profiles/`. Use them as is or add your own style, mascot or voice beside them.
 
-**Not included:** brand assets, fonts, model weights.
+**Not included:** third-party brand assets or logos, model weights, GSAP, a click-through slide engine (profiles `deck-voiceover` and `compliance-connector` are marked partial for that).
 
 ## Test status (0.2.0)
 

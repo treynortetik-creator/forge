@@ -1,0 +1,9 @@
+Use your built-in image generation tool (do not write code to draw anything). Make ONE image: a finished frame of an
+animated explainer, landscape 16:9, at the highest quality, saved in the current folder as style-frame.png.
+STYLE: match style-reference, station-example and token-example exactly: matte soft 3D modelling-clay / plasticine look,
+chunky rounded forms, visible soft clay texture with tiny fingerprint-like surface variation, warm palette (cream,
+terracotta coral, mustard, slate blue, sage, teal), soft studio light from top-left, one soft shadow under each object.
+BACKGROUND: one flat warm cream page (#F6EFE6) edge to edge, no wall, no floor line, no vignette. Wide shot, everything
+complete and inside the frame, a clear path for the eye from left to right, the bottom 12% empty for captions.
+NO text, letters, numbers or logos anywhere; signs are blank.
+SCENE: (replace this line: the one picture that shows the whole system working, named object by named object, left to right)

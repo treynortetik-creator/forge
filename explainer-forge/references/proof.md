@@ -6,7 +6,7 @@ Run all of it before anyone else sees a cut. A script's green is a claim until y
 |---|---|---|
 | Every line said right | `render_lines.py --check` | WER under 0.10 on every line, every `hyp` read, product names listened to by a person |
 | Pace | `stitch_narration.py` output + `cue-table.md`, or `audio_build.py` output | about the agreed wpm (state speaking or overall); tempo about 0.8 to 1.25 |
-| Runtime | `cues.json` total | inside the agreed cap (default 3:00-3:30, never over 5:00) |
+| Runtime | `cues.json` total | inside the format's agreed length (profiles/: review explainer or demo 3:00-3:30, never over 5:00; concept video about 4:00-5:00; story film about 2:00) |
 | Every scene rendered and looked at | `verify_video.sh` → `review/sheet-*.png` (1 frame / 2 s) | every sheet read: no stray ring, no double crossfade, no overflow, no blank flash, no caption over a callout |
 | Callouts land | `ring_check.mjs` | no "NEVER fully visible"; every crop read; ring on its target to the pixel |
 | A/V sync, per-line clips | `verify_video.sh` | under about 50 ms at the first line of the first, middle and last scene |

@@ -1,5 +1,5 @@
 {
-  "_comment": "Copy to voice.json in the folder you run the voice scripts from; it overrides voice_common.py. Keys are case-insensitive. 'voices' replaces the whole candidate set, so list every candidate you want to audition (3 is the sweet spot). Write each one fully: accent chosen on purpose, age, pitch, texture, pace, and what to avoid. The 'default' entries point at the bundled narrator: reference_audio and reference_text are paths relative to the plugin root; copy them to ref/ref-default.wav and ref/ref-default.txt for render_lines.py --voice default.",
+  "_comment": "Copy to voice.json in the folder you run the voice scripts from; it overrides voice_common.py. Keys are case-insensitive. 'voices' replaces the whole candidate set, so list every candidate you want to audition (3 is the sweet spot). Write each one fully: accent chosen on purpose, age, pitch, texture, pace, and what to avoid. The 'default' entries point at the bundled narrator: reference_audio and reference_text are paths relative to the plugin root; copy them to ref/ref-default.wav and ref/ref-default.txt for render_lines.py --voice default (the per-line fallback). The default route is scripts/voice/one_take.py, which reads the bundled voices directly. per_line_demo_wpm is only the pace of one approved demo, not a default.",
   "voices": {
     "A": "A mid-range alto voice, mellow and even. Speaks American English with a neutral General American accent, no foreign accent. Adult woman around 30. Casual and smooth, warm, low-key and conversational, like a friendly coworker walking you through a tool. Slow, relaxed medium pace, calm and restrained intonation with modest pitch variation. Not bubbly, not dramatic, not announcer-like, not breathy.",
     "B": "A lower-pitched, soft alto voice, grounded and calm, a bit deeper than average. Speaks American English with a neutral General American accent, no foreign accent. Adult woman around 30. Casual and smooth, warm, low-key and conversational. Calm and restrained intonation. Not bubbly, not dramatic, not announcer-like, not breathy.",
@@ -12,6 +12,6 @@
   "default_reference": {
     "reference_audio": "voices/default-narrator/reference.wav",
     "reference_text": "voices/default-narrator/reference.txt",
-    "target_wpm": 180
+    "per_line_demo_wpm": 180
   }
 }

@@ -6,14 +6,16 @@ reviewer caught it.
 
 ## What the viewer and the owner want
 
-1. **Short.** 3:00 to 3:30 is the target for a single-topic explainer; 5:00 is the hard cap. About 7 scenes. One idea
-   per sentence; merge rather than repeat. A presentation someone delivers live: under 10 minutes, three ideas.
+1. **Length follows the format** (profiles in `profiles/` carry the numbers). A low-risk review explainer or a product
+   demo: 3:00 to 3:30 target, 5:00 hard cap (house rules T1, T2). A concept video that teaches beginners: as long as
+   clarity needs, about 4:00 to 5:00. A story film: about 2:00. About 7 scenes. One idea per sentence; merge rather
+   than repeat. A presentation someone delivers live: under 10 minutes, three ideas.
 2. **Fast, calm voice, with the pace set by the owner's ear.** Two approved cuts measured about 180 and about 207
-   speaking words per minute (pauses not counted); a first cut at about 120 was "a snail". These are measured results,
+   speaking words per minute (pauses not counted); a first cut at about 120 was called far too slow. These are measured results,
    not targets: pick a number, play 30 seconds, let the owner move it up or down. The calm comes from the voice, not
    from slowing it. See voice.md and lessons 45 and 46.
-3. **No stock voices, no dramatic reads.** Presets had an accent the owner disliked; a cloned house voice was "overly
-   intense". Plain, friendly sentences, not punchy one-liners.
+3. **No stock voices, no dramatic reads.** Presets had an accent the owner disliked; a cloned house voice was rejected
+   as too forceful. Plain, friendly sentences, not punchy one-liners.
 4. **Light, warm, approachable look.** Off-white background, soft matte "clay" 3D or flat illustration, one or two
    accent colours, everyday metaphors. Dark neon "cyberpunk" vaults and glowing circuits were rejected. Approved from
    ONE sample image plus ONE rendered scene: make the style sample before building, every time a style is new.
@@ -34,10 +36,10 @@ reviewer caught it.
 
 12. **Timeline time is narration time.** Every animation is placed from the cue times (`T`, `E`) or the moment a word
     is spoken (`W`), never typed seconds, so a re-voiced line carries its animation with it.
-13. **Know where your cue times come from.** With one clip per line, stitching clips with fixed gaps makes the cue times
-    sums, exact to the sample; no alignment step. With one take for the whole script (lesson 44) the cues are
+13. **Know where your cue times come from.** With one take for the whole script (the default, lesson 44) the cues are
     alignments of whisper word times to the script and carry a real error: measure it (lesson 50) instead of assuming
-    it away. Word timing from whisper alone drifted about 0.4 s on an earlier per-clip deck.
+    it away. Only in the per-line fallback (one clip per line, stitched with fixed gaps) are the cue times sums, exact
+    to the sample, with no alignment step. Word timing from whisper alone drifted about 0.4 s on an earlier per-clip deck.
 14. **Render frame by frame, never screen-record.** Seek the paused timeline and every video per frame. Real-time
     capture drops frames.
 15. **Re-encode footage with a short GOP** (6 frames, no B-frames) so every seek lands on the exact frame.
@@ -66,7 +68,7 @@ reviewer caught it.
 ## Drawn character animation
 
 From a 2-minute clay-style story film (7 scenes, about 300 generated drawings, three overnight passes). The first cut
-shipped half its scenes on reused art with code-only motion; the owner called the two key actions "flimsy".
+shipped half its scenes on reused art with code-only motion; the owner called the two key actions weak.
 
 27. **Lock script, voice and storyboard before any drawing.** Narration and captions then stay frozen: check the
     decoded-audio hash and the frame count of every scene after each rebuild, so redraws never move sync.
@@ -78,7 +80,7 @@ shipped half its scenes on reused art with code-only motion; the owner called th
     sizes and the mismatch was the first thing a reviewer saw.
 31. **State the screen direction of every action in the shot list.** Shots drawn in isolation flipped a fall from
     rightward to leftward across one cut.
-32. **An action needs drawn poses.** Rotating, sliding or gliding one drawing reads as flimsy however it is eased.
+32. **An action needs drawn poses.** Rotating, sliding or gliding one drawing reads as weak however it is eased.
     Aim for a new drawing every 2 to 3 frames at 30 fps during action; hold only on stillness. A figure frozen while a
     prop moves is the same fault.
 33. **Give weight three beats**: anticipation, the action, follow-through and settle. A thrown object keeps its held
@@ -105,7 +107,7 @@ shipped half its scenes on reused art with code-only motion; the owner called th
 43. **A logo is a file, not a font rendering.** Ask which mark is meant (icon or wordmark) when both exist, use the
     exact file, and check its real pixel size first: canvas metadata can be wrong and crop it silently.
 
-44. **Record story narration in one take, not scene by scene.** Clips generated separately drift in tone and the
+44. **Record narration in one take, not scene by scene.** Clips generated separately drift in tone and the
     viewer hears it at the scene changes. Generate the whole script in one request, put pauses and delivery notes in
     the text with the model's own inline direction tags (look up the tag syntax and the length limit first), then cut
     scenes from that single take by word timings. Re-record everything, not one scene, when a line changes. The tag

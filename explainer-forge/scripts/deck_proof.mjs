@@ -11,24 +11,20 @@
 // cues.json for --sync: [[slide1_start, build1, build2, ...], [slide2_start, ...], ...] in seconds.
 // Slide mode reports text under 18 px and anything overflowing the #stage box; read every PNG anyway.
 // Sync mode prints OK/BAD per cue and the mismatch count (must be 0, at 1x and at the --rate you ship).
-import { createRequire } from 'node:module';
+import { loadPlaywright, launch } from './pw_common.mjs';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const require = createRequire(import.meta.url);
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 if (process.argv.includes('--help') || !arg('page')) {
   console.log('usage: node deck_proof.mjs --page <explainer.html> [--out proof] [--sync cues.json [--rate 1]]');
   process.exit(arg('page') ? 0 : 2);
 }
-const pw = (() => {
-  if (process.env.PLAYWRIGHT_PATH) return require(process.env.PLAYWRIGHT_PATH);
-  try { return require('playwright'); } catch { return require('@playwright/test'); }
-})();
+const pw = loadPlaywright();
 const PAGE = resolve(arg('page')), URL = pathToFileURL(PAGE).href;
 const OUT = resolve(arg('out', join(dirname(PAGE), 'proof'))); mkdirSync(OUT, { recursive: true });
-const b = await pw.chromium.launch({ headless: true, args: ['--autoplay-policy=no-user-gesture-required', '--ignore-gpu-blocklist'] });
+const b = await launch(pw, { args: ['--allow-file-access-from-files', '--autoplay-policy=no-user-gesture-required', '--ignore-gpu-blocklist'] });
 
 if (arg('sync')) {
   const cues = JSON.parse(readFileSync(resolve(arg('sync'))));

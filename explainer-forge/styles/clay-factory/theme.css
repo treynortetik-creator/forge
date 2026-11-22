@@ -1,0 +1,11 @@
+/* clay-factory tokens for the engine (templates/engine/engine.css). Source: STYLE.md. */
+:root{
+  --paper:#F6EFE6; --ink:#2E2823; --muted:#5A4F44; --accent:#C4533B; --ok:#5E7F4E; --info:#2F8F86; --warm:#D99A2B;
+  --tag-ink:#4C4036; --tag-text:#FFF8EE; --shadow:#3b2a1a;
+  --bar:#2E2823; --bar-ink:#F6EFE6; --focus:#F2C98B;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bar:#1E1A17; } }
+:root[data-theme="dark"]{ --bar:#1E1A17; }
+/* labels under objects: ink, not grey (small grey labels were unreadable on a phone) */
+.lab span{color:var(--ink)}
+#cap span{background:rgba(46,40,35,.86);color:#FFF8EE}

@@ -216,7 +216,7 @@ const EF = {
     pos.max = DUR;
     CUES.scenes.forEach(s => { const i = document.createElement('i'); i.style.left = (s.start / DUR * 100) + '%'; i.title = s.title; $('#ticks').appendChild(i); });
     const fmt = x => Math.floor(x / 60) + ':' + String(Math.floor(x % 60)).padStart(2, '0');
-    const RATES = [1, 1.25, 1.5, 0.75];
+    const RATES = [1, 1.25, 1.5, 1.75, 2, 0.75];   // house rule T10: speed up to 2x, pitch preserved
     const store = { get: k => { try { return localStorage.getItem(EF_KEY + k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(EF_KEY + k, v); } catch (e) {} } };
     let rate = +store.get('rate') || 1;
     const setRate = r => { rate = r; au.playbackRate = r; au.preservesPitch = true; $('#spd').innerHTML = r + '&times;'; store.set('rate', r); };
@@ -230,6 +230,12 @@ const EF = {
     pp.onclick = toggle;
     $('#spd').onclick = () => setRate(RATES[(RATES.indexOf(rate) + 1) % RATES.length]);
     $('#cc').onclick = () => setCap(!cap);
+    const fullscreen = () => {                         // house rule T10: F toggles full screen; Esc leaves it
+      const d = document, el = d.documentElement;
+      if (d.fullscreenElement) return d.exitFullscreen && d.exitFullscreen();
+      if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+    };
+    if ($('#fs')) $('#fs').onclick = fullscreen;
     pos.oninput = () => { au.currentTime = +pos.value; $('#big').style.display = 'none'; };
     au.onplay = () => pp.textContent = 'Pause'; au.onpause = () => pp.textContent = 'Play'; au.onended = () => { pp.textContent = 'Replay'; };
     document.addEventListener('keydown', e => {
@@ -238,6 +244,7 @@ const EF = {
       else if (e.key === 'ArrowRight') au.currentTime = Math.min(DUR, au.currentTime + 5);
       else if (e.key === 'ArrowLeft') au.currentTime = Math.max(0, au.currentTime - 5);
       else if (e.key === 'c' || e.key === 'C') setCap(!cap);
+      else if (e.key === 'f' || e.key === 'F') fullscreen();
     });
     function fit() {
       if (document.body.classList.contains('render')) return;

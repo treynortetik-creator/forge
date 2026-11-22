@@ -1,0 +1,1 @@
+So here's the thing. Most of the work in a project is waiting on somebody else, and a good tool just takes that wait away. You ask for what you need in plain English, it goes and does it, and then it shows you the result.

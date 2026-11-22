@@ -2,7 +2,7 @@
   "name": "explainer-forge",
   "displayName": "Explainer Forge",
   "version": "0.2.0",
-  "description": "Make instructional and explainer videos with Claude Code, measured instead of eyeballed: a narrator voice designed once and cloned, rendered per line with exact cue times or as ONE take for the whole script (one uniform tempo to a target speaking pace, scene gaps capped at 1.2 s, cue sheet, take and sync checks), a sprite-world engine (stage, player, camera, belts, tokens, captions with safe areas), real product footage captured with fake data and human pacing, a deterministic frame-by-frame render to MP4 with captions, and a proof pass for every scene, text size, dead air and A/V sync. Outputs an MP4 with an SRT, or one self-contained interactive HTML explainer.",
+  "description": "Make instructional and explainer videos with Claude Code, measured instead of eyeballed: a narrator voice designed once and cloned, recorded as ONE take for the whole script (one clip per line with exact cue times stays as a fallback; one uniform tempo to a target speaking pace, scene gaps capped at 1.2 s, cue sheet, take and sync checks), a sprite-world engine (stage, player, camera, belts, tokens, captions with safe areas), real product footage captured with fake data and human pacing, a deterministic frame-by-frame render to MP4 with captions, and a proof pass for every scene, text size, dead air and A/V sync. Outputs an MP4 with an SRT, or one self-contained interactive HTML explainer.",
   "author": {
     "name": "treynortetik-creator"
   },

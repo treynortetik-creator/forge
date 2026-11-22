@@ -4,7 +4,8 @@
   python3 name_check.py [--names people.txt] FILE_OR_DIR [...] [--allow allow.txt] [--overlay DIR] [--candidates-only]
 
 people.txt: one name per line (everyone in the source material: requesters, approvers, assignees, commenters, anyone
-quoted). Each full name AND each first and last name of 3+ letters is searched, case-insensitive, whole words.
+quoted). Each full name AND each first and last name of 3+ letters is searched, case-insensitive, whole words. A name part under 3 letters
+(a two-letter surname) is NOT searched on its own: it is caught only inside the full name, so list the full name.
 Also lists capitalised "First Last" pairs that are not in --allow (product names, fictional sample names), as
 candidates for a human to read: a heuristic, never proof of absence.
 --names and --allow default to names.txt and allow.txt in the private overlay folder (--overlay, then
